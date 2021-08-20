@@ -1,17 +1,10 @@
 # User-visible changes in the DeducerPlugInMoose package
 
-### TODO
+## Version 0.4-0 -- August 19, 2021
 
-* Outline for documentation
-* Improve GUI help dialogs.
-* Write proper Rd docs for comp.
-* Expand Rd docs text, possibly organize better.
-* Comp related functions to describe
-* Depends -> Inports as much as possible (pbapply can be dropped)
-* Need imports from stats
-* Objects like MooseData & ModelList needs to be defines with in a hidden
-  environment (.mooseEnv) created at startup
-* fully check composition data
+* Package renamed from DeducerPlugInMoose to moosecounter,
+  with the intention of dropping the rJava/Deducer GUI features
+  in favour of a Shiny app. Version numbering is continuous.
 
 ## Version 0.3-3 -- March 24, 2020
 
