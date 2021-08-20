@@ -1,0 +1,9 @@
+Package: DeducerPlugInMoose
+Version: 0.3-3
+Date: 2020-03-24
+Title: Adaptive Moose Surveys
+Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos
+Maintainer: Peter Solymos <psolymos@gmail.com>
+Description: Adaptive Moose surveys.
+Depends: pscl, MuMIn, partykit, MASS, VGAM, pbapply
+License: GPL-2
