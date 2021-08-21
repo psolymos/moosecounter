@@ -1,140 +1,63 @@
-## switch total/cows
-
-solvenear <- function (x) {
-    if (is.null(x))
-        return(NULL)
-    xinv <- try(solve(x), silent = TRUE)
-    if (inherits(xinv, "try-error"))
-        xinv <- as.matrix(solve(Matrix::nearPD(x)$mat))
-    xinv
-}
-
-switch_response <- function(type="total") {
-    type <- match.arg(type, c("total", "cows"))
-    opts <- getOption("moose_options")
-    if (type == "total") {
-        opts$Ntot <- "MOOSE_TOTA"
-        opts$composition <- c("BULL_SMALL", "BULL_LARGE", "LONE_COW",
-            "COW_1C", "COW_2C", "LONE_CALF", "UNKNOWN_AG")
-    }
-    if (type == "cows") {
-        opts$Ntot <- "COW_TOTA"
-        opts$composition <- c("LONE_COW", "COW_1C", "COW_2C")
-    }
-    opts$response <- type
-    moose_options(opts)
-}
-
-## density plots
-
-plotUnivariateExpl <- function(colid, dist='negbin') {
-
-    x <- MooseData
-    srv <- MooseData$srv
-    opts <- getOption("moose_options")
-    d <- density(x[,colid])
-    d_srv <- density(x[srv,colid])
-    d_uns <- density(x[!srv,colid])
-
-    ylim <- c(0, max(max(d_srv$y), max(d_uns$y)))
-    xlim <- c(0, max(max(d_srv$x), max(d_uns$x)))
-
-    z <- x[,colid]
-    xy <- x[, opts$xy]
-    Col <- rev(heat.colors(10))
-    dat <- data.frame(y=x[srv,opts$Ntot], z=x[srv,colid])
-    dat <- dat[order(dat$z),]
-    m <- zeroinfl2(y ~ z | 1, dat, dist=dist, link='logit')
-    dat$zhat <- fitted(m)
-
-    op <- par(mfrow=c(1,3))
-    plot(d, xlim=xlim,
-      ylim=ylim + c(0, 0.2*diff(ylim)), xlab=colid, main="Density")
-    lines(d_srv, col=2)
-    rug(x[,colid], col=1, side=1)
-    rug(x[srv,colid], col=2, side=3)
-    #lines(d_uns, col=4)
-    legend("topleft", bty="n", lty=1, col=c(1,2),
-        legend=c("All","Surveyed"))
-
-    plot(xy, pch=19, col=Col[cut(z, 10)], main="Map",
-        xlab="Longitude", ylab="Latitude",
-        ylim=c(min(xy[,2])-0.2*diff(range(xy[,2])), max(xy[,2])))
-    legend("bottomleft", bty="n", pch=19, col=Col[c(length(Col),1)],
-      legend=c("High", "Low"))
-
-    plot(jitter(y) ~ z, dat, main="Total moose response",
-        xlab=colid, ylab="Total moose", col="darkgrey", pch=19)
-    lines(zhat ~ z, dat, col=4, lwd=2)
-
-    par(op)
-    invisible(NULL)
-}
-
-wzi <- function(object, pass_data=FALSE, ...) {
-    wscale <- getOption("moose_options")$wscale
-    n <- nobs(object)
-    ll0 <- as.numeric(logLik(object))
-    ll <- numeric(n)
-    w <- rep(1, n)
-    ctrl <- zeroinfl.control(
-        method = getOption("moose_options")$method,
-        start = attr(object, "parms.start"))
-    d <- model.frame(object)
-    for (i in seq_len(n)) {
-        m <- try(suppressWarnings(update(object, data=d[-i,,drop=FALSE],
-            weights=w[-i], control=ctrl)), silent=TRUE)
-        ll[i] <- if (inherits(m, "try-error"))
-            (n-1)*ll0/n else as.numeric(logLik(m))
-    }
-    w <- 1/abs(ll0-ll)^wscale
-    w <- n*w/sum(w)
-    if (pass_data) {
-        out <- try(suppressWarnings(update(object, data=d,
-            weights=w, control=ctrl)), silent=TRUE)
-        if (inherits(out, "try-error"))
-            out <- object
-    } else {
-        out <- try(suppressWarnings(update(object,
-            weights=w, control=ctrl)), silent=TRUE)
-        if (inherits(out, "try-error"))
-            out <- object
-    }
-    out$unweighted_model <- object
-    class(out) <- c("wzi", class(out))
-    out
-}
 
 ## define ZINB model
 
-checkModelList <- function() {
-	if (!exists("ModelList"))
-			assign("ModelList", list(), envir=.GlobalEnv)
-	invisible(NULL)
-}
-saveMooseData <- function(x, srv, ss=NULL, force=FALSE) {
+#checkModelList <- function() {
+#	if (!exists("ModelList"))
+#			assign("ModelList", list(), envir=.GlobalEnv)
+#	invisible(NULL)
+#}
+
+# used to be saveMooseData
+mc_update_data_total <- function(x, srv=NULL, ss=NULL) {
+  opts <- getOption("moose_options")
+  if (is.null(srv)) {
+    srv <- x[[opts$srv_name]] == opts$srv_value
+  }
   x$srv <- srv
   ## this is needed for COW analysis
   x$COW_TOTA <- rowSums(x[,c("LONE_COW", "COW_1C", "COW_2C")])
   if (!is.null(ss))
     x <- x[ss,]
-  if (!exists("MooseData")) {
-  		assign("MooseData", x, envir=.GlobalEnv)
-  } else {
-      if (force)
-          assign("MooseData", x, envir=.GlobalEnv)
-  }
-  #assign("MooseData", x, envir=.GlobalEnv)
-	invisible(NULL)
+  x
 }
-updateModelTab <- function() {
-	ModelTabFull <- model.sel(ModelList, rank = AIC)
-  DensityTab <- sapply(names(ModelList), pred_density_moose)
-  ModelTab <- data.frame(t(ModelTabFull[,c("AIC","df","logLik","delta")]))
-  ModelTab <- rbind(ModelTab, DensityTab[,colnames(ModelTab), drop=FALSE])
-	assign("ModelTab", ModelTab, envir=.GlobalEnv)
-	invisible(ModelTabFull)
+
+mc_fit_model_total <- function(vars, x, zi_vars=NULL,
+    dist="ZINB", weighted=FALSE, ...) {
+    opts <- getOption("moose_options")
+    vars <- vars[!(vars %in% c(opts$Ntot, opts$composition))]
+    CNT <- paste(vars, collapse=" + ")
+    if (is.null(zi_vars)) {
+        ZI <- "1"
+    } else {
+        zi_vars <- zi_vars[!(zi_vars %in% c(opts$Ntot, opts$composition))]
+        ZI <- paste(zi_vars, collapse=" + ")
+    }
+    Form <- as.formula(paste(opts$Ntot, "~", CNT, "|", ZI))
+    out <- zeroinfl2(
+        formula=Form,
+        data=x[x$srv,],
+        dist=dist,
+        link="logit",
+        ...)
+    if (weighted)
+        out <- wzi(out)
+    out$call <- match.call()
+    out
 }
+
+# was updateModelTab
+mc_make_model_tab <- function(ml, x) {
+    aic <- data.frame(
+        AIC=sapply(ml, AIC),
+        df=sapply(ml, function(z) length(coef(z))),
+        logLik=sapply(ml, function(z) as.numeric(logLik(z))))
+    aic$delta <- aic$AIC - min(aic$AIC)
+    aic$weight <- exp( -0.5 * aic$delta) / sum(exp( -0.5 * aic$delta))
+    D <- t(sapply(ml, pred_density_moose, x=x))
+    out <- data.frame(aic, D)
+    out[order(out$delta),]
+}
+
 
 ## predict total moose abundance and density
 pred_total_moose <- function(x, surveyed, fit){
@@ -154,10 +77,9 @@ pred_total_moose <- function(x, surveyed, fit){
     out
 }
 
-pred_density_moose <- function(model_id){
-    fit <- ModelList[[model_id]]
+# x: MooseData
+pred_density_moose <- function(fit, x){
     opts <- getOption("moose_options")
-    x <- MooseData
     srv <- x$srv
     Ntot <- pred_total_moose(x, srv, fit)
     A_all <- sum(x$AREA_KM)
@@ -165,32 +87,16 @@ pred_density_moose <- function(model_id){
     c(N=Ntot$Ntot_all, A=A_all, D=Density)
 }
 
-# note: phi.zi is prob of 1 (not 0 as in zeroinfl)
-# poisson gives theta.nb=NULL
-rZINB = function(N, mu.nb, theta.nb, phi.zi){
-    if (length(phi.zi) < N)
-        phi.zi <- rep(phi.zi, N)[seq_len(N)]
-    A <- rbinom(N,1,phi.zi)
-    if (!is.null(theta.nb)) {
-        Z <- rnegbin(N,mu=mu.nb,theta=rep(theta.nb, N))
-    } else {
-        Z <- rpois(N, lambda=mu.nb)
-    }
-    Y <- A * Z
-    Y
-}
 
-MooseSim.PI <-
-#function(Survey.data,Unsurvey.data,moose.model,B,model.B,MAXCELL,alpha)
-function(model_id, do_boot=TRUE, do_avg=FALSE, dist="negbin")
-{
-    wt <- updateModelTab()
+# was: MooseSim.PI
+# x: MooseData
+mc_pred_model_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
+    wt <- mc_make_model_tab(ml, x)
     if (!any(model_id %in% rownames(wt)))
         stop("model_id not recognized")
     wts <- wt[model_id,,drop=FALSE]
     opts <- getOption("moose_options")
     model_id0 <- model_id
-    x <- MooseData
     ## if some survey area is defined, use dual prediction
     DUAL <- !is.null(opts$area_srv)
     if (DUAL) {
@@ -201,7 +107,7 @@ function(model_id, do_boot=TRUE, do_avg=FALSE, dist="negbin")
     x$sort_id <- 1:nrow(x)
     srv <- x$srv
     x$observed_values <- NA
-    x$observed_values[srv] <- ModelList[[1]]$y # all models should have same data
+    x$observed_values[srv] <- ml[[1]]$y # all models should have same data
     x$fitted_values <- NA
 #    x$fitted_values[srv] <- fit$fitted.values
     B <- opts$B
@@ -238,10 +144,11 @@ function(model_id, do_boot=TRUE, do_avg=FALSE, dist="negbin")
                 model_id <- sample(model_id, 1)
         }
         mid[b] <- model_id
+        #cat("Fitting #", b, " of ", model_id, "\n", sep="")
 
-        if (!(model_id %in% names(ModelList)))
+        if (!(model_id %in% names(ml)))
             stop(model_id, " model cannot be found")
-        fit <- ModelList[[model_id]]
+        fit <- ml[[model_id]]
 
         fit.out[,b] <- fit$fitted.values
 
@@ -259,9 +166,9 @@ function(model_id, do_boot=TRUE, do_avg=FALSE, dist="negbin")
 
             if (do_boot) {
                 model.Boot <- try(suppressWarnings(update(fit,
-                    data = BSurvey.data,
+                    x = BSurvey.data,
                     weights=rep(1, nrow(BSurvey.data)),
-                    control = zeroinfl.control(
+                    control = pscl::zeroinfl.control(
                         start = parms.start,
                         method = opts$method))), silent = TRUE)
                 if (!inherits(model.Boot, "try-error")) {
@@ -319,7 +226,7 @@ function(model_id, do_boot=TRUE, do_avg=FALSE, dist="negbin")
     TotalMoose.dist <- apply(boot.out, 2, sum)
     Cell.PI <- apply(boot.out, 1, quantile, c(alpha/2, 0.5, (1-alpha/2)))
     x_uns$Cell.mean <- rowMeans(boot.out)
-    x_uns$Cell.mode <- apply(boot.out, 1, Mode)
+    x_uns$Cell.mode <- apply(boot.out, 1, find_mode)
     x_uns$Cell.pred <- Cell.PI[2,]
     x_uns$Cell.PIL <- Cell.PI[1,]
     x_uns$Cell.PIU <- Cell.PI[3,]
@@ -354,45 +261,32 @@ function(model_id, do_boot=TRUE, do_avg=FALSE, dist="negbin")
     csfull <- colSums(boot.full)
     tmPI <- c(Mean=mean(csfull),
         Median=unname(quantile(csfull, 0.5)),
-        Mode=Mode(csfull),
+        Mode=find_mode(csfull),
         quantile(csfull, c(alpha/2, (1-alpha/2))))
     out$total <- rbind(N=tmPI,
         A=sum(x_full[[opts$Area]]),
         D=tmPI/sum(x_full[[opts$Area]]))
     out
 }
-## how to get cell.pred with decimals when it is median?
-## use mean?
 
-
-## need to use density to get the model because values tend to
-## be spread out
-Mode <- function(csfull) {
-    d <- density(csfull)
-    round(d$x[which.max(d$y)])
-}
-
-## Use Unsurveyed.data for plotting/maps
-## use ranking and accuracy
-
-savePiData <- function(PI) {
-#  tmp <- PI$Unsurvey.data[,c("SU_ID", "Cell.pred", "Cell.PIL",  "Cell.PIU",
-#    "Cell.accuracy", "Rank")]
-  tmp <- PI$data[!PI$data$srv,,drop=FALSE]
-  tmp <- tmp[order(tmp$Cell.accuracy, decreasing=TRUE),]
-  assign("PiData", tmp, envir=.GlobalEnv)
-	invisible(NULL)
-}
+#savePiData <- function(PI) {
+#  tmp <- PI$data[!PI$data$srv,,drop=FALSE]
+#  tmp <- tmp[order(tmp$Cell.accuracy, decreasing=TRUE),]
+#  assign("PiData", tmp, envir=.GlobalEnv)
+#  invisible(NULL)
+#}
 ## this is used for subset, to avoid confusion
-savePiDataSubset <- function(PI) {
-  tmp <- PI$data[!PI$data$srv,,drop=FALSE]
-  tmp <- tmp[order(tmp$Cell.accuracy, decreasing=TRUE),]
-  assign("PiDataSubset", tmp, envir=.GlobalEnv)
-    invisible(NULL)
-}
+#savePiDataSubset <- function(PI) {
+#  tmp <- PI$data[!PI$data$srv,,drop=FALSE]
+#  tmp <- tmp[order(tmp$Cell.accuracy, decreasing=TRUE),]
+#  assign("PiDataSubset", tmp, envir=.GlobalEnv)
+#  invisible(NULL)
+#}
 
-subsetPiData <- function(PI, ss) {
-    if (missing(ss))
+
+# was: subsetPiData
+mc_get_pred <- function(PI, ss=NULL) {
+    if (is.null(ss))
         ss <- rep(TRUE, nrow(PI$data))
     opts <- getOption("moose_options")
     PIout <- PI
@@ -407,7 +301,7 @@ subsetPiData <- function(PI, ss) {
     alpha <- getOption("moose_options")$alpha
     tmPI <- c(Mean=mean(csfull),
         Median=unname(quantile(csfull, 0.5)),
-        Mode=Mode(csfull),
+        Mode=find_mode(csfull),
         quantile(csfull, c(alpha/2, (1-alpha/2))))
     PIout$total <- rbind(N=tmPI,
         A=sum(PIout$data[[opts$Area]]),
@@ -427,10 +321,10 @@ pred_density_moose_PI <- function(PI){
 }
 
 
-plotResiduals <- function(model_id) {
-    fit <- ModelList[[model_id]]
+# was: plotResiduals
+mc_plot_residuals <- function(model_id, ml, x) {
+    fit <- ml[[model_id]]
     opts <- getOption("moose_options")
-    x <- MooseData
     srv <- x$srv
     Y <- fit$y
     Mean <- fit$fitted.values

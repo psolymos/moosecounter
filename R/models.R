@@ -1,12 +1,56 @@
+## weighted ZI model to tame influential observations
+wzi <- function(object, pass_data=FALSE, ...) {
+    wscale <- getOption("moose_options")$wscale
+    n <- nobs(object)
+    ll0 <- as.numeric(logLik(object))
+    ll <- numeric(n)
+    w <- rep(1, n)
+    ctrl <- pscl::zeroinfl.control(
+        method = getOption("moose_options")$method,
+        start = attr(object, "parms.start"))
+    d <- model.frame(object)
+    for (i in seq_len(n)) {
+        m <- try(suppressWarnings(update(object, data=d[-i,,drop=FALSE],
+            weights=w[-i], control=ctrl)), silent=TRUE)
+        ll[i] <- if (inherits(m, "try-error"))
+            (n-1)*ll0/n else as.numeric(logLik(m))
+    }
+    w <- 1/abs(ll0-ll)^wscale
+    w <- n*w/sum(w)
+    if (pass_data) {
+        out <- try(suppressWarnings(update(object, data=d,
+            weights=w, control=ctrl)), silent=TRUE)
+        if (inherits(out, "try-error"))
+            out <- object
+    } else {
+        out <- try(suppressWarnings(update(object,
+            weights=w, control=ctrl)), silent=TRUE)
+        if (inherits(out, "try-error"))
+            out <- object
+    }
+    out$unweighted_model <- object
+    class(out) <- c("wzi", class(out))
+    out
+}
+
 # poisson=ZIP, negbin=ZINB, P=poisson (non-ZI), NB=negbin (non-ZI)
-zeroinfl2 <-
-function (formula, data, subset, na.action, weights, offset,
+zeroinfl2 <- function (formula, data,
+    subset, na.action, weights, offset,
     dist = c("poisson", "negbin", "P", "NB"),
     link = c("logit", "probit", "cloglog"),
-    control = zeroinfl.control(...),
+    control = NULL,
     model = TRUE, y = TRUE, x = FALSE,
-    solveH=TRUE, ...)
-{
+    solveH=TRUE, ...) {
+
+    if (is.null(control))
+        control <- pscl::zeroinfl.control(...)
+    dist <- switch(dist,
+        "P"="P",
+        "NB"="NB",
+        "ZIP"="poisson",
+        "ZINB"="negbin",
+        stop("dist must be one of P, NB, ZIP, or ZINB"))
+
     ziPoissonNonZI <- function(parms) {
         mu <- as.vector(exp(X %*% parms[1:kx] + offsetx))
         #phi <- as.vector(linkinv(Z %*% parms[(kx + 1):(kx + kz)] + offsetz))

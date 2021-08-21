@@ -13,7 +13,6 @@
     if (is.null(getOption("moose_options")))
         options(
 #            "scipen"=999,
-            "moose_options"=list(
                 method = "Nelder-Mead",
                 B=500,
                 MAXCELL=NULL, # this is max possible total abundance in a cell
@@ -21,7 +20,9 @@
                 wscale=1,
                 MINCELL=10, # this is min number of cells for composition
                 Ntot="MOOSE_TOTA",
-                srv="Sampled==1",#"CENSUS_ID==7",
+                #srv="Sampled==1",#"CENSUS_ID==7",
+                srv_name="Sampled",
+                srv_value=1,
                 area_srv=NULL,
                 Area="AREA_KM",
                 sightability=1,

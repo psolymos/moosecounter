@@ -1,7 +1,5 @@
 ## define global options
-moose_options <-
-function(...)
-{
+mc_options <- function(...) {
     opar <- getOption("moose_options")
     args <- list(...)
     if (length(args)) {
