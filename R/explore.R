@@ -3,7 +3,7 @@
 # used to be plotUnivariateExpl
 # x: MooseData
 # i: colid
-mc_plot_univariate <- function(i, x, dist='negbin') {
+mc_plot_univariate <- function(i, x, dist="ZINB") {
 
     srv <- x$srv
     opts <- getOption("moose_options")
