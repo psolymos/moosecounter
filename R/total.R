@@ -8,7 +8,7 @@
 #}
 
 # used to be saveMooseData
-mc_update_data_total <- function(x, srv=NULL, ss=NULL) {
+mc_update_total <- function(x, srv=NULL, ss=NULL) {
   opts <- getOption("moose_options")
   if (is.null(srv)) {
     srv <- x[[opts$srv_name]] == opts$srv_value
@@ -21,7 +21,7 @@ mc_update_data_total <- function(x, srv=NULL, ss=NULL) {
   x
 }
 
-mc_fit_model_total <- function(vars, x, zi_vars=NULL,
+mc_fit_total <- function(vars, x, zi_vars=NULL,
     dist="ZINB", weighted=FALSE, ...) {
     opts <- getOption("moose_options")
     vars <- vars[!(vars %in% c(opts$Ntot, opts$composition))]
@@ -46,7 +46,7 @@ mc_fit_model_total <- function(vars, x, zi_vars=NULL,
 }
 
 # was updateModelTab
-mc_make_model_tab <- function(ml, x) {
+mc_models_total <- function(ml, x) {
     aic <- data.frame(
         AIC=sapply(ml, AIC),
         df=sapply(ml, function(z) length(coef(z))),
@@ -90,8 +90,8 @@ pred_density_moose <- function(fit, x){
 
 # was: MooseSim.PI
 # x: MooseData
-mc_pred_model_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
-    wt <- mc_make_model_tab(ml, x)
+mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
+    wt <- mc_models_total(ml, x)
     if (!any(model_id %in% rownames(wt)))
         stop("model_id not recognized")
     wts <- wt[model_id,,drop=FALSE]
@@ -365,7 +365,7 @@ mc_plot_residuals <- function(model_id, ml, x) {
     invisible(z)
 }
 
-plot_predPI <- function(PI) {
+mc_plot_predpi <- function(PI) {
 
     opts <- getOption("moose_options")
     x <- PI$data
@@ -381,7 +381,8 @@ plot_predPI <- function(PI) {
     z <- (Y - Mean) / sqrt(Y + 0.5)
     xy <- x[!srv, opts$xy]
 
-    Colfun <- colorRampPalette(c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'))
+    Colfun <- colorRampPalette(
+        c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'))
     AbsMax <- max(abs(z))
     Sd <- sd(z)
     nn <- ceiling(AbsMax / Sd)
@@ -426,7 +427,8 @@ plot_predPI <- function(PI) {
     zNpred <- Npred / Max
     zAcc <- (Acc - min(Acc)) / diff(range(Acc))
 
-    Colfun <- colorRampPalette(c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'))
+    Colfun <- colorRampPalette(
+        c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'))
     Col <- Colfun(9)
     #Col <- brewer.pal(9, "YlOrRd")[1:5]
     czAcc <- cut(zAcc, c(-0.1, 0.2, 0.4, 0.6, 0.8, 1.1))
@@ -448,7 +450,7 @@ plot_predPI <- function(PI) {
     invisible(PI)
 }
 
-PlotPiDistr <- function(PI, plot=TRUE, breaks="Sturges") {
+mc_plot_pidistr <- function(PI, plot=TRUE, breaks="Sturges") {
     csfull <- colSums(PI$boot_full)
     if (plot) {
         h <- hist(csfull, breaks=breaks, plot=FALSE)
@@ -477,7 +479,7 @@ PlotPiDistr <- function(PI, plot=TRUE, breaks="Sturges") {
     }
     invisible(csfull)
 }
-PlotPiDistrCell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
+mc_plot_pidistrcell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
     csfull <- PI$boot_full[id,]
     if (plot) {
         h <- hist(csfull, breaks=breaks, plot=FALSE)
