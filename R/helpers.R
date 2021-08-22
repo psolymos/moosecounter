@@ -1,4 +1,4 @@
-#' Random numbers from ZINB distribution
+#' Random Numbers From ZINB Distribution
 #'
 #' ZINB = zero inflated negative binomial.
 #'
@@ -16,17 +16,21 @@
 rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
     if (length(phi.zi) < N)
         phi.zi <- rep(phi.zi, N)[seq_len(N)]
-    A <- rbinom(N, 1, phi.zi)
+    A <- stats::rbinom(N, 1, phi.zi)
     if (!is.null(theta.nb)) {
         Z <- MASS::rnegbin(N, mu=mu.nb, theta=rep(theta.nb, N))
     } else {
-        Z <- rpois(N, lambda=mu.nb)
+        Z <- stats::rpois(N, lambda=mu.nb)
     }
     Y <- A * Z
     Y
 }
 
-## robust matrix inversion
+#' Robust Matrix Inversion
+#'
+#' @param x a symmetric square matrix
+#'
+#' @export
 solvenear <- function (x) {
     if (is.null(x))
         return(NULL)
@@ -36,7 +40,11 @@ solvenear <- function (x) {
     xinv
 }
 
-## switch total/cows
+#' Switch Response
+#'
+#' @param type type of the response, can be `"total"` or `"cows"`
+#'
+#' @export
 switch_response <- function(type="total") {
     type <- match.arg(type, c("total", "cows"))
     opts <- getOption("moose_options")
@@ -53,9 +61,14 @@ switch_response <- function(type="total") {
     mc_options(opts)
 }
 
+#' Find Mode
+#'
+#' @param x a numeric vector
+#'
+#' @export
 ## need to use density to get the mode because values tend to
 ## be spread out
 find_mode <- function(x) {
-    d <- density(x)
+    d <- stats::density(x)
     round(d$x[which.max(d$y)])
 }

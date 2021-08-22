@@ -1,12 +1,10 @@
-
-## define ZINB model
-
-#checkModelList <- function() {
-#	if (!exists("ModelList"))
-#			assign("ModelList", list(), envir=.GlobalEnv)
-#	invisible(NULL)
-#}
-
+#' Update Moose Data
+#'
+#' @param x data frame
+#' @param srv logical vector, rows of `x` that are surveyed, falls back to global options when `NULL`
+#' @param ss logical vector to subset `x`, default is to take no subset
+#'
+#' @export
 # used to be saveMooseData
 mc_update_total <- function(x, srv=NULL, ss=NULL) {
   opts <- getOption("moose_options")
@@ -21,6 +19,16 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
   x
 }
 
+#' Fit Model to Total Abundance
+#'
+#' @param vars column names of `x` to be used as predictors for the count model
+#' @param x data frame (use `mc_update_total()` on `x` prior)
+#' @param zi_vars optional, column names of `x` to be used as predictors for the zero model
+#' @param dist distribution (P, NB, ZIP, ZINB)
+#' @param weighted logical, to use weighting to moderate influential observations
+#' @param ... other args passed to `zeroinfl2()`
+#'
+#' @export
 mc_fit_total <- function(vars, x, zi_vars=NULL,
     dist="ZINB", weighted=FALSE, ...) {
     opts <- getOption("moose_options")
@@ -32,7 +40,7 @@ mc_fit_total <- function(vars, x, zi_vars=NULL,
         zi_vars <- zi_vars[!(zi_vars %in% c(opts$Ntot, opts$composition))]
         ZI <- paste(zi_vars, collapse=" + ")
     }
-    Form <- as.formula(paste(opts$Ntot, "~", CNT, "|", ZI))
+    Form <- stats::as.formula(paste(opts$Ntot, "~", CNT, "|", ZI))
     out <- zeroinfl2(
         formula=Form,
         data=x[x$srv,],
@@ -45,12 +53,18 @@ mc_fit_total <- function(vars, x, zi_vars=NULL,
     out
 }
 
+#' Total Abundance Models
+#'
+#' @param ml named list of models
+#' @param x data frame
+#'
+#' @export
 # was updateModelTab
 mc_models_total <- function(ml, x) {
     aic <- data.frame(
-        AIC=sapply(ml, AIC),
-        df=sapply(ml, function(z) length(coef(z))),
-        logLik=sapply(ml, function(z) as.numeric(logLik(z))))
+        AIC=sapply(ml, stats::AIC),
+        df=sapply(ml, function(z) length(stats::coef(z))),
+        logLik=sapply(ml, function(z) as.numeric(stats::logLik(z))))
     aic$delta <- aic$AIC - min(aic$AIC)
     aic$weight <- exp( -0.5 * aic$delta) / sum(exp( -0.5 * aic$delta))
     D <- t(sapply(ml, pred_density_moose, x=x))
@@ -63,7 +77,7 @@ mc_models_total <- function(ml, x) {
 pred_total_moose <- function(x, surveyed, fit){
     opts <- getOption("moose_options")
     ## predict response for unsurveyed cells
-    pr_uns <- predict(fit, newdata=x[!surveyed,,drop=FALSE], type=c("response"))
+    pr_uns <- stats::predict(fit, newdata=x[!surveyed,,drop=FALSE], type=c("response"))
     ## sum observed + predicted
     pr_total <- sum(pr_uns) + sum(x[[opts$Ntot]][surveyed])
     ## here is the sightability
@@ -88,6 +102,15 @@ pred_density_moose <- function(fit, x){
 }
 
 
+#' Total Abundance Prediction Intervals
+#'
+#' @param model_id model ID or model IDs (can be multiple from `names(ml)`)
+#' @param ml named list of models
+#' @param x data frame
+#' @param do_boot logical, to do bootstrap
+#' @param do_avg logical, to do model averaging
+#'
+#' @export
 # was: MooseSim.PI
 # x: MooseData
 mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
@@ -129,8 +152,8 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     mid <- character(B)
     b <- 1
 
-    pb <- startpb(0, B)
-    on.exit(closepb(pb))
+    pb <- pbapply::startpb(0, B)
+    on.exit(pbapply::closepb(pb))
     ISSUES <- list()
 
     while (b <= B) {
@@ -165,7 +188,7 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
         if (max(BSurvey.data[[opts$Ntot]]) != 0){
 
             if (do_boot) {
-                model.Boot <- try(suppressWarnings(update(fit,
+                model.Boot <- try(suppressWarnings(stats::update(fit,
                     x = BSurvey.data,
                     weights=rep(1, nrow(BSurvey.data)),
                     control = pscl::zeroinfl.control(
@@ -181,27 +204,27 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
             }
 
             if (!inherits(model.Boot, "try-error")) {
-                predict.BNS <- predict(model.Boot, newdata=x_uns, type="response")
+                predict.BNS <- stats::predict(model.Boot, newdata=x_uns, type="response")
                 predict.BNSout <- if (DUAL && inherits(fit, "wzi")) {
-                    predict(model.Boot$unweighted_model,
+                    stats::predict(model.Boot$unweighted_model,
                         newdata=x_uns, type="response")
                 } else {
                     predict.BNS
                 }
 
                 if (max(predict.BNS, predict.BNSout) <= MAXCELL && model.Boot$optim$convergence == 0) {
-                    Bm.NS <- predict(model.Boot, newdata = x_uns, type="count")
+                    Bm.NS <- stats::predict(model.Boot, newdata = x_uns, type="count")
                     Btheta.nb <- model.Boot$theta
-                    Bphi.zi <- 1 - predict(model.Boot, newdata = x_uns, type="zero")
+                    Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="zero")
                     boot.out[,b] <- rZINB(NS,
                         mu.nb = Bm.NS,
                         theta.nb=Btheta.nb,
                         phi.zi=Bphi.zi) # this os prob of 1 (not 0) and is correct
                     if (DUAL && inherits(fit, "wzi")) {
-                        Bm.NSout <- predict(model.Boot$unweighted_model,
+                        Bm.NSout <- stats::predict(model.Boot$unweighted_model,
                                             newdata = x_uns[!x_uns$area_srv,], type="count")
                         Btheta.nbout <- model.Boot$unweighted_model$theta
-                        Bphi.ziout <- 1 - predict(model.Boot$unweighted_model,
+                        Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
                                                newdata = x_uns[!x_uns$area_srv,], type="zero")
                         boot.out[!x_uns$area_srv,b] <- rZINB(sum(!x_uns$area_srv),
                             mu.nb = Bm.NSout,
@@ -209,7 +232,7 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                             phi.zi=Bphi.ziout)
                     }
                     if (max(boot.out[,b]) <= MAXCELL) {
-                        setpb(pb, b)
+                        pbapply::setpb(pb, b)
                         b <- b + 1
                     }
                 }
@@ -224,7 +247,7 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     boot.out <- boot.out / s
 
     TotalMoose.dist <- apply(boot.out, 2, sum)
-    Cell.PI <- apply(boot.out, 1, quantile, c(alpha/2, 0.5, (1-alpha/2)))
+    Cell.PI <- apply(boot.out, 1, stats::quantile, c(alpha/2, 0.5, (1-alpha/2)))
     x_uns$Cell.mean <- rowMeans(boot.out)
     x_uns$Cell.mode <- apply(boot.out, 1, find_mode)
     x_uns$Cell.pred <- Cell.PI[2,]
@@ -260,9 +283,9 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
 
     csfull <- colSums(boot.full)
     tmPI <- c(Mean=mean(csfull),
-        Median=unname(quantile(csfull, 0.5)),
+        Median=unname(stats::quantile(csfull, 0.5)),
         Mode=find_mode(csfull),
-        quantile(csfull, c(alpha/2, (1-alpha/2))))
+        stats::quantile(csfull, c(alpha/2, (1-alpha/2))))
     out$total <- rbind(N=tmPI,
         A=sum(x_full[[opts$Area]]),
         D=tmPI/sum(x_full[[opts$Area]]))
@@ -284,6 +307,12 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
 #}
 
 
+#' Get PI Info
+#'
+#' @param PI PI object returned by `mc_predict_total()`
+#' @param ss subset indicator
+#'
+#' @export
 # was: subsetPiData
 mc_get_pred <- function(PI, ss=NULL) {
     if (is.null(ss))
@@ -300,15 +329,20 @@ mc_get_pred <- function(PI, ss=NULL) {
     csfull <- colSums(PIout$boot_full)
     alpha <- getOption("moose_options")$alpha
     tmPI <- c(Mean=mean(csfull),
-        Median=unname(quantile(csfull, 0.5)),
+        Median=unname(stats::quantile(csfull, 0.5)),
         Mode=find_mode(csfull),
-        quantile(csfull, c(alpha/2, (1-alpha/2))))
+        stats::quantile(csfull, c(alpha/2, (1-alpha/2))))
     PIout$total <- rbind(N=tmPI,
         A=sum(PIout$data[[opts$Area]]),
         D=tmPI/sum(PIout$data[[opts$Area]]))
     PIout
 }
 
+#' Get PI Density
+#'
+#' @param PI PI object returned by `mc_predict_total()`
+#'
+#' @export
 pred_density_moose_PI <- function(PI){
     out <- round(PI$total, 2)
     cat("Total Moose PI summary:\n\n")
@@ -321,6 +355,13 @@ pred_density_moose_PI <- function(PI){
 }
 
 
+#' Plot Model Residuals
+#'
+#' @param model_id model ID (one from `names(ml)`)
+#' @param ml named list of models
+#' @param x data frame
+#'
+#' @export
 # was: plotResiduals
 mc_plot_residuals <- function(model_id, ml, x) {
     fit <- ml[[model_id]]
@@ -331,40 +372,46 @@ mc_plot_residuals <- function(model_id, ml, x) {
     z <- (Y - Mean) / sqrt(Y + 0.5)
     xy <- x[!srv, opts$xy]
 
-    Colfun <- colorRampPalette(c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'))
+    Colfun <- grDevices::colorRampPalette(
+        c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'))
     AbsMax <- max(abs(z))
-    Sd <- sd(z)
+    Sd <- stats::sd(z)
     nn <- ceiling(AbsMax / Sd)
     br <- seq(-nn*Sd, nn*Sd, by=0.5*Sd)
-    tmp <- hist(z, plot=FALSE, breaks=br)
+    tmp <- graphics::hist(z, plot=FALSE, breaks=br)
     Col <- Colfun(length(tmp$counts))
     tz <- tanh(z)
     ctz <- cut(z, br)
 
-    op <- par(mfrow=c(1,2))
+    op <- graphics::par(mfrow=c(1,2))
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
       xlab="Longitude", ylab="Latitude",
       main=paste("Residuals for Model ID:", model_id),
       ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
-    points(x[!srv,opts$xy], pch="+", col="grey")
-    legend("bottomleft", pch=c("o","+"), col="grey",
+    graphics::points(x[!srv,opts$xy], pch="+", col="grey")
+    graphics::legend("bottomleft", pch=c("o","+"), col="grey",
       bty="n", legend=c("Surveyed", "Unsurveyed"))
 
     lo <- x[srv,,drop=FALSE]
     lo <- lo[z <= (-1.5*Sd),,drop=FALSE]
     if (nrow(lo) > 0)
-        text(lo[, opts$xy], labels = lo$SU_ID, cex=0.8)
+        graphics::text(lo[, opts$xy], labels = lo$SU_ID, cex=0.8)
     hi <- x[srv,,drop=FALSE]
     hi <- hi[z >= 1.5*Sd,,drop=FALSE]
     if (nrow(hi) > 0)
-        text(hi[, opts$xy], labels = hi$SU_ID, cex=0.8)
+        graphics::text(hi[, opts$xy], labels = hi$SU_ID, cex=0.8)
 
-    hist(z, xlab="Standardized Residuals", col=Col, breaks=br,
+    graphics::hist(z, xlab="Standardized Residuals", col=Col, breaks=br,
       main=paste("Model ID:", model_id))
-    par(op)
+    graphics::par(op)
     invisible(z)
 }
 
+#' Plot PI
+#'
+#' @param PI PI object returned by `mc_predict_total()`
+#'
+#' @export
 mc_plot_predpi <- function(PI) {
 
     opts <- getOption("moose_options")
@@ -381,18 +428,18 @@ mc_plot_predpi <- function(PI) {
     z <- (Y - Mean) / sqrt(Y + 0.5)
     xy <- x[!srv, opts$xy]
 
-    Colfun <- colorRampPalette(
+    Colfun <- grDevices::colorRampPalette(
         c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'))
     AbsMax <- max(abs(z))
-    Sd <- sd(z)
+    Sd <- stats::sd(z)
     nn <- ceiling(AbsMax / Sd)
     br <- seq(-nn*Sd, nn*Sd, by=0.5*Sd)
-    tmp <- hist(z, plot=FALSE, breaks=br)
+    tmp <- graphics::hist(z, plot=FALSE, breaks=br)
     Col <- Colfun(length(tmp$counts))
     tz <- tanh(z)
     ctz <- cut(z, br)
 
-    op <- par(mfrow=c(1,3))
+    op <- graphics::par(mfrow=c(1,3))
 
     ModID <- PI$model_id
     if (length(ModID)>1)
@@ -401,20 +448,20 @@ mc_plot_predpi <- function(PI) {
         xlab="Longitude", ylab="Latitude",
         main=paste("Residuals for Model ID:", ModID),
         ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
-    points(x[!srv,opts$xy], pch="+", col="grey")
-    legend("bottomleft", pch=c("o","+"), col="grey",
+    graphics::points(x[!srv,opts$xy], pch="+", col="grey")
+    graphics::legend("bottomleft", pch=c("o","+"), col="grey",
         bty="n", legend=c("Surveyed", "Unsurveyed"))
 
     lo <- x[srv,,drop=FALSE]
     lo <- lo[z <= (-1.5*Sd),,drop=FALSE]
     if (nrow(lo) > 0)
-        text(lo[, opts$xy], labels = lo$SU_ID, cex=0.8)
+        graphics::text(lo[, opts$xy], labels = lo$SU_ID, cex=0.8)
     hi <- x[srv,,drop=FALSE]
     hi <- hi[z >= 1.5*Sd,,drop=FALSE]
     if (nrow(hi) > 0)
-        text(hi[, opts$xy], labels = hi$SU_ID, cex=0.8)
+        graphics::text(hi[, opts$xy], labels = hi$SU_ID, cex=0.8)
 
-    hist(z, breaks=br, xlab="Standardized Residuals", col=Col,
+    graphics::hist(z, breaks=br, xlab="Standardized Residuals", col=Col,
         main=paste("Model ID:", ModID))
 
     xy <- PI$data[!srv, opts$xy]
@@ -427,7 +474,7 @@ mc_plot_predpi <- function(PI) {
     zNpred <- Npred / Max
     zAcc <- (Acc - min(Acc)) / diff(range(Acc))
 
-    Colfun <- colorRampPalette(
+    Colfun <- grDevices::colorRampPalette(
         c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'))
     Col <- Colfun(9)
     #Col <- brewer.pal(9, "YlOrRd")[1:5]
@@ -440,70 +487,86 @@ mc_plot_predpi <- function(PI) {
       ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0),
       xlab="Longitude", ylab="Latitude",
       main=paste("Accuracy for Model ID:", ModID))
-    points(x[srv,opts$xy], pch="+", col="grey")
+    graphics::points(x[srv,opts$xy], pch="+", col="grey")
 #    text(x[!srv,opts$xy][AccRank <= Min,], labels=AccRank[AccRank <= Min], cex=1)
-    text(x[!srv,opts$xy][AccRank <= Min,], labels=x[!srv,"SU_ID"][AccRank <= Min], cex=1)
-    legend("bottomleft", pch=19, col=Col[c(5,3,1)],
+    graphics::text(x[!srv,opts$xy][AccRank <= Min,], labels=x[!srv,"SU_ID"][AccRank <= Min], cex=1)
+    graphics::legend("bottomleft", pch=19, col=Col[c(5,3,1)],
       bty="n", legend=c("+++", "++", "+"))
-    par(op)
+    graphics::par(op)
 
     invisible(PI)
 }
 
+#' Plot the total PI distribution
+#'
+#' @param PI PI object returned by `mc_predict_total()`
+#' @param plot logical, to plot or just give summary
+#' @param breaks breaks arg passed to `graphics::hist()`
+#'
+#' @export
 mc_plot_pidistr <- function(PI, plot=TRUE, breaks="Sturges") {
     csfull <- colSums(PI$boot_full)
     if (plot) {
-        h <- hist(csfull, breaks=breaks, plot=FALSE)
+        h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
         h$density <- h$counts * 100 / sum(h$counts)
         if (length(unique(csfull)) == 1) {
             h$mids <- unique(csfull)
             h$breaks <- unique(csfull) + c(-0.5, 0.5)
         }
-        d <- density(csfull)
+        d <- stats::density(csfull)
         d$y <- max(h$density) * d$y / max(d$y)
         plot(h,
             freq=FALSE, col="lightgrey", main="Total Moose PI",
             xlab="Predicted Total Moose", ylab="Percent",
             border="darkgrey",
             ylim=c(0, max(h$density, d$y)))
-        lines(d)
-        rug(csfull, col=1)
-        abline(v=PI$total["N", "Mean"], col=2)
-        abline(v=PI$total["N", "Median"], col=3)
-        abline(v=PI$total["N", "Mode"], col=4)
-        abline(v=PI$total["N", 4:5], col="darkgrey", lty=2)
+        graphics::lines(d)
+        graphics::rug(csfull, col=1)
+        graphics::abline(v=PI$total["N", "Mean"], col=2)
+        graphics::abline(v=PI$total["N", "Median"], col=3)
+        graphics::abline(v=PI$total["N", "Mode"], col=4)
+        graphics::abline(v=PI$total["N", 4:5], col="darkgrey", lty=2)
         TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
             round(PI$total["N", c("Mean", "Median", "Mode")]))
-        legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
+        graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
             legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
     }
     invisible(csfull)
 }
+
+#' Plot the total PI distribution for a cell
+#'
+#' @param PI PI object returned by `mc_predict_total()`
+#' @param id cell ID
+#' @param plot logical, to plot or just give summary
+#' @param breaks breaks arg passed to `graphics::hist()`
+#'
+#' @export
 mc_plot_pidistrcell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
     csfull <- PI$boot_full[id,]
     if (plot) {
-        h <- hist(csfull, breaks=breaks, plot=FALSE)
+        h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
         h$density <- h$counts * 100 / sum(h$counts)
         if (length(unique(csfull)) == 1) {
             h$mids <- unique(csfull)
             h$breaks <- unique(csfull) + c(-0.5, 0.5)
         }
-        d <- density(csfull)
+        d <- stats::density(csfull)
         d$y <- max(h$density) * d$y / max(d$y)
         plot(h,
             freq=FALSE, col="lightgrey", main="Cell Moose PI",
             xlab="Predicted Total Moose in cell", ylab="Percent",
             border="darkgrey",
             ylim=c(0, max(h$density, d$y)))
-        lines(d)
-        rug(csfull, col=1)
-        abline(v=PI$data[id, "Cell.mean"], col=2)
-        abline(v=PI$data[id, "Cell.pred"], col=3)
-        abline(v=PI$data[id, "Cell.mode"], col=4)
-        abline(v=PI$data[id, c("Cell.PIL", "Cell.PIU")], col="darkgrey", lty=2)
+        graphics::lines(d)
+        graphics::rug(csfull, col=1)
+        graphics::abline(v=PI$data[id, "Cell.mean"], col=2)
+        graphics::abline(v=PI$data[id, "Cell.pred"], col=3)
+        graphics::abline(v=PI$data[id, "Cell.mode"], col=4)
+        graphics::abline(v=PI$data[id, c("Cell.PIL", "Cell.PIU")], col="darkgrey", lty=2)
         TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
             round(PI$data[id, c("Cell.mean", "Cell.pred", "Cell.mode")]))
-        legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
+        graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
             legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
     }
     invisible(csfull)

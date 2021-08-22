@@ -5,5 +5,6 @@ Title: Adaptive Moose Surveys
 Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos
 Maintainer: Peter Solymos <psolymos@gmail.com>
 Description: Adaptive Moose surveys.
-Imports: pscl, MuMIn, partykit, MASS, VGAM, pbapply
+Imports: pscl, partykit, MASS, pbapply, shiny, Matrix
 License: GPL-2
+RoxygenNote: 7.1.1

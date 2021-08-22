@@ -1,3 +1,8 @@
+#' Set Moose Options
+#'
+#' @param ... options to set (see `zzz.R`)
+#'
+#' @export
 ## define global options
 mc_options <- function(...) {
     opar <- getOption("moose_options")

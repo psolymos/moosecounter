@@ -1,29 +1,36 @@
+#' Weighted Refitting of Models
+#'
+#' @param object a model as returned by `zeroinfl2()`
+#' @param pass_data logical, to pass the data or not
+#' @param ... other params
+#'
+#' @export
 ## weighted ZI model to tame influential observations
 wzi <- function(object, pass_data=FALSE, ...) {
     wscale <- getOption("moose_options")$wscale
-    n <- nobs(object)
-    ll0 <- as.numeric(logLik(object))
+    n <- stats::nobs(object)
+    ll0 <- as.numeric(stats::logLik(object))
     ll <- numeric(n)
     w <- rep(1, n)
     ctrl <- pscl::zeroinfl.control(
         method = getOption("moose_options")$method,
         start = attr(object, "parms.start"))
-    d <- model.frame(object)
+    d <- stats::model.frame(object)
     for (i in seq_len(n)) {
-        m <- try(suppressWarnings(update(object, data=d[-i,,drop=FALSE],
+        m <- try(suppressWarnings(stats::update(object, data=d[-i,,drop=FALSE],
             weights=w[-i], control=ctrl)), silent=TRUE)
         ll[i] <- if (inherits(m, "try-error"))
-            (n-1)*ll0/n else as.numeric(logLik(m))
+            (n-1)*ll0/n else as.numeric(stats::logLik(m))
     }
     w <- 1/abs(ll0-ll)^wscale
     w <- n*w/sum(w)
     if (pass_data) {
-        out <- try(suppressWarnings(update(object, data=d,
+        out <- try(suppressWarnings(stats::update(object, data=d,
             weights=w, control=ctrl)), silent=TRUE)
         if (inherits(out, "try-error"))
             out <- object
     } else {
-        out <- try(suppressWarnings(update(object,
+        out <- try(suppressWarnings(stats::update(object,
             weights=w, control=ctrl)), silent=TRUE)
         if (inherits(out, "try-error"))
             out <- object
@@ -33,10 +40,22 @@ wzi <- function(object, pass_data=FALSE, ...) {
     out
 }
 
+#' Count Models
+#'
+#' @param formula model formula as in `pscl::zeroinfl()`
+#' @param data Moose data set
+#' @param subset,na.action,weights,offset,model,y,x arguments as in `pscl::zeroinfl()`
+#' @param control see `pscl::zeroinfl.control()`
+#' @param solveH logical, to use robust matrix inversion to get VCV
+#' @param dist count distribution, one of `"ZIP"`, `"ZINB"`, `"P"`, `"NB"`
+#' @param link link function for the zero model
+#' @param ... control arguments
+#'
+#' @export
 # poisson=ZIP, negbin=ZINB, P=poisson (non-ZI), NB=negbin (non-ZI)
 zeroinfl2 <- function (formula, data,
     subset, na.action, weights, offset,
-    dist = c("poisson", "negbin", "P", "NB"),
+    dist = c("ZIP", "ZINB", "P", "NB"),
     link = c("logit", "probit", "cloglog"),
     control = NULL,
     model = TRUE, y = TRUE, x = FALSE,
@@ -50,13 +69,36 @@ zeroinfl2 <- function (formula, data,
         "ZIP"="poisson",
         "ZINB"="negbin",
         stop("dist must be one of P, NB, ZIP, or ZINB"))
+    .model_offset_2 <- function (x, terms = NULL, offset = TRUE) {
+            if (is.null(terms))
+                terms <- attr(x, "terms")
+            offsets <- attr(terms, "offset")
+            if (length(offsets) > 0) {
+                ans <- if (offset)
+                    x$"(offset)"
+                else NULL
+                if (is.null(ans))
+                    ans <- 0
+                for (i in offsets) ans <- ans + x[[deparse(attr(terms,
+                    "variables")[[i + 1]])]]
+                ans
+            }
+            else {
+                ans <- if (offset)
+                    x$"(offset)"
+                else NULL
+            }
+            if (!is.null(ans) && !is.numeric(ans))
+                stop("'offset' must be numeric")
+            ans
+        }
 
     ziPoissonNonZI <- function(parms) {
         mu <- as.vector(exp(X %*% parms[1:kx] + offsetx))
         #phi <- as.vector(linkinv(Z %*% parms[(kx + 1):(kx + kz)] + offsetz))
         phi <- linkinv(-100)
         loglik0 <- log(phi + exp(log(1 - phi) - mu))
-        loglik1 <- log(1 - phi) + dpois(Y, lambda = mu, log = TRUE)
+        loglik1 <- log(1 - phi) + stats::dpois(Y, lambda = mu, log = TRUE)
         loglik <- sum(weights[Y0] * loglik0[Y0]) + sum(weights[Y1] *
             loglik1[Y1])
         loglik
@@ -82,7 +124,7 @@ zeroinfl2 <- function (formula, data,
         phi <- as.vector(linkinv(Z %*% parms[(kx + 1):(kx + kz)] +
             offsetz))
         loglik0 <- log(phi + exp(log(1 - phi) - mu))
-        loglik1 <- log(1 - phi) + dpois(Y, lambda = mu, log = TRUE)
+        loglik1 <- log(1 - phi) + stats::dpois(Y, lambda = mu, log = TRUE)
         loglik <- sum(weights[Y0] * loglik0[Y0]) + sum(weights[Y1] *
             loglik1[Y1])
         loglik
@@ -107,9 +149,9 @@ zeroinfl2 <- function (formula, data,
         #phi <- as.vector(linkinv(Z %*% parms[(kx + 1):(kx + kz)] + offsetz))
         phi <- linkinv(-100)
         theta <- exp(parms[(kx + kz) + 1])
-        loglik0 <- log(phi + exp(log(1 - phi) + suppressWarnings(dnbinom(0,
+        loglik0 <- log(phi + exp(log(1 - phi) + suppressWarnings(stats::dnbinom(0,
             size = theta, mu = mu, log = TRUE))))
-        loglik1 <- log(1 - phi) + suppressWarnings(dnbinom(Y,
+        loglik1 <- log(1 - phi) + suppressWarnings(stats::dnbinom(Y,
             size = theta, mu = mu, log = TRUE))
         loglik <- sum(weights[Y0] * loglik0[Y0]) + sum(weights[Y1] *
             loglik1[Y1])
@@ -122,7 +164,7 @@ zeroinfl2 <- function (formula, data,
         etaz <- -100
         muz <- linkinv(etaz)
         theta <- exp(parms[(kx + kz) + 1])
-        clogdens0 <- dnbinom(0, size = theta, mu = mu, log = TRUE)
+        clogdens0 <- stats::dnbinom(0, size = theta, mu = mu, log = TRUE)
         dens0 <- muz * (1 - as.numeric(Y1)) + exp(log(1 - muz) +
             clogdens0)
         wres_count <- ifelse(Y1, Y - mu * (Y + theta)/(mu + theta),
@@ -143,9 +185,9 @@ zeroinfl2 <- function (formula, data,
         phi <- as.vector(linkinv(Z %*% parms[(kx + 1):(kx + kz)] +
             offsetz))
         theta <- exp(parms[(kx + kz) + 1])
-        loglik0 <- log(phi + exp(log(1 - phi) + suppressWarnings(dnbinom(0,
+        loglik0 <- log(phi + exp(log(1 - phi) + suppressWarnings(stats::dnbinom(0,
             size = theta, mu = mu, log = TRUE))))
-        loglik1 <- log(1 - phi) + suppressWarnings(dnbinom(Y,
+        loglik1 <- log(1 - phi) + suppressWarnings(stats::dnbinom(Y,
             size = theta, mu = mu, log = TRUE))
         loglik <- sum(weights[Y0] * loglik0[Y0]) + sum(weights[Y1] *
             loglik1[Y1])
@@ -157,7 +199,7 @@ zeroinfl2 <- function (formula, data,
         etaz <- as.vector(Z %*% parms[(kx + 1):(kx + kz)] + offsetz)
         muz <- linkinv(etaz)
         theta <- exp(parms[(kx + kz) + 1])
-        clogdens0 <- dnbinom(0, size = theta, mu = mu, log = TRUE)
+        clogdens0 <- stats::dnbinom(0, size = theta, mu = mu, log = TRUE)
         dens0 <- muz * (1 - as.numeric(Y1)) + exp(log(1 - muz) +
             clogdens0)
         wres_count <- ifelse(Y1, Y - mu * (Y + theta)/(mu + theta),
@@ -173,7 +215,7 @@ zeroinfl2 <- function (formula, data,
         colSums(cbind(wres_count * weights * X, wres_zero * weights *
             Z, wres_theta))
     }
-    dist <- match.arg(dist)
+    #dist <- match.arg(dist)
     NonZI <- dist %in% c("P", "NB")
     loglikfun <- switch(dist,
         poisson = ziPoisson,
@@ -186,7 +228,7 @@ zeroinfl2 <- function (formula, data,
         P = gradPoissonNonZI,
         NB = gradNegBinNonZI)
     linkstr <- match.arg(link)
-    linkobj <- make.link(linkstr)
+    linkobj <- stats::make.link(linkstr)
     linkinv <- linkobj$linkinv
     cl <- match.call()
     if (missing(data))
@@ -211,19 +253,19 @@ zeroinfl2 <- function (formula, data,
         ffz <- ffc <- ff <- formula
         ffz[[2]] <- NULL
     }
-    if (inherits(try(terms(ffz), silent = TRUE), "try-error")) {
+    if (inherits(try(stats::terms(ffz), silent = TRUE), "try-error")) {
         ffz <- eval(parse(text = sprintf(paste("%s -", deparse(ffc[[2]])),
             deparse(ffz))))
     }
     mf[[1]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
     mt <- attr(mf, "terms")
-    mtX <- terms(ffc, data = data)
-    X <- model.matrix(mtX, mf)
-    mtZ <- terms(ffz, data = data)
-    mtZ <- terms(update(mtZ, ~.), data = data)
-    Z <- model.matrix(mtZ, mf)
-    Y <- model.response(mf, "numeric")
+    mtX <- stats::terms(ffc, data = data)
+    X <- stats::model.matrix(mtX, mf)
+    mtZ <- stats::terms(ffz, data = data)
+    mtZ <- stats::terms(stats::update(mtZ, ~.), data = data)
+    Z <- stats::model.matrix(mtZ, mf)
+    Y <- stats::model.response(mf, "numeric")
     if (length(Y) < 1)
         stop("empty model")
     if (all(Y > 0))
@@ -239,20 +281,20 @@ zeroinfl2 <- function (formula, data,
     kz <- NCOL(Z)
     Y0 <- Y <= 0
     Y1 <- Y > 0
-    weights <- model.weights(mf)
+    weights <- stats::model.weights(mf)
     if (is.null(weights))
         weights <- 1
     if (length(weights) == 1)
         weights <- rep.int(weights, n)
     weights <- as.vector(weights)
     names(weights) <- rownames(mf)
-    offsetx <- pscl:::model_offset_2(mf, terms = mtX, offset = TRUE)
+    offsetx <- .model_offset_2(mf, terms = mtX, offset = TRUE)
     if (is.null(offsetx))
         offsetx <- 0
     if (length(offsetx) == 1)
         offsetx <- rep.int(offsetx, n)
     offsetx <- as.vector(offsetx)
-    offsetz <- pscl:::model_offset_2(mf, terms = mtZ, offset = FALSE)
+    offsetz <- .model_offset_2(mf, terms = mtZ, offset = FALSE)
     if (is.null(offsetz))
         offsetz <- 0
     if (length(offsetz) == 1)
@@ -294,14 +336,15 @@ zeroinfl2 <- function (formula, data,
     if (is.null(start)) {
         if (control$trace)
             cat("generating starting values...")
-        model_count <- glm.fit(X, Y, family = poisson(), weights = weights,
+        model_count <- stats::glm.fit(X, Y,
+            family = stats::poisson(), weights = weights,
             offset = offsetx)
         if (NonZI) {
             start <- list(count = model_count$coefficients,
                 zero = rep(-100, kz))
         } else {
-            model_zero <- glm.fit(Z, as.integer(Y0), weights = weights,
-                family = binomial(link = linkstr), offset = offsetz)
+            model_zero <- stats::glm.fit(Z, as.integer(Y0), weights = weights,
+                family = stats::binomial(link = linkstr), offset = offsetz)
             start <- list(count = model_count$coefficients,
                 zero = model_zero$coefficients)
         }
@@ -314,7 +357,7 @@ zeroinfl2 <- function (formula, data,
         hessian <- FALSE
     ocontrol <- control
     control$method <- control$hessian <- control$EM <- control$start <- NULL
-    fit <- optim(fn = loglikfun, gr = gradfun, par = c(start$count,
+    fit <- stats::optim(fn = loglikfun, gr = gradfun, par = c(start$count,
         start$zero,
         if (dist %in% c("negbin", "NB")) log(start$theta) else NULL),
         method = method, hessian = hessian, control = control)
@@ -365,7 +408,7 @@ zeroinfl2 <- function (formula, data,
         terms = list(count = mtX, zero = mtZ, full = mt), theta = theta,
         SE.logtheta = SE.logtheta, loglik = fit$value, vcov = vc,
         dist = dist, link = linkstr, linkinv = linkinv, converged = fit$convergence <
-            1, call = cl, formula = ff, levels = .getXlevels(mt,
+            1, call = cl, formula = ff, levels = stats::.getXlevels(mt,
             mf), contrasts = list(count = attr(X, "contrasts"),
             zero = attr(Z, "contrasts")))
     if (NonZI) {
@@ -382,12 +425,13 @@ zeroinfl2 <- function (formula, data,
     return(rval)
 }
 
+#' @export
 summary.non_zeroinfl <-
 function (object, ...)
 {
     tmp <- object
     tmp$dist <- if (object$dist == "NB") "negbin" else "poisson"
-    object$residuals <- residuals(tmp, type = "pearson")
+    object$residuals <- stats::residuals(tmp, type = "pearson")
     kc <- length(object$coefficients$count)
     kz <- length(object$coefficients$zero)
     se <- sqrt(diag(object$vcov))
@@ -400,7 +444,7 @@ function (object, ...)
         kc <- kc + 1
     }
     zstat <- coef/se
-    pval <- 2 * pnorm(-abs(zstat))
+    pval <- 2 * stats::pnorm(-abs(zstat))
     coef <- cbind(coef, se, zstat, pval)
     colnames(coef) <- c("Estimate", "Std. Error", "z value",
         "Pr(>|z|)")
@@ -411,6 +455,7 @@ function (object, ...)
     object
 }
 
+#' @export
 print.summary.non_zeroinfl <-
 function (x, digits = max(3, getOption("digits") - 3), ...)
 {
@@ -420,11 +465,12 @@ function (x, digits = max(3, getOption("digits") - 3), ...)
         cat("model did not converge\n")
     } else {
         cat("Pearson residuals:\n")
-        print(structure(quantile(x$residuals), names = c("Min",
+        print(structure(stats::quantile(x$residuals), names = c("Min",
             "1Q", "Median", "3Q", "Max")), digits = digits, ...)
         cat(paste("\nCount model coefficients (", x$dist, " with log link):\n",
             sep = ""))
-        printCoefmat(x$coefficients$count, digits = digits, signif.legend = FALSE)
+        stats::printCoefmat(
+            x$coefficients$count, digits = digits, signif.legend = FALSE)
         #cat(paste("\nZero-inflation model coefficients (binomial with ",
         #    x$link, " link):\n", sep = ""))
         #printCoefmat(x$coefficients$zero, digits = digits, signif.legend = FALSE)
@@ -435,11 +481,13 @@ function (x, digits = max(3, getOption("digits") - 3), ...)
             cat(paste("\nTheta =", round(x$theta, digits), "\n"))
         else cat("\n")
         cat(paste("Number of iterations in", x$method, "optimization:",
-            tail(na.omit(x$optim$count), 1), "\n"))
+            utils::tail(stats::na.omit(x$optim$count), 1), "\n"))
         cat("Log-likelihood:", formatC(x$loglik, digits = digits),
             "on", x$n - x$df.residual, "Df\n")
     }
     invisible(x)
 }
 
+#' @importFrom stats nobs
+#' @export
 nobs.zeroinfl <- function(object, ...) object$n

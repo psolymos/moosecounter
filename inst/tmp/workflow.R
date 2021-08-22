@@ -1,30 +1,5 @@
-#library(DeducerPlugInMoose)
+library(moosecounter)
 
-for (i in list.files("R")[list.files("R") != "zzz.R"])
-    source(file.path("R", i))
-library(pbapply)
-pboptions(type="timer")
-
-options(
-    "moose_options"=list(
-                method = "Nelder-Mead",
-                B=500,
-                MAXCELL=NULL, # this is max possible total abundance in a cell
-                alpha=0.1,
-                wscale=1,
-                MINCELL=10, # this is min number of cells for composition
-                Ntot="MOOSE_TOTA",
-                #srv="Sampled==1",#"CENSUS_ID==7",
-                srv_name="Sampled",
-                srv_value=1,
-                area_srv=NULL,
-                Area="AREA_KM",
-                sightability=1,
-                response="total", # total/cows
-                xy=c("CENTRLON", "CENTRLAT"),
-                composition=c("BULL_SMALL", "BULL_LARGE", "LONE_COW",
-                        "COW_1C", "COW_2C", "LONE_CALF", "UNKNOWN_AG")))
-set.seed(1)
 
 ## modify options as needed
 mc_options(B=100)
@@ -41,7 +16,7 @@ switch_response("total")
 x <- mc_update_total(x)
 
 ## univariate exploration
-mc_plot_univariate("Subalp_Shrub_250buf", x)
+mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
 
 ## multivariate exploration
 vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
