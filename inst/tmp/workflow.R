@@ -1,8 +1,7 @@
 library(moosecounter)
 
-
 ## modify options as needed
-mc_options(B=100)
+mc_options(B=20)
 
 ## load/read data set
 x <- read.csv("inst/extdata/MayoMMU_QuerriedData.csv")
@@ -46,6 +45,11 @@ pred_density_moose_PI(PI)
 mc_plot_predpi(PI)
 mc_plot_pidistr(PI)
 mc_plot_pidistrcell(PI)
+
+# shinyBS shinydashboard
+run_app()
+
+shiny::runApp("inst/shiny")
 
 ## --
 set.seed(1)

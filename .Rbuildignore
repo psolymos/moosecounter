@@ -1,4 +1,3 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-.gitlab-ci.yml
-^.*\.md$
+^README\.md$
