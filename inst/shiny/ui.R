@@ -1,3 +1,6 @@
+## note: the ui_* UI pieces can be stored & sourced as separate file
+## or added as modules
+
 ui_home <- fluidRow(
   column(width=12,
     includeMarkdown("intro.md")
@@ -74,7 +77,7 @@ dashboardPage(
       ),
       menuItem("Total", tabName = "total", icon=icon("circle"),
         menuSubItem("Add model", tabName = "addmodel"),
-        menuSubItem("Resduals", tabName = "residuals"),
+        menuSubItem("Residuals", tabName = "residuals"),
         menuSubItem("Calculate PI", tabName = "calculatepi"),
         menuSubItem("Explore PI", tabName = "explorepi")
       ),
