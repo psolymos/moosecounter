@@ -35,3 +35,15 @@ var_filter <- c("Survey Name" = "SURVEY_NAM",
                 "Yukon Territory Region" = "YT_REGION",
                 "Survey Year" = "SURVEY_YEA",
                 "Survey ID" = "SURVEY_ID")
+
+opts_tooltip <- list(
+  "method" = "Defines the optimization algorithm used by <code>optim</code>",
+  "response" = "Whether to use all moose spotted (Total) or just Cows",
+  "maxcell" = "",
+  "b" = paste("Number of times to run a simulation when establishing ",
+              "prediction intervals"),
+  "alpha" = paste("Type I error rate for prediction intervals,",
+                  "as well as for multivariate exploration"),
+  "wscale" = "How much to weight influential observations. 0 produces equal weights",
+  "sightability" = "Detection probability used to correct total Moose results")
+
