@@ -1,27 +1,76 @@
 ## note: the ui_* UI pieces can be stored & sourced as separate file
 ## or added as modules
 
+# Home -------------------
 ui_home <- fluidRow(
   column(width=12,
     includeMarkdown("intro.md")
   )
 )
 
+# Docs -------------------
 ui_docs <- fluidRow(
   column(width=12,
     includeMarkdown("docs.md")
   )
 )
 
-ui_data <- fluidRow(
+# Setting -------------------
+ui_settings <- fluidRow(
   column(width=12,
-    h2("Data")
+
+         h2("Settings"),
+
+         box(width = 12,
+             column(width = 6,
+             radioButtons("opts_response", inline = TRUE,
+                          label = "Response variable",
+                          choices = c("Total" = "total", "Cows" = "cows")),
+             bsTooltip("opts_response", opts_tooltip$response),
+
+             radioButtons("opts_method",  inline = TRUE,
+                          label = "Model optimization method",
+                          choices = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B",
+                                      "SANN", "Brent")),
+             bsTooltip("opts_method", opts_tooltip$method),
+
+             sliderInput("opts_b",
+                         label = "No. bootstrap interations",
+                         value = 500, min = 100, max = 1000, step = 50),
+             bsTooltip("opts_b", opts_tooltip$b),
+
+             radioButtons("opts_alpha", inline = TRUE,
+                          label = "Alpha level",
+                          choices = c(0.01, 0.05, 0.1)),
+             bsTooltip("opts_alpha", opts_tooltip$alpha)
+           ),
+
+           column(width = 6,
+             # Maxcell is optional
+             # sliderInput("opts_maxcell",
+             #             label = "Maximum abundance in cells",
+             #             min = 1, max = 100),
+             # bsTooltip("opts_maxcell", opts_tooltip$maxcell)
+
+             sliderInput("opts_wscale",
+                         label = "Weighting scale",
+                         value = 1, min = 0, max = 10, step = 0.1),
+             bsTooltip("opts_wscale", opts_tooltip$wscale),
+
+             sliderInput("opts_sightability",
+                         label = "Sightability",
+                         value = 1, min = 0, max = 1, step = 0.1),
+             bsTooltip("opts_sightability", opts_tooltip$sightability)
+           ),
+           box(width = 12,
+               tableOutput("opts")))
+
+         # Surveyed units?
+         # Surveyed area?
+
   )
 )
 
-ui_settings <- fluidRow(
-  column(width=12,
-    h2("Settings")
   )
 )
 
