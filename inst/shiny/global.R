@@ -47,3 +47,11 @@ opts_tooltip <- list(
   "wscale" = "How much to weight influential observations. 0 produces equal weights",
   "sightability" = "Detection probability used to correct total Moose results")
 
+
+select_dep <- function(id, name, x, multiple = FALSE) {
+  req(x)
+  opts <- names(x)
+  opts <- opts[!opts %in% c(var_meta, var_resp)]
+  if(!multiple) opts <- c("none", opts)
+  selectInput(id, name, opts, multiple = multiple)
+}
