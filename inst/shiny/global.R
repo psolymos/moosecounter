@@ -17,3 +17,21 @@ library(ggplot2)
 ver <- read.dcf(
     file = system.file("DESCRIPTION", package = "moosecounter"),
     fields = "Version")
+
+# Columns representing metadata, if present
+var_meta <- c("SURVEY_NAM", "YT_REGION", "SURVEY_YEA", "SURVEY_ID",
+              "S_SET_ID", "SU_ID", "ID", "SUS_", "SUS_ID",
+              "In1Out0", "SU_STRATUM", "ALL_STRATA",
+              "IDLATDEG", "IDLATMIN", "IDLONDEG", "IDLONMIN", "CENTRLAT", "CENTRLON",
+              "REGION", "GMU", "GMU2", "USE_SCALE", "SRC_SCALE",
+              "AREA_KM", "Sampled", "srv")
+
+# Columns representing response variables
+var_resp <- c("BULL_SMALL", "BULL_LARGE", "LONE_COW", "COW_1C", "COW_2C", "LONE_CALF",
+              "UNKNOWN_AG", "MOOSE_TOTA", "COW_TOTA")
+
+# Columns which can be filtered, if present
+var_filter <- c("Survey Name" = "SURVEY_NAM",
+                "Yukon Territory Region" = "YT_REGION",
+                "Survey Year" = "SURVEY_YEA",
+                "Survey ID" = "SURVEY_ID")
