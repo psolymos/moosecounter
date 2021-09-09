@@ -71,6 +71,21 @@ ui_settings <- fluidRow(
   )
 )
 
+# Data -------------------
+ui_data <- fluidRow(
+  column(width = 12,
+    h2("Data"),
+
+    fileInput("survey_file", "Choose Survey CSV File",
+              multiple = FALSE,
+              accept = c("text/csv",
+                         "text/comma-separated-values,text/plain",
+                         ".csv")),
+    uiOutput("filters"),
+
+    div(style = "overflow-x: scroll", DTOutput("survey_preview"))
+    # Move search and pagination to left
+
   )
 )
 
