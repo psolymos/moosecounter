@@ -108,9 +108,26 @@ ui_multivar <- fluidRow(
   )
 )
 
+# Add model -------------------
 ui_addmodel <- fluidRow(
-  column(width=12,
-    h2("Add model")
+  column(width = 12,
+    h2("Add model"),
+    column(width = 4,
+           uiOutput("model_id"),
+           uiOutput("model_var_count"),
+           uiOutput("model_var_zero"),
+           radioButtons("model_dist", "Distribution",
+                        choices = c("P", "NB", "ZIP", "ZINB"), inline = TRUE),
+           radioButtons("model_weighted", NULL,
+                        c("Non weighted" = FALSE, "Weighted" = TRUE),
+                        inline = TRUE),
+           actionButton("model_add", "Add")),
+    column(width = 8,
+           h4("Current models"),
+           tableOutput("model_list"),
+           uiOutput("model_delete"))
+
+    ## Consider tabset with model output
   )
 )
 

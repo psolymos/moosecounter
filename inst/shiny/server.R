@@ -105,5 +105,97 @@ server <- function(input, output, session) {
 
     mc_plot_multivariate(input$multi_var, survey_sub())
   }, res = 100)
+
+
+
+  # Add models -----------------------------------
+  models <- reactiveValues()
+
+  output$model_var_count <- renderUI(select_dep("model_var_count",
+                                                "Count Variables",
+                                                survey_sub(),
+                                                multiple = TRUE))
+  output$model_var_zero <- renderUI(select_dep("model_var_zero",
+                                               "Zero Variables",
+                                               survey_sub(),
+                                               multiple = TRUE))
+  output$model_id <- renderUI({
+    if(is.null(models)) {
+      val <- "A"
+    } else {
+      val <- LETTERS[!LETTERS %in% names(models)][1]
+    }
+
+    textInput("model_id", "Model ID", value = val)
+
+  })
+
+
+  observeEvent(input$model_add, {
+    req(input$model_var_count,
+        input$model_dist, input$model_id, input$model_weighted)
+
+    models[[input$model_id]] <- list(
+      dist = input$model_dist,
+      weighted = input$model_weighted,
+      var_count = input$model_var_count,
+      var_zero = input$model_var_zero,
+      model = mc_fit_total(vars = input$model_var_count,
+                           x = survey_sub(),
+                           zi_vars = input$model_var_zero,
+                           dist = input$model_dist,
+                           weighted = input$model_weighted))
+
+    shinyjs::reset("model_id")
+
+  })
+
+  output$model_list <- renderTable({
+    req(models, length(names(models)) > 0)
+
+    t <- imap_dfr(reactiveValuesToList(models), ~{
+      if(!is.null(.x)) {
+        data.frame(Model = .y,
+                   `Count variables` = paste(.x$var_count, collapse = ", "),
+                   `Zero variables` = paste(.x$var_zero, collapse = ", "),
+                   Distribution = .x$dist,
+                   Weighted = .x$weighted)
+        }
+      })
+
+    if(nrow(t) > 0) t <- t[order(t$Model), ]
+    t
+  })
+
+  # Dynamically create delete buttons for each model
+  output$model_delete <- renderUI({
+    req(models, length(names(models)) > 0)
+
+    m <- reactiveValuesToList(models)
+    m <- m[order(names(m))]
+
+    imap(m, ~ {
+      if(!is.null(.x)) {
+        actionButton(paste0("delete_model_", .y),
+                     label = .y,
+                     icon = icon("times"))
+      }
+    })
+  })
+
+  # Dynamically create observeEvents for each model delete button
+  observe({
+    req(models, length(names(models)) > 0)
+
+    isolate({
+      map(names(reactiveValuesToList(models)), ~ {
+        cat("create observeEvent ", .)
+        observeEvent(input[[paste0("delete_model_", .)]], {
+          models[[.]] <- NULL
+        })
+      })
+    })
+
+  })
 }
 

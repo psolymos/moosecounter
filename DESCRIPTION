@@ -11,7 +11,8 @@ Imports:
     MASS (>= 7.3.54),
     pbapply (>= 1.4.3),
     shiny (>= 1.6.0),
-    Matrix (>= 1.3.4)
+    Matrix (>= 1.3.4),
+    purrr (>= 0.3.4)
 Suggests: 
     DT (>= 0.18),
     shinyBS (>= 0.61),
