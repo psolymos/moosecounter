@@ -5,7 +5,17 @@ Title: Adaptive Moose Surveys
 Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos
 Maintainer: Peter Solymos <psolymos@gmail.com>
 Description: Adaptive Moose surveys.
-Imports: pscl, partykit, MASS, pbapply, shiny, Matrix
-Suggests: shinyBS, shinydashboard, plotly, knitr
+Imports: 
+    pscl (>= 1.5.5),
+    partykit (>= 1.2.15),
+    MASS (>= 7.3.54),
+    pbapply (>= 1.4.3),
+    shiny (>= 1.6.0),
+    Matrix (>= 1.3.4)
+Suggests: 
+    DT (>= 0.18),
+    shinyBS (>= 0.61),
+    shinyjs (>= 2.0.0),
+    shinydashboard (>= 0.7.1)
 License: GPL-2
 RoxygenNote: 7.1.1
