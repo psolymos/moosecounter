@@ -89,15 +89,22 @@ ui_data <- fluidRow(
   )
 )
 
+# Univariate ----------------
 ui_univar <- fluidRow(
-  column(width=12,
-    h2("Univar")
+  column(width = 12,
+    h2("Univariate Exploration"),
+    box(uiOutput("uni_var")),
+    box(radioButtons("uni_dist", "Distribution", choices = c("P", "NB", "ZIP", "ZINB"), inline = TRUE)),
+    plotOutput("uni_graph", width = "100%")
   )
 )
 
+# Multivariate -------------------
 ui_multivar <- fluidRow(
   column(width=12,
-    h2("Multivar")
+    h2("Multivariate Exploration"),
+    box(uiOutput("multi_var")),
+    plotOutput("multi_graph")
   )
 )
 

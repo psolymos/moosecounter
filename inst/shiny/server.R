@@ -76,5 +76,34 @@ server <- function(input, output, session) {
   output$survey_preview <- renderDT({
     datatable(survey_sub())
   })
+
+
+  # Univariate Exploration ---------------------------
+  output$uni_var <- renderUI(select_dep("uni_var",
+                                        "Univariate variable to explore",
+                                        survey_sub()))
+
+  output$uni_graph <- renderPlot({
+    req(input$uni_var, input$uni_dist)
+    req(input$uni_var != "none")
+    req(opts())
+
+    mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist)
+  }, res = 125)
+
+
+  # Multivariate Exploration ---------------------
+  output$multi_var <- renderUI(select_dep("multi_var",
+                                          "Multivariate variables to explore",
+                                          survey_sub(),
+                                          multiple = TRUE))
+
+  output$multi_graph <- renderPlot({
+    req(input$multi_var)
+    req(input$multi_var != "none")
+    req(opts())
+
+    mc_plot_multivariate(input$multi_var, survey_sub())
+  }, res = 100)
 }
 
