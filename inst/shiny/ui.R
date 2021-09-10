@@ -61,9 +61,9 @@ ui_settings <- fluidRow(
                          label = "Sightability",
                          value = 1, min = 0, max = 1, step = 0.1),
              bsTooltip("opts_sightability", opts_tooltip$sightability)
-           ),
-           box(width = 12,
-               tableOutput("opts")))
+           )),
+         box(width = 12, title = "Current Settings",
+             tableOutput("opts"))
 
          # Surveyed units?
          # Surveyed area?
@@ -76,7 +76,7 @@ ui_data <- fluidRow(
   column(width = 12,
     h2("Data"),
 
-    column(width = 4,
+    box(width = 4,
            fileInput("survey_file", "Choose Survey CSV File",
                      multiple = FALSE,
                      accept = c("text/csv",
@@ -84,7 +84,7 @@ ui_data <- fluidRow(
                                 ".csv")),
            uiOutput("filters")),
 
-    column(width = 8,
+    box(width = 8,
            div(style = "overflow-x: scroll", DTOutput("survey_preview")))
 
   )
@@ -94,18 +94,20 @@ ui_data <- fluidRow(
 ui_univar <- fluidRow(
   column(width = 12,
     h2("Univariate Exploration"),
-    box(uiOutput("uni_var")),
-    box(radioButtons("uni_dist", "Distribution", choices = c("P", "NB", "ZIP", "ZINB"), inline = TRUE)),
+    box(height = "100px", uiOutput("uni_var")),
+    box(height = "100px",
+        radioButtons("uni_dist", "Distribution", inline = TRUE,
+                     choices = c("P", "NB", "ZIP", "ZINB"))),
     plotOutput("uni_graph", width = "100%")
   )
 )
 
 # Multivariate -------------------
 ui_multivar <- fluidRow(
-  column(width=12,
+  column(width = 12,
     h2("Multivariate Exploration"),
-    box(uiOutput("multi_var")),
-    plotOutput("multi_graph")
+    box(width = 6, uiOutput("multi_var")),
+    box(width = 12, plotOutput("multi_graph"))
   )
 )
 
@@ -113,32 +115,33 @@ ui_multivar <- fluidRow(
 ui_addmodel <- fluidRow(
   column(width = 12,
     h2("Add model"),
-    column(width = 4,
-           uiOutput("model_id"),
-           uiOutput("model_var_count"),
-           uiOutput("model_var_zero"),
-           radioButtons("model_dist", "Distribution",
-                        choices = c("P", "NB", "ZIP", "ZINB"), inline = TRUE),
-           radioButtons("model_weighted", NULL,
-                        c("Non weighted" = FALSE, "Weighted" = TRUE),
-                        inline = TRUE),
-           actionButton("model_add", "Add")),
-    column(width = 8,
-           h4("Current models"),
-           tableOutput("model_table"),
-           uiOutput("model_delete"),
-           hr(),
-           h4("AIC Model Comparison"),
-           tableOutput("model_aic"))
+    box(width = 4,
+        uiOutput("model_id"),
+        uiOutput("model_var_count"),
+        uiOutput("model_var_zero"),
+        radioButtons("model_dist", "Distribution",
+                     choices = c("P", "NB", "ZIP", "ZINB"), inline = TRUE),
+        radioButtons("model_weighted", NULL,
+                     c("Non weighted" = FALSE, "Weighted" = TRUE),
+                     inline = TRUE),
+        actionButton("model_add", "Add")),
+    box(width = 8,
+        h4("Current models"),
+        tableOutput("model_table"),
+        uiOutput("model_delete"),
+        hr(),
+        h4("AIC Model Comparison"),
+        tableOutput("model_aic"))
   )
 )
 
 # Residuals -----------------
 ui_residuals <- fluidRow(
-  column(width=12,
+  column(width = 12,
     h2("Residuals"),
-    uiOutput("resid_models"),
-    plotOutput("resid_plot")
+    box(width = 12,
+      uiOutput("resid_models"),
+      plotOutput("resid_plot"))
   )
 )
 
