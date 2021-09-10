@@ -136,7 +136,9 @@ ui_addmodel <- fluidRow(
 # Residuals -----------------
 ui_residuals <- fluidRow(
   column(width=12,
-    h2("Residuals")
+    h2("Residuals"),
+    uiOutput("resid_models"),
+    plotOutput("resid_plot")
   )
 )
 

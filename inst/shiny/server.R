@@ -202,5 +202,21 @@ server <- function(input, output, session) {
       mc_models_total(survey_sub()) %>%
       mutate(across(everything(), round, 2))
   })
+
+  # Model residuals / diagnostics ------------------------------
+
+  output$resid_models <- renderUI({
+    req(length(models()) > 0)
+    radioButtons("resid_model", label = "Model", inline = TRUE,
+                 choices = sort(names(models())))
+  })
+
+  output$resid_plot <- renderPlot({
+    req(length(models()) > 0, input$resid_model)
+
+    map(models(), "model") %>%
+      mc_plot_residuals(input$resid_model, ., survey_sub())
+  })
+
 }
 
