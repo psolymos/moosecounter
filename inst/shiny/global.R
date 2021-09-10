@@ -7,9 +7,11 @@
 library(moosecounter)
 library(shiny)
 library(shinydashboard)
+
+library(dplyr)
+library(purrr)
 library(DT)
 library(shinyBS)
-library(shinyjs)
 library(ggplot2)
 #library(openxlsx)
 #library(reactable)

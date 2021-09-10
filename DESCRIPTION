@@ -12,11 +12,12 @@ Imports:
     pbapply (>= 1.4.3),
     shiny (>= 1.6.0),
     Matrix (>= 1.3.4),
-    purrr (>= 0.3.4)
+    purrr (>= 0.3.4),
+    magrittr
 Suggests: 
+    dplyr (>= 1.0.7),
     DT (>= 0.18),
     shinyBS (>= 0.61),
-    shinyjs (>= 2.0.0),
     shinydashboard (>= 0.7.1)
 License: GPL-2
 RoxygenNote: 7.1.1
