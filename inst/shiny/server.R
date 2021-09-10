@@ -128,11 +128,15 @@ server <- function(input, output, session) {
     m[order(names(m))]
 
     # Run and add model
-    map(m, ~ append(., c("model" = list(mc_fit_total(vars = .$var_count,
-                                                     x = survey_sub(),
-                                                     zi_vars = .$var_zero,
-                                                     dist = .$dist,
-                                                     weighted = .$weighted)))))
+    # Evaluate directly to include data in the call itself, to prevent problems
+    # with stats::update() later in the Prediction Interval steps.
+    # idea from: https://stackoverflow.com/a/57528229/3362144
+    map(m, ~ append(., c("model" = list(
+      eval(rlang::expr(mc_fit_total(vars = !!.$var_count,
+                                    x = survey_sub(),
+                                    zi_vars = !!!.$var_zero,
+                                    dist = !!.$dist,
+                                    weighted = !!.$weighted)))))))
   })
 
   output$model_id <- renderUI({
