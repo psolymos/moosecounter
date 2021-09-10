@@ -124,13 +124,15 @@ ui_addmodel <- fluidRow(
            actionButton("model_add", "Add")),
     column(width = 8,
            h4("Current models"),
-           tableOutput("model_list"),
-           uiOutput("model_delete"))
-
-    ## Consider tabset with model output
+           tableOutput("model_table"),
+           uiOutput("model_delete"),
+           hr(),
+           h4("AIC Model Comparison"),
+           tableOutput("model_aic"))
   )
 )
 
+# Residuals -----------------
 ui_residuals <- fluidRow(
   column(width=12,
     h2("Residuals")
