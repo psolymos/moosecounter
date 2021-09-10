@@ -196,8 +196,7 @@ dashboardPage(
       tabItem("multivar", ui_multivar),
       tabItem("addmodel", ui_addmodel),
       tabItem("residuals", ui_residuals),
-      tabItem("pi", ui_pi),
-      tabItem("explorepi", ui_explorepi)
+      tabItem("pi", ui_pi)
     )
   )
 )
