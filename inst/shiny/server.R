@@ -117,13 +117,13 @@ server <- function(input, output, session) {
                                                "Zero Variables",
                                                survey_sub(),
                                                multiple = TRUE))
-  models_list <- reactiveValues()
+  models_list <- reactiveValues(m = list())
 
   # Create reactive for using the models, not modifying, models
   models <- reactive({
-    req(opts) # Make sure this reactive invalidates if options change
+    req(opts, length(models_list$m) > 0) # Make sure models() invalidates if opts() change
 
-    m <- reactiveValuesToList(models_list)
+    m <- models_list$m
     m <- m[!map_lgl(m, is.null)]
     m[order(names(m))]
 
@@ -140,7 +140,7 @@ server <- function(input, output, session) {
   })
 
   output$model_id <- renderUI({
-    if(is.null(models())) {
+    if(length(models_list$m) == 0 || is.null(models())) {
       val <- "A"
     } else {
       val <- LETTERS[!LETTERS %in% names(models())][1]
@@ -154,7 +154,7 @@ server <- function(input, output, session) {
     req(input$model_var_count,
         input$model_dist, input$model_id, input$model_weighted)
 
-    models_list[[input$model_id]] <- list(
+    models_list$m[[input$model_id]] <- list(
       dist = input$model_dist,
       weighted = as.logical(input$model_weighted),
       var_count = input$model_var_count,
@@ -190,8 +190,8 @@ server <- function(input, output, session) {
     isolate({
       map(names(models()), ~ {
         observeEvent(input[[paste0("delete_model_", .)]], {
-          models_list[[.]] <- NULL
-        })
+          models_list$m[[.]] <- NULL
+        }, ignoreInit = TRUE)
       })
     })
 
