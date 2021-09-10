@@ -142,15 +142,25 @@ ui_residuals <- fluidRow(
   )
 )
 
-ui_calculatepi <- fluidRow(
+# Prediction Intervals -----------------
+ui_pi <- fluidRow(
   column(width=12,
-    h2("Calculate PI")
-  )
-)
-
-ui_explorepi <- fluidRow(
-  column(width=12,
-    h2("Explore PI")
+    h2("Prediction Intervals"),
+    box(width = 4, height = "200px",
+        uiOutput("pred_models"),
+        conditionalPanel(
+          condition = "input.pred_models.length > 1",
+          radioButtons("pred_average", label = NULL, inline = TRUE,
+                       choices = c("Use best model" = FALSE,
+                                   "Average over models" = TRUE),
+                       selected = TRUE)),
+        actionButton("pred_calc", "Calculate Prediction Interval")),
+    box(width = 8, height = "200px", title = "Prediction Interval Summary",
+        tableOutput("pred_density")),
+    tabBox(width = 12,
+           tabPanel("Diagnostic Plots", plotOutput("pred_predpi")),
+           tabPanel("Total Moose", plotOutput("pred_pidistr")),
+           tabPanel("Moose in Cell", plotOutput("pred_pidistrcell")))
   )
 )
 
@@ -171,8 +181,7 @@ dashboardPage(
       menuItem("Total", tabName = "total", icon=icon("circle"),
         menuSubItem("Add model", tabName = "addmodel"),
         menuSubItem("Residuals", tabName = "residuals"),
-        menuSubItem("Calculate PI", tabName = "calculatepi"),
-        menuSubItem("Explore PI", tabName = "explorepi")
+        menuSubItem("Prediction Intervals", tabName = "pi")
       ),
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
     )
@@ -187,7 +196,7 @@ dashboardPage(
       tabItem("multivar", ui_multivar),
       tabItem("addmodel", ui_addmodel),
       tabItem("residuals", ui_residuals),
-      tabItem("calculatepi", ui_calculatepi),
+      tabItem("pi", ui_pi),
       tabItem("explorepi", ui_explorepi)
     )
   )

@@ -222,5 +222,40 @@ server <- function(input, output, session) {
       mc_plot_residuals(input$resid_model, ., survey_sub())
   })
 
+
+
+  # Prediction Intervals ----------------------------------------------------
+
+  output$pred_models <- renderUI({
+    selectInput("pred_models",
+                label = "Model(s) to calculate prediction intervals for",
+                choices = names(models()), multiple = TRUE)
+  })
+
+  pi <- eventReactive(input$pred_calc, {
+    req(length(models()) > 0,
+        opts(),
+        survey_sub(),
+        input$pred_models, input$pred_average)
+
+    mc_predict_total(
+      model_id = input$pred_models,
+      ml = map(models(), "model"),
+      x = survey_sub(),
+      do_boot = TRUE,
+      do_avg = as.logical(input$pred_average)) # Options to adjust these?
+  })
+
+  # Tables
+  output$pred_density <- renderTable({
+    pred_density_moose_PI(pi())
+  }, rownames = TRUE)
+
+  # Plots
+  output$pred_predpi <- renderPlot(mc_plot_predpi(pi()), res = 125)
+  output$pred_pidistr <- renderPlot(mc_plot_pidistr(pi()), res = 85)
+  output$pred_pidistrcell <- renderPlot(mc_plot_pidistrcell(pi()), res = 85)
+
+
 }
 
