@@ -156,7 +156,7 @@ server <- function(input, output, session) {
 
     models_list[[input$model_id]] <- list(
       dist = input$model_dist,
-      weighted = input$model_weighted,
+      weighted = as.logical(input$model_weighted),
       var_count = input$model_var_count,
       var_zero = input$model_var_zero)
   })
@@ -205,7 +205,7 @@ server <- function(input, output, session) {
     map(models(), "model") %>%
       mc_models_total(survey_sub()) %>%
       mutate(across(everything(), round, 2))
-  })
+  }, rownames = TRUE)
 
   # Model residuals / diagnostics ------------------------------
 
