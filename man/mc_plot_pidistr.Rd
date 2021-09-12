@@ -4,10 +4,12 @@
 \alias{mc_plot_pidistr}
 \title{Plot the total PI distribution}
 \usage{
-mc_plot_pidistr(PI, plot = TRUE, breaks = "Sturges")
+mc_plot_pidistr(PI, id = NULL, plot = TRUE, breaks = "Sturges")
 }
 \arguments{
 \item{PI}{PI object returned by `mc_predict_total()`}
+
+\item{id}{cell ID}
 
 \item{plot}{logical, to plot or just give summary}
 
