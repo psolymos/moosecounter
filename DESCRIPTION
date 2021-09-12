@@ -9,3 +9,4 @@ Imports: pscl, partykit, MASS, pbapply, shiny, Matrix
 Suggests: shinyBS, shinydashboard, plotly, knitr
 License: GPL-2
 RoxygenNote: 7.1.1
+Encoding: UTF-8
