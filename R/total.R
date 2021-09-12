@@ -445,9 +445,8 @@ mc_plot_predpi <- function(PI) {
 
     op <- graphics::par(mfrow=c(1,3))
 
-    ModID <- PI$model_id
-    if (length(ModID)>1)
-        ModID <- "Avg"
+    ModID <- if (length(PI$model_id)>1)
+        "Avg" else unique(PI$model_select_id)
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
         xlab="Longitude", ylab="Latitude",
         main=paste("Residuals for Model ID:", ModID),
