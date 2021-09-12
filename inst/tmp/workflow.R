@@ -26,9 +26,10 @@ mc_plot_multivariate(vars, x)
 
 ## build model list
 ML <- list()
-ML[["Model 1"]] <- mc_fit_total(vars[1:2], x, dist="ZINB", weighted=TRUE)
-ML[["Model 2"]] <- mc_fit_total(vars[2:3], x, dist="ZINB", weighted=TRUE)
-ML[["Model 3"]] <- mc_fit_total(vars[3:4], x, dist="ZINB", weighted=TRUE)
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
 
 mc_models_total(ML, x)
 mc_plot_residuals("Model 3", ML, x)
@@ -44,7 +45,7 @@ mc_get_pred(PI)
 pred_density_moose_PI(PI)
 mc_plot_predpi(PI)
 mc_plot_pidistr(PI)
-mc_plot_pidistrcell(PI)
+mc_plot_pidistr(PI, id=1)
 
 # shinyBS shinydashboard
 run_app()

@@ -21,19 +21,23 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 
 #' Fit Model to Total Abundance
 #'
-#' @param vars column names of `x` to be used as predictors for the count model
 #' @param x data frame (use `mc_update_total()` on `x` prior)
+#' @param vars column names of `x` to be used as predictors for the count model
 #' @param zi_vars optional, column names of `x` to be used as predictors for the zero model
 #' @param dist distribution (P, NB, ZIP, ZINB)
 #' @param weighted logical, to use weighting to moderate influential observations
 #' @param ... other args passed to `zeroinfl2()`
 #'
 #' @export
-mc_fit_total <- function(vars, x, zi_vars=NULL,
+mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
     dist="ZINB", weighted=FALSE, ...) {
     opts <- getOption("moose_options")
-    vars <- vars[!(vars %in% c(opts$Ntot, opts$composition))]
-    CNT <- paste(vars, collapse=" + ")
+    if (is.null(vars)) {
+        CNT <- "1"
+    } else {
+        vars <- vars[!(vars %in% c(opts$Ntot, opts$composition))]
+        CNT <- paste(vars, collapse=" + ")
+    }
     if (is.null(zi_vars)) {
         ZI <- "1"
     } else {
@@ -441,9 +445,8 @@ mc_plot_predpi <- function(PI) {
 
     op <- graphics::par(mfrow=c(1,3))
 
-    ModID <- PI$model_id
-    if (length(ModID)>1)
-        ModID <- "Avg"
+    ModID <- if (length(PI$model_id)>1)
+        "Avg" else unique(PI$model_select_id)
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
         xlab="Longitude", ylab="Latitude",
         main=paste("Residuals for Model ID:", ModID),
@@ -500,11 +503,20 @@ mc_plot_predpi <- function(PI) {
 #' Plot the total PI distribution
 #'
 #' @param PI PI object returned by `mc_predict_total()`
+#' @param id cell ID
 #' @param plot logical, to plot or just give summary
 #' @param breaks breaks arg passed to `graphics::hist()`
 #'
 #' @export
-mc_plot_pidistr <- function(PI, plot=TRUE, breaks="Sturges") {
+mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
+    if (is.null(id)) {
+        .mc_plot_pidistrall(PI=PI, plot=plot, breaks=breaks)
+    } else {
+        .mc_plot_pidistrcell(PI=PI, id+id, plot=plot, breaks=breaks)
+    }
+}
+
+.mc_plot_pidistrall <- function(PI, plot=TRUE, breaks="Sturges") {
     csfull <- colSums(PI$boot_full)
     if (plot) {
         h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
@@ -534,15 +546,7 @@ mc_plot_pidistr <- function(PI, plot=TRUE, breaks="Sturges") {
     invisible(csfull)
 }
 
-#' Plot the total PI distribution for a cell
-#'
-#' @param PI PI object returned by `mc_predict_total()`
-#' @param id cell ID
-#' @param plot logical, to plot or just give summary
-#' @param breaks breaks arg passed to `graphics::hist()`
-#'
-#' @export
-mc_plot_pidistrcell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
+.mc_plot_pidistrcell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
     csfull <- PI$boot_full[id,]
     if (plot) {
         h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
@@ -554,7 +558,8 @@ mc_plot_pidistrcell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
         d <- stats::density(csfull)
         d$y <- max(h$density) * d$y / max(d$y)
         plot(h,
-            freq=FALSE, col="lightgrey", main="Cell Moose PI",
+            freq=FALSE, col="lightgrey", 
+            main=paste("Moose PI for Cell", id),
             xlab="Predicted Total Moose in cell", ylab="Percent",
             border="darkgrey",
             ylim=c(0, max(h$density, d$y)))
