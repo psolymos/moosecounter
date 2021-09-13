@@ -146,8 +146,8 @@ server <- function(input, output, session) {
     # Evaluate directly to include args in the call itself, to prevent problems
     # with stats::update() later in the Prediction Interval steps.
     # idea from: https://stackoverflow.com/a/57528229/3362144
-    m <- eval(rlang::expr(mc_fit_total(vars = !!input$model_var_count,
-                                       x = survey_sub(),
+    m <- eval(rlang::expr(mc_fit_total(x = survey_sub(),
+                                       vars = !!input$model_var_count,
                                        zi_vars = !!input$model_var_zero,
                                        dist = !!input$model_dist,
                                        weighted = !!input$model_weighted))) %>%
