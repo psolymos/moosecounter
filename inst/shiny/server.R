@@ -246,10 +246,16 @@ server <- function(input, output, session) {
 
   # Prediction Intervals ----------------------------------------------------
 
+  # UI elements
   output$pred_models <- renderUI({
     selectInput("pred_models",
-                label = "Model(s) to calculate prediction intervals for",
+                label = "Model(s) to use",
                 choices = names(models()), multiple = TRUE)
+  })
+
+  output$pred_cell <- renderUI({
+    numericInput("pred_cell", label = "Cell to plot for predictions",
+                 value = 1, min = 1, max = nrow(pi()$data), step = 1)
   })
 
   pi <- eventReactive(input$pred_calc, {
@@ -272,8 +278,18 @@ server <- function(input, output, session) {
 
   # Plots
   output$pred_predpi <- renderPlot(mc_plot_predpi(pi()), res = 125)
-  output$pred_pidistr <- renderPlot(mc_plot_pidistr(pi()), res = 85)
-  output$pred_pidistrcell <- renderPlot(mc_plot_pidistrcell(pi()), res = 85)
+  output$pred_pidistr <- renderPlot({
+    req(input$pred_cell)
+    validate(need(input$pred_cell <= nrow(pi()$data) &
+                    input$pred_cell > 0,
+                  paste0("Out of cell range: There are only ",
+                         nrow(pi()$data),
+                         " cells in the data")))
+    op <- par(mfrow = c(1, 2))
+    mc_plot_pidistr(pi())
+    mc_plot_pidistr(pi(), id = input$pred_cell)
+    par(op)
+  }, res = 100)
 
 
 }
