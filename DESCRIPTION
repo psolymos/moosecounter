@@ -21,3 +21,4 @@ Suggests:
     shinydashboard (>= 0.7.1)
 License: GPL-2
 RoxygenNote: 7.1.1
+Encoding: UTF-8

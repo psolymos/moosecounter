@@ -4,12 +4,19 @@
 \alias{mc_fit_total}
 \title{Fit Model to Total Abundance}
 \usage{
-mc_fit_total(vars, x, zi_vars = NULL, dist = "ZINB", weighted = FALSE, ...)
+mc_fit_total(
+  x,
+  vars = NULL,
+  zi_vars = NULL,
+  dist = "ZINB",
+  weighted = FALSE,
+  ...
+)
 }
 \arguments{
-\item{vars}{column names of `x` to be used as predictors for the count model}
-
 \item{x}{data frame (use `mc_update_total()` on `x` prior)}
+
+\item{vars}{column names of `x` to be used as predictors for the count model}
 
 \item{zi_vars}{optional, column names of `x` to be used as predictors for the zero model}
 
