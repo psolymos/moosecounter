@@ -121,11 +121,37 @@ server <- function(input, output, session) {
 
   # Create reactive for using the models, not modifying, models
   models <- reactive({
-    req(opts, length(models_list$m) > 0) # Make sure models() invalidates if opts() change
+    req(length(models_list$m) > 0)
+    req(opts()) # To invalidate when settings change
 
     m <- models_list$m
     m <- m[!map_lgl(m, is.null)]
     m[order(names(m))]
+
+    # TESTING errors
+    #if("C" %in% names(m)) m$C$dist <- "nope"
+
+
+    # Run and add model and details
+    # Evaluate directly to include args in the call itself, to prevent problems
+    # with stats::update() later in the Prediction Interval steps.
+    # idea from: https://stackoverflow.com/a/57528229/3362144
+    map(m, ~ append(., c("model" = list(
+      try(eval(rlang::expr(mc_fit_total(vars = !!.$var_count,
+                                        x = survey_sub(),
+                                        zi_vars = !!!.$var_zero,
+                                        dist = !!.$dist,
+                                        weighted = !!.$weighted))),
+          silent = TRUE)))))
+  })
+
+  output$model_msgs <- renderUI({
+    m <- map_chr(models(), ~if("try-error" %in% class(.$model)) .$model[1] else "no problem")
+    m <- m[m != "no problem"]
+    if(length(m) > 0) {
+      msg <- tagList("Problem with model ", strong(names(m)), ": ", br(), m)
+    } else msg <- tagList()
+    msg
   })
 
   output$model_id <- renderUI({
@@ -142,36 +168,11 @@ server <- function(input, output, session) {
   observeEvent(input$model_add, {
     req(input$model_dist, input$model_id, input$model_weighted)
 
-    # Run and add model and details
-    # Evaluate directly to include args in the call itself, to prevent problems
-    # with stats::update() later in the Prediction Interval steps.
-    # idea from: https://stackoverflow.com/a/57528229/3362144
-    m <- eval(rlang::expr(mc_fit_total(x = survey_sub(),
-                                       vars = !!input$model_var_count,
-                                       zi_vars = !!input$model_var_zero,
-                                       dist = !!input$model_dist,
-                                       weighted = !!input$model_weighted))) %>%
-      try(silent = TRUE)
-
-    # FOR TESTING
-    # if(input$model_id == "C") m <- try(stop("test stop"), silent = TRUE)
-
-    # Message to user if error (because observer, must be explicit,
-    # cannot rely on validate/need
-    if("try-error" %in% class(m)) {
-      msg <- paste("Model error: ", m[1])
-    } else msg <- ""
-    output$model_msgs <- renderText(msg)
-
-    # Don't continue if error
-    validate(need(!"try-error" %in% class(m), message = FALSE))
-
     models_list$m[[input$model_id]] <- list(
       dist = input$model_dist,
       weighted = as.logical(input$model_weighted),
       var_count = input$model_var_count,
-      var_zero = input$model_var_zero,
-      model = m)
+      var_zero = input$model_var_zero)
   })
 
   output$model_table <- renderTable({
@@ -182,6 +183,8 @@ server <- function(input, output, session) {
                   `Zero variables` = paste(.x$var_zero, collapse = ", "),
                   Distribution = .x$dist,
                   Weighted = .x$weighted,
+                  method = .x$model$method,
+                  response = names(.x$model$model),
                   row.names = .y))
   })
 
@@ -214,6 +217,7 @@ server <- function(input, output, session) {
   output$model_aic <- renderTable({
     req(length(models()) > 0)
     req(opts())
+    validate_models(models())
 
     map(models(), "model") %>%
       mc_models_total(survey_sub()) %>%
@@ -224,12 +228,15 @@ server <- function(input, output, session) {
 
   output$resid_models <- renderUI({
     req(length(models()) > 0)
+    validate_models(models())
+
     radioButtons("resid_model", label = "Model", inline = TRUE,
                  choices = sort(names(models())))
   })
 
   output$resid_plot <- renderPlot({
     req(length(models()) > 0, input$resid_model)
+    validate_models(models())
 
     map(models(), "model") %>%
       mc_plot_residuals(input$resid_model, ., survey_sub())
@@ -246,10 +253,9 @@ server <- function(input, output, session) {
   })
 
   pi <- eventReactive(input$pred_calc, {
-    req(length(models()) > 0,
-        opts(),
-        survey_sub(),
-        input$pred_models, input$pred_average)
+    req(length(models()) > 0, input$pred_average)
+    validate(need(input$pred_models, "Please choose your model(s)"))
+    validate_models(models())
 
     mc_predict_total(
       model_id = input$pred_models,

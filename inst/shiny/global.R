@@ -39,11 +39,11 @@ var_filter <- c("Survey Name" = "SURVEY_NAM",
                 "Survey ID" = "SURVEY_ID")
 
 opts_tooltip <- list(
-  "method" = "Defines the optimization algorithm used by <code>optim</code>",
+  "method" = "Defines the optimization algorithm used by <code>optim</code> for <emph>Prediction Intervals</emph>",
   "response" = "Whether to use all moose spotted (Total) or just Cows",
   "maxcell" = "",
   "b" = paste("Number of times to run a simulation when establishing ",
-              "prediction intervals"),
+              "Prediction Intervals"),
   "alpha" = paste("Type I error rate for prediction intervals,",
                   "as well as for multivariate exploration"),
   "wscale" = "How much to weight influential observations. 0 produces equal weights",
@@ -57,3 +57,16 @@ select_dep <- function(id, name, x, multiple = FALSE) {
   if(!multiple) opts <- c("none", opts)
   selectInput(id, name, opts, multiple = multiple)
 }
+
+
+model_errors <- function(m) {
+  map(m, "model") %>%
+    map_lgl(~ "try-error" %in% class(.))
+}
+
+validate_models <- function(m) {
+  validate(need(!any(model_errors(m)),
+                paste0("Some models have problems (see 'Models' tab), ",
+                       "adjust settings or remove models")))
+}
+

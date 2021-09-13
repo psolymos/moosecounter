@@ -128,7 +128,7 @@ ui_addmodel <- fluidRow(
                actionButton("model_add", "Add")),
            box(width = 12,
                h4("Error messages"),
-               textOutput("model_msgs"))),
+               uiOutput("model_msgs"))),
     box(width = 8,
         h4("Current models"),
         tableOutput("model_table"),
@@ -152,22 +152,23 @@ ui_residuals <- fluidRow(
 # Prediction Intervals -----------------
 ui_pi <- fluidRow(
   column(width=12,
-    h2("Prediction Intervals"),
+    h2("Calculating Prediction Intervals"),
     box(width = 4, height = "200px",
-        uiOutput("pred_models"),
-        conditionalPanel(
+        column(width = 6, uiOutput("pred_models")),
+        column(width = 6, conditionalPanel(
           condition = "input.pred_models.length > 1",
-          radioButtons("pred_average", label = NULL, inline = TRUE,
+          radioButtons("pred_average", label = "With multiple models...",
                        choices = c("Use best model" = FALSE,
                                    "Average over models" = TRUE),
-                       selected = TRUE)),
-        actionButton("pred_calc", "Calculate Prediction Interval")),
+                       selected = TRUE))),
+        actionButton("pred_calc", "Calculate Prediction Interval"),
+        uiOutput("pred_cell")),
     box(width = 8, height = "200px", title = "Prediction Interval Summary",
         tableOutput("pred_density")),
     tabBox(width = 12,
            tabPanel("Diagnostic Plots", plotOutput("pred_predpi")),
-           tabPanel("Total Moose", plotOutput("pred_pidistr")),
-           tabPanel("Moose in Cell", plotOutput("pred_pidistrcell")))
+           tabPanel("Moose Predictions",
+                    plotOutput("pred_pidistr")))
   )
 )
 
@@ -186,7 +187,7 @@ dashboardPage(
         menuSubItem("Multivariate", tabName = "multivar")
       ),
       menuItem("Total", tabName = "total", icon=icon("circle"),
-        menuSubItem("Add model", tabName = "addmodel"),
+        menuSubItem("Models", tabName = "addmodel"),
         menuSubItem("Residuals", tabName = "residuals"),
         menuSubItem("Prediction Intervals", tabName = "pi")
       ),
