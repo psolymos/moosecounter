@@ -126,17 +126,6 @@ server <- function(input, output, session) {
     m <- models_list$m
     m <- m[!map_lgl(m, is.null)]
     m[order(names(m))]
-
-    # Run and add model
-    # Evaluate directly to include data in the call itself, to prevent problems
-    # with stats::update() later in the Prediction Interval steps.
-    # idea from: https://stackoverflow.com/a/57528229/3362144
-    map(m, ~ append(., c("model" = list(
-      eval(rlang::expr(mc_fit_total(vars = !!.$var_count,
-                                    x = survey_sub(),
-                                    zi_vars = !!!.$var_zero,
-                                    dist = !!.$dist,
-                                    weighted = !!.$weighted)))))))
   })
 
   output$model_id <- renderUI({
@@ -151,14 +140,38 @@ server <- function(input, output, session) {
 
 
   observeEvent(input$model_add, {
-    req(input$model_var_count,
-        input$model_dist, input$model_id, input$model_weighted)
+    req(input$model_dist, input$model_id, input$model_weighted)
+
+    # Run and add model and details
+    # Evaluate directly to include args in the call itself, to prevent problems
+    # with stats::update() later in the Prediction Interval steps.
+    # idea from: https://stackoverflow.com/a/57528229/3362144
+    m <- eval(rlang::expr(mc_fit_total(vars = !!input$model_var_count,
+                                       x = survey_sub(),
+                                       zi_vars = !!input$model_var_zero,
+                                       dist = !!input$model_dist,
+                                       weighted = !!input$model_weighted))) %>%
+      try(silent = TRUE)
+
+    # FOR TESTING
+    # if(input$model_id == "C") m <- try(stop("test stop"), silent = TRUE)
+
+    # Message to user if error (because observer, must be explicit,
+    # cannot rely on validate/need
+    if("try-error" %in% class(m)) {
+      msg <- paste("Model error: ", m[1])
+    } else msg <- ""
+    output$model_msgs <- renderText(msg)
+
+    # Don't continue if error
+    validate(need(!"try-error" %in% class(m), message = FALSE))
 
     models_list$m[[input$model_id]] <- list(
       dist = input$model_dist,
       weighted = as.logical(input$model_weighted),
       var_count = input$model_var_count,
-      var_zero = input$model_var_zero)
+      var_zero = input$model_var_zero,
+      model = m)
   })
 
   output$model_table <- renderTable({
