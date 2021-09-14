@@ -50,9 +50,10 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         data=x[x$srv,],
         dist=dist,
         link="logit",
+        method=opts$method,
         ...)
     if (weighted)
-        out <- wzi(out)
+        out <- wzi(out) # wzi know about method
     out$call <- match.call()
     out
 }
@@ -558,7 +559,7 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
         d <- stats::density(csfull)
         d$y <- max(h$density) * d$y / max(d$y)
         plot(h,
-            freq=FALSE, col="lightgrey", 
+            freq=FALSE, col="lightgrey",
             main=paste("Moose PI for Cell", id),
             xlab="Predicted Total Moose in cell", ylab="Percent",
             border="darkgrey",
