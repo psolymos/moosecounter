@@ -2,7 +2,7 @@ Package: moosecounter
 Version: 0.4-0
 Date: 2021-08-19
 Title: Adaptive Moose Surveys
-Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos
+Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos, Steffi LaZerte
 Maintainer: Peter Solymos <psolymos@gmail.com>
 Description: Adaptive Moose surveys.
 Imports: 
