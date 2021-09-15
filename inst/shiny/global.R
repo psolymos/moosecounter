@@ -22,11 +22,15 @@ ver <- read.dcf(
 
 # Columns representing metadata, if present
 var_meta <- c("SURVEY_NAM", "YT_REGION", "SURVEY_YEA", "SURVEY_ID",
-              "S_SET_ID", "SU_ID", "ID", "SUS_", "SUS_ID",
+              "S_SET_ID", "SU_ID", "ID", "SUS_", "SUS_ID", "S_YEAR_ID",
+              "S_TYPE", "S_SEASON",
+              "PROJECT_ID", "CENSUS_ID",
               "In1Out0", "SU_STRATUM", "ALL_STRATA",
               "IDLATDEG", "IDLATMIN", "IDLONDEG", "IDLONMIN", "CENTRLAT", "CENTRLON",
-              "REGION", "GMU", "GMU2", "USE_SCALE", "SRC_SCALE",
-              "AREA_KM", "Sampled", "srv")
+              "REGION", "GMU", "GMU2", "USE_SCALE", "SRC_SCALE", "SRC_NOTES",
+              "AREA_KM", "PERIM_KM", "AREA_MI", "PERIM_MI", "FEATURE_ID",
+              "SUBSET_NAM", "SUBSET_ID",
+              "Sampled", "srv", "Kluane_ID")
 
 # Columns representing response variables
 var_resp <- c("BULL_SMALL", "BULL_LARGE", "LONE_COW", "COW_1C", "COW_2C", "LONE_CALF",
