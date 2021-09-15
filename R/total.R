@@ -446,7 +446,7 @@ mc_plot_predpi <- function(PI) {
 
     op <- graphics::par(mfrow=c(1,3))
 
-    ModID <- if (length(PI$model_id)>1)
+    ModID <- if (length(unique(PI$model_select_id))>1)
         "Avg" else unique(PI$model_select_id)
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
         xlab="Longitude", ylab="Latitude",
@@ -513,7 +513,7 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
     if (is.null(id)) {
         .mc_plot_pidistrall(PI=PI, plot=plot, breaks=breaks)
     } else {
-        .mc_plot_pidistrcell(PI=PI, id+id, plot=plot, breaks=breaks)
+        .mc_plot_pidistrcell(PI=PI, id=id, plot=plot, breaks=breaks)
     }
 }
 
