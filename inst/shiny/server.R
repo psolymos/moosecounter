@@ -137,9 +137,9 @@ server <- function(input, output, session) {
     # with stats::update() later in the Prediction Interval steps.
     # idea from: https://stackoverflow.com/a/57528229/3362144
     map(m, ~ append(., c("model" = list(
-      try(eval(rlang::expr(mc_fit_total(vars = !!.$var_count,
-                                        x = survey_sub(),
-                                        zi_vars = !!!.$var_zero,
+      try(eval(rlang::expr(mc_fit_total(x = survey_sub(),
+                                        vars = !!.$var_count,
+                                        zi_vars = !!.$var_zero,
                                         dist = !!.$dist,
                                         weighted = !!.$weighted))),
           silent = TRUE)))))
