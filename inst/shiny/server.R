@@ -208,12 +208,12 @@ server <- function(input, output, session) {
 
     m <- models()[order(names(models()))]
 
-    imap(m, ~ actionButton(paste0("delete_model_", .y),
-                           label = .y,
-                           icon = icon("times"),
-                           class = if_else("try-error" %in% class(.x$model),
-                                           "btn-danger",
-                                           "btn-default")))
+    imap(m, ~ bsButton(paste0("delete_model_", .y),
+                       label = .y,
+                       icon = icon("times"),
+                       style = if_else("try-error" %in% class(.x$model),
+                                       "danger",
+                                       "default")))
   })
 
   # Dynamically create observeEvents for each model delete button
