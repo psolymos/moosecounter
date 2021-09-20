@@ -31,7 +31,7 @@ ui_settings <- fluidRow(
              radioButtons("opts_method",  inline = TRUE,
                           label = "Model optimization method",
                           choices = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B",
-                                      "SANN", "Brent")),
+                                      "SANN")),
              bsTooltip("opts_method", opts_tooltip$method),
 
              sliderInput("opts_b",
