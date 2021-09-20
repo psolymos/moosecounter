@@ -12,7 +12,7 @@ library(dplyr)
 library(purrr)
 library(DT)
 library(shinyBS)
-library(ggplot2)
+library(kableExtra)
 #library(openxlsx)
 #library(reactable)
 

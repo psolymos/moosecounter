@@ -146,11 +146,17 @@ server <- function(input, output, session) {
   })
 
   output$model_msgs <- renderUI({
-    m <- map_chr(models(), ~if("try-error" %in% class(.$model)) .$model[1] else "no problem")
+    m <- map_chr(models(), ~{
+      if("try-error" %in% class(.$model)) .$model[1] else "no problem"})
     m <- m[m != "no problem"]
+
     if(length(m) > 0) {
-      msg <- tagList("Problem with model ", strong(names(m)), ": ", br(), m)
+      msg <- imap(m, ~tagList(span("Problem with model ", strong(.y), ": ",
+                                   class = "alert-danger"), br(),
+                              .x, p())) %>%
+        tagList()
     } else msg <- tagList()
+
     msg
   })
 
@@ -175,18 +181,26 @@ server <- function(input, output, session) {
       var_zero = input$model_var_zero)
   })
 
-  output$model_table <- renderTable({
-    imap_dfr(
-      models(),
-      ~data.frame(Model = .y,
-                  `Count variables` = paste(.x$var_count, collapse = ", "),
-                  `Zero variables` = paste(.x$var_zero, collapse = ", "),
-                  Distribution = .x$dist,
-                  Weighted = .x$weighted,
-                  method = .x$model$method,
-                  response = names(.x$model$model),
-                  row.names = .y))
-  })
+  output$model_table <- function() {
+    imap_dfr(models(), ~{
+      d <- data.frame(Model = .y,
+                      `Count variables` = paste(.x$var_count, collapse = ", "),
+                      `Zero variables` = paste(.x$var_zero, collapse = ", "),
+                      Distribution = .x$dist,
+                      Weighted = .x$weighted)
+      if("try-error" %in% class(.x$model)) {
+        d <- mutate(d, method = "MODEL PROBLEM", response = "MODEL PROBLEM")
+      } else {
+        d <- mutate(d,
+                    method = .x$model$method,
+                    response = names(.x$model$model)[1])
+      }
+      d
+    }) %>%
+      kable() %>%
+      kable_styling() %>%
+      row_spec(which(model_errors(models())), background = "#f2dede")
+  }
 
   # Dynamically create delete buttons for each model
   output$model_delete <- renderUI({
@@ -196,7 +210,10 @@ server <- function(input, output, session) {
 
     imap(m, ~ actionButton(paste0("delete_model_", .y),
                            label = .y,
-                           icon = icon("times")))
+                           icon = icon("times"),
+                           class = if_else("try-error" %in% class(.x$model),
+                                           "btn-danger",
+                                           "btn-default")))
   })
 
   # Dynamically create observeEvents for each model delete button
