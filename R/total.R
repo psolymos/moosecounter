@@ -158,14 +158,12 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     b <- 1
 
     # Progress bars setup
+    if(requireNamespace("shiny") && shiny::isRunning()) {
+      pbapply::pboptions(type = "shiny",
+                         title = "Calculating prediction intervals")
+    }
     pb <- pbapply::startpb(0, B)
     on.exit(pbapply::closepb(pb))
-
-    if(requireNamespace("shiny", quietly = TRUE) && shiny::isRunning()) {
-      pbs <- shiny::Progress$new(min = 0, max = B)
-      pbs$set(message = "Calculating prediction intervals", value = 0)
-      on.exit(pbs$close())
-    }
 
     ISSUES <- list()
 
@@ -246,8 +244,6 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                     }
                     if (max(boot.out[,b]) <= MAXCELL) {
                         pbapply::setpb(pb, b)
-                        if(requireNamespace("shiny", quietly = TRUE) &&
-                           shiny::isRunning()) pbs$set(value = b)
                         b <- b + 1
                     }
                 }
