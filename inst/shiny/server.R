@@ -79,9 +79,14 @@ server <- function(input, output, session) {
 
 
   # Univariate Exploration ---------------------------
-  output$uni_var <- renderUI(select_dep("uni_var",
-                                        "Univariate variable to explore",
-                                        survey_sub()))
+  output$uni_var <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+
+    select_dep("uni_var",
+               "Univariate variable to explore",
+               survey_sub())
+  })
 
   output$uni_graph <- renderPlot({
     req(input$uni_var, input$uni_dist)
@@ -93,10 +98,14 @@ server <- function(input, output, session) {
 
 
   # Multivariate Exploration ---------------------
-  output$multi_var <- renderUI(select_dep("multi_var",
-                                          "Multivariate variables to explore",
-                                          survey_sub(),
-                                          multiple = TRUE))
+  output$multi_var <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+    select_dep("multi_var",
+               "Multivariate variables to explore",
+               survey_sub(),
+               multiple = TRUE)
+  })
 
   output$multi_graph <- renderPlot({
     req(input$multi_var)
@@ -109,14 +118,34 @@ server <- function(input, output, session) {
 
 
   # Add models -----------------------------------
-  output$model_var_count <- renderUI(select_dep("model_var_count",
-                                                "Count Variables",
-                                                survey_sub(),
-                                                multiple = TRUE))
+
+  output$model_id <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+
+    if(length(models_list$m) == 0 || is.null(models())) {
+      val <- "A"
+    } else {
+      val <- LETTERS[!LETTERS %in% names(models())][1]
+    }
+
+    textInput("model_id", "Model ID", value = val)
+  })
+
+  output$model_var_count <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+    select_dep("model_var_count",
+               "Count Variables",
+               survey_sub(),
+               multiple = TRUE)
+  })
+
   output$model_var_zero <- renderUI(select_dep("model_var_zero",
                                                "Zero Variables",
                                                survey_sub(),
                                                multiple = TRUE))
+
   models_list <- reactiveValues(m = list())
 
   # Create reactive for using the models, not modifying, models
@@ -131,6 +160,12 @@ server <- function(input, output, session) {
     # TESTING errors
     #if("C" %in% names(m)) m$C$dist <- "nope"
 
+    # Record a change in models()
+    isolate({
+      if(is.null(input$pred_calc) || input$pred_calc > 0)
+      updateButton(session, "pred_calc", style = "warning",
+                   label = "Models have changed<br>(re-run)")
+    })
 
     # Run and add model and details
     # Evaluate directly to include args in the call itself, to prevent problems
@@ -158,16 +193,6 @@ server <- function(input, output, session) {
     } else msg <- tagList()
 
     msg
-  })
-
-  output$model_id <- renderUI({
-    if(length(models_list$m) == 0 || is.null(models())) {
-      val <- "A"
-    } else {
-      val <- LETTERS[!LETTERS %in% names(models())][1]
-    }
-
-    textInput("model_id", "Model ID", value = val)
   })
 
 
@@ -244,7 +269,8 @@ server <- function(input, output, session) {
   # Model residuals / diagnostics ------------------------------
 
   output$resid_models <- renderUI({
-    req(length(models()) > 0)
+    validate(need(length(models_list$m) > 0,
+                  "First create models in the \"Models\" tab"))
     validate_models(models())
 
     radioButtons("resid_model", label = "Model", inline = TRUE,
@@ -265,6 +291,10 @@ server <- function(input, output, session) {
 
   # UI elements
   output$pred_models <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab") %then%
+               need(length(models_list$m) > 0,
+                    "First create models in the \"Models\" tab"))
     selectInput("pred_models",
                 label = "Model(s) to use",
                 choices = names(models()), multiple = TRUE)
@@ -279,6 +309,8 @@ server <- function(input, output, session) {
     req(length(models()) > 0, input$pred_average)
     validate(need(input$pred_models, "Please choose your model(s)"))
     validate_models(models())
+
+    updateButton(session, "pred_calc", style = "primary", label = "Calculate PI")
 
     mc_predict_total(
       model_id = input$pred_models,

@@ -74,3 +74,7 @@ validate_models <- function(m) {
                        "adjust settings or remove models")))
 }
 
+`%then%` <- function(a, b) {
+  if (is.null(a)) b else a
+}
+
