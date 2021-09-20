@@ -302,7 +302,7 @@ server <- function(input, output, session) {
 
   output$pred_cell <- renderUI({
     numericInput("pred_cell", label = "Cell to plot for predictions",
-                 value = 1, min = 1, max = nrow(pi()$data), step = 1)
+                 value = 1, min = 1, max = nrow(pi()$pi$data), step = 1)
   })
 
   pi <- eventReactive(input$pred_calc, {
@@ -312,31 +312,50 @@ server <- function(input, output, session) {
 
     updateButton(session, "pred_calc", style = "primary", label = "Calculate PI")
 
-    mc_predict_total(
-      model_id = input$pred_models,
-      ml = map(models(), "model"),
-      x = survey_sub(),
-      do_boot = TRUE,
-      do_avg = as.logical(input$pred_average)) # Options to adjust these?
+    list(pi = mc_predict_total(model_id = input$pred_models,
+                               ml = map(models(), "model"),
+                               x = survey_sub(),
+                               do_boot = TRUE,
+                               do_avg = as.logical(input$pred_average)),
+         opts = opts())
   })
 
   # Tables
   output$pred_density <- renderTable({
-    pred_density_moose_PI(pi())
+    pred_density_moose_PI(pi()$pi)
   }, rownames = TRUE)
 
+  output$pred_options <- function() {
+    req(pi())
+
+    pi <- pi()$pi
+
+    i <- paste0(pi$issues, collapse = "; ")
+
+    tibble(Issues = if_else(i == "", "None", i),
+           Bootstraps = ncol(pi$boot_full),
+           Method = pi()$opts$method,
+           Response = if_else(pi()$opts$response == "total",
+                              "MOOSE_TOTA",
+                              "COW_TOTA")) %>%
+      kable() %>%
+      kable_styling()
+  }
+
+
+
   # Plots
-  output$pred_predpi <- renderPlot(mc_plot_predpi(pi()), res = 125)
+  output$pred_predpi <- renderPlot(mc_plot_predpi(pi()$pi), res = 125)
   output$pred_pidistr <- renderPlot({
     req(input$pred_cell)
-    validate(need(input$pred_cell <= nrow(pi()$data) &
+    validate(need(input$pred_cell <= nrow(pi()$pi$data) &
                     input$pred_cell > 0,
                   paste0("Out of cell range: There are only ",
-                         nrow(pi()$data),
+                         nrow(pi()$pi$data),
                          " cells in the data")))
     op <- par(mfrow = c(1, 2))
-    mc_plot_pidistr(pi())
-    mc_plot_pidistr(pi(), id = input$pred_cell)
+    mc_plot_pidistr(pi()$pi)
+    mc_plot_pidistr(pi()$pi, id = input$pred_cell)
     par(op)
   }, res = 100)
 

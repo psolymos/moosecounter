@@ -165,8 +165,15 @@ ui_pi <- fluidRow(
                                    "Average over models" = TRUE),
                        selected = TRUE)),
           uiOutput("pred_cell"))),
-    box(width = 8, height = "200px", title = "Prediction Interval Summary",
+
+    box(width = 4, height = "200px",
+        title = "Summary",
         tableOutput("pred_density")),
+
+    box(width = 4, height = "200px",
+        title = "Options",
+        tableOutput("pred_options")),
+
     tabBox(width = 12,
            tabPanel("Diagnostic Plots", plotOutput("pred_predpi")),
            tabPanel("Moose Predictions",
