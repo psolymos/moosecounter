@@ -147,7 +147,7 @@ ui_addmodel <- fluidRow(
         uiOutput("model_delete"),
         hr(),
         h4("AIC Model Comparison"),
-        tableOutput("model_aic"))
+        tableOutput("model_aic1"))
   )
 )
 
@@ -156,8 +156,10 @@ ui_residuals <- fluidRow(
   column(width = 12,
     h2("Residuals"),
     box(width = 12,
-      uiOutput("resid_models"),
-      plotOutput("resid_plot"))
+        h4("AIC Model Comparison"),
+        tableOutput("model_aic2"),
+        uiOutput("resid_models"),
+        plotOutput("resid_plot"))
   )
 )
 

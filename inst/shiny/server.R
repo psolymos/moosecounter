@@ -293,8 +293,7 @@ server <- function(input, output, session) {
 
   })
 
-
-  output$model_aic <- renderTable({
+  model_aic <- reactive({
     req(length(models()) > 0)
     req(opts())
     validate_models(models())
@@ -302,6 +301,14 @@ server <- function(input, output, session) {
     map(models(), "model") %>%
       mc_models_total(survey_sub()) %>%
       mutate(across(everything(), round, 2))
+  })
+
+  output$model_aic1 <- renderTable({
+    model_aic()
+  }, rownames = TRUE)
+
+  output$model_aic2 <- renderTable({
+    model_aic()
   }, rownames = TRUE)
 
   # Model residuals / diagnostics ------------------------------
