@@ -54,7 +54,7 @@ opts_tooltip <- list(
   "sightability" = "Detection probability used to correct total Moose results")
 
 
-select_dep <- function(id, name, x, multiple = FALSE) {
+select_explanatory <- function(id, name, x, multiple = FALSE) {
   req(x)
   opts <- names(x)
   opts <- opts[!opts %in% c(var_meta, var_resp)]

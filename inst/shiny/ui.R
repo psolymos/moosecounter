@@ -77,15 +77,27 @@ ui_data <- fluidRow(
     h2("Data"),
 
     box(width = 4,
-           fileInput("survey_file", "Choose Survey CSV File",
-                     multiple = FALSE,
-                     accept = c("text/csv",
-                                "text/comma-separated-values,text/plain",
-                                ".csv")),
-           uiOutput("filters")),
+        fileInput("survey_file", "Choose Survey CSV File",
+                  multiple = FALSE,
+                  accept = c("text/csv",
+                             "text/comma-separated-values,text/plain",
+                             ".csv")),
+        uiOutput("survey_factors"),
+        h3("Filter data"),
+        uiOutput("filters")),
 
     box(width = 8,
-           div(style = "overflow-x: scroll", DTOutput("survey_preview")))
+        tabBox(width = 12,
+          tabPanel("Interactive table",
+                   div(style = "overflow-x: scroll", DTOutput("survey_preview"))),
+          tabPanel("Data Structure",
+                   h3("Explanatory variables",
+                      span("(inferred)", style = "font-size: 70%;")),
+                   verbatimTextOutput("survey_explanatory"),
+                   h3("Response variables"),
+                   verbatimTextOutput("survey_response"),
+                   h3("Metadata variables"),
+                   verbatimTextOutput("survey_meta"))))
 
   )
 )

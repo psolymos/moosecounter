@@ -37,13 +37,27 @@ server <- function(input, output, session) {
   survey_data <- reactive({
     req(input$survey_file)
 
-    # ADD CHECKS
+    try(d <- read.csv(input$survey_file$datapath), silent = TRUE)
+    validate(need(!"try-error" %in% class(t),
+                  "Error loading data. Is it a valid csv?"))
 
-    read.csv(input$survey_file$datapath)
+    d
+  })
+
+  output$survey_factors <- renderUI({
+    req(survey_data())
+
+    vars <- survey_data() %>%
+      select(-any_of(c(var_meta, var_resp))) %>%
+      select(where(is.integer)) %>%
+      names()
+
+    selectInput("survey_factors",
+                label = "Convert integer to categorical",
+                choices = vars, multiple = TRUE)
   })
 
   # Filtering --------------------------------------
-  # Consider dynamically adding inputs when user clicks button
   output$filters <- renderUI({
     req(survey_data())
 
@@ -60,12 +74,18 @@ server <- function(input, output, session) {
   })
 
 
+
   survey_sub <- reactive({
 
     s <- survey_data()
     for(x in var_filter) {
       n <- paste0("filter_", x)
       if(x %in% names(s) && !is.null(input[[n]])) s <- s[s[[x]] %in% input[[n]], ]
+    }
+
+    # Convert selected integers to factors
+    if(!is.null(input$survey_factors)) {
+      s <- mutate(s, across(input$survey_factors, as.factor))
     }
 
     # Apply filtering
@@ -77,15 +97,33 @@ server <- function(input, output, session) {
     datatable(survey_sub())
   })
 
+  output$survey_response <- renderPrint({
+    survey_sub() %>%
+      select(any_of(var_resp)) %>%
+      str()
+  })
+
+  output$survey_meta <- renderPrint({
+    survey_sub() %>%
+      select(any_of(var_meta)) %>%
+      str()
+  })
+
+  output$survey_explanatory <- renderPrint({
+    survey_sub() %>%
+      select(-any_of(c(var_resp, var_meta))) %>%
+      str()
+  })
+
 
   # Univariate Exploration ---------------------------
   output$uni_var <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
 
-    select_dep("uni_var",
-               "Univariate variable to explore",
-               survey_sub())
+    select_explanatory("uni_var",
+                       "Univariate variable to explore",
+                       survey_sub())
   })
 
   output$uni_graph <- renderPlot({
@@ -101,10 +139,10 @@ server <- function(input, output, session) {
   output$multi_var <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
-    select_dep("multi_var",
-               "Multivariate variables to explore",
-               survey_sub(),
-               multiple = TRUE)
+    select_explanatory("multi_var",
+                       "Multivariate variables to explore",
+                       survey_sub(),
+                       multiple = TRUE)
   })
 
   output$multi_graph <- renderPlot({
@@ -135,16 +173,16 @@ server <- function(input, output, session) {
   output$model_var_count <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
-    select_dep("model_var_count",
-               "Count Variables",
-               survey_sub(),
-               multiple = TRUE)
+    select_explanatory("model_var_count",
+                       "Count Variables",
+                       survey_sub(),
+                       multiple = TRUE)
   })
 
-  output$model_var_zero <- renderUI(select_dep("model_var_zero",
-                                               "Zero Variables",
-                                               survey_sub(),
-                                               multiple = TRUE))
+  output$model_var_zero <- renderUI(select_explanatory("model_var_zero",
+                                                       "Zero Variables",
+                                                       survey_sub(),
+                                                       multiple = TRUE))
 
   models_list <- reactiveValues(m = list())
 
@@ -163,8 +201,8 @@ server <- function(input, output, session) {
     # Record a change in models()
     isolate({
       if(is.null(input$pred_calc) || input$pred_calc > 0)
-      updateButton(session, "pred_calc", style = "warning",
-                   label = "Models have changed<br>(re-run)")
+        updateButton(session, "pred_calc", style = "warning",
+                     label = "Models have changed<br>(re-run)")
     })
 
     # Run and add model and details
