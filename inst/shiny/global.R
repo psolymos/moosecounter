@@ -81,3 +81,6 @@ validate_models <- function(m) {
   if (is.null(a)) b else a
 }
 
+missing_levels <- function(x, cols) {
+  map_lgl(cols, ~any(table(x[[.]], x$srv) == 0L))
+}
