@@ -58,14 +58,32 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
     out
 }
 
+## organize coefs from ZI models
+get_coefs <- function(ML) {
+    l <- lapply(ML, stats::coef)
+    cfn <- unique(unname(unlist(lapply(l, names))))
+    cfn1 <- cfn[startsWith(cfn, "count_")]
+    cfn1 <- c("count_(Intercept)", cfn1[cfn1 != "count_(Intercept)"])
+    cfn0 <- cfn[startsWith(cfn, "zero_")]
+    cfn0 <- c("zero_(Intercept)", cfn0[cfn0 != "zero_(Intercept)"])
+    cfn <- c(cfn1, cfn0)
+    M <- matrix(NA_real_, length(ML), length(cfn))
+    dimnames(M) <- list(names(ML), cfn)
+    for (i in seq_len(length(ML))) {
+        M[i,] <- l[[i]][match(cfn, names(l[[i]]))]
+    }
+    M
+}
+
 #' Total Abundance Models
 #'
 #' @param ml named list of models
 #' @param x data frame
+#' @param coefs logical, return coefficient table too
 #'
 #' @export
 # was updateModelTab
-mc_models_total <- function(ml, x) {
+mc_models_total <- function(ml, x, coefs=TRUE) {
     aic <- data.frame(
         AIC=sapply(ml, stats::AIC),
         df=sapply(ml, function(z) length(stats::coef(z))),
@@ -73,7 +91,8 @@ mc_models_total <- function(ml, x) {
     aic$delta <- aic$AIC - min(aic$AIC)
     aic$weight <- exp( -0.5 * aic$delta) / sum(exp( -0.5 * aic$delta))
     D <- t(sapply(ml, pred_density_moose, x=x))
-    out <- data.frame(aic, D)
+    cf <- if (coefs) get_coefs(ml) else NULL
+    out <- data.frame(aic, D, cf)
     out[order(out$delta),]
 }
 
@@ -102,8 +121,12 @@ pred_density_moose <- function(fit, x){
     srv <- x$srv
     Ntot <- pred_total_moose(x, srv, fit)
     A_all <- sum(x$AREA_KM)
-    Density <- Ntot$Ntot_all / A_all
-    c(N=Ntot$Ntot_all, A=A_all, D=Density)
+    Density <- Ntot$Ntot_all / (1000*A_all)
+    out <- c(N=Ntot$Ntot_all, A=A_all, D=Density)
+    names(out) <- sprintf(
+        c("%s_Moose", "Total_Area_km2", "Density_%s_Per1000km2"),
+        if (opts$response == "total") "Total" else "Cows")
+    out
 }
 
 
@@ -395,8 +418,10 @@ mc_plot_residuals <- function(model_id, ml, x) {
     ctz <- cut(z, br)
 
     op <- graphics::par(mfrow=c(1,2))
+    on.exit(graphics::par(op))
+
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
-      xlab="Longitude", ylab="Latitude",
+      xlab="Longitude", ylab="Latitude", asp=1,
       main=paste("Residuals for Model ID:", model_id),
       ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
     graphics::points(x[!srv,opts$xy], pch="+", col="grey")
@@ -414,7 +439,7 @@ mc_plot_residuals <- function(model_id, ml, x) {
 
     graphics::hist(z, xlab="Standardized Residuals", col=Col, breaks=br,
       main=paste("Model ID:", model_id))
-    graphics::par(op)
+
     invisible(z)
 }
 
@@ -451,11 +476,12 @@ mc_plot_predpi <- function(PI) {
     ctz <- cut(z, br)
 
     op <- graphics::par(mfrow=c(1,3))
+    on.exit(graphics::par(op))
 
     ModID <- if (length(unique(PI$model_select_id))>1)
         "Avg" else unique(PI$model_select_id)
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
-        xlab="Longitude", ylab="Latitude",
+        xlab="Longitude", ylab="Latitude", asp=1,
         main=paste("Residuals for Model ID:", ModID),
         ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
     graphics::points(x[!srv,opts$xy], pch="+", col="grey")
@@ -495,14 +521,13 @@ mc_plot_predpi <- function(PI) {
 
     plot(xy, pch=19, col=Col[czAcc], cex=1+zAcc*1,
       ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0),
-      xlab="Longitude", ylab="Latitude",
+      xlab="Longitude", ylab="Latitude", asp=1,
       main=paste("Accuracy for Model ID:", ModID))
     graphics::points(x[srv,opts$xy], pch="+", col="grey")
 #    text(x[!srv,opts$xy][AccRank <= Min,], labels=AccRank[AccRank <= Min], cex=1)
     graphics::text(x[!srv,opts$xy][AccRank <= Min,], labels=x[!srv,"SU_ID"][AccRank <= Min], cex=1)
     graphics::legend("bottomleft", pch=19, col=Col[c(5,3,1)],
       bty="n", legend=c("+++", "++", "+"))
-    graphics::par(op)
 
     invisible(PI)
 }

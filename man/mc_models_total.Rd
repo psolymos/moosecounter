@@ -4,12 +4,14 @@
 \alias{mc_models_total}
 \title{Total Abundance Models}
 \usage{
-mc_models_total(ml, x)
+mc_models_total(ml, x, coefs = TRUE)
 }
 \arguments{
 \item{ml}{named list of models}
 
 \item{x}{data frame}
+
+\item{coefs}{logical, return coefficient table too}
 }
 \description{
 Total Abundance Models
