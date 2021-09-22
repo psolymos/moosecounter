@@ -44,6 +44,22 @@ server <- function(input, output, session) {
     d
   })
 
+  output$survey_omit <- renderUI({
+    req(survey_data())
+
+    vars <- survey_data() %>%
+      select(-any_of(c(var_meta, var_resp))) %>%
+      select(where(~is.integer(.) || is.character(.) || is.factor(.))) %>%
+      names()
+
+    # Check for missing levels in filtered data
+    isolate({vars <- vars[missing_levels(survey_sub(), vars)]})
+
+    selectInput("survey_omit",
+                label = "Omit variables with too few surveyed levels",
+                selected = vars, choices = vars, multiple = TRUE)
+  })
+
   output$survey_factors <- renderUI({
     req(survey_data())
 
@@ -52,10 +68,19 @@ server <- function(input, output, session) {
       select(where(is.integer)) %>%
       names()
 
+    if(!is.null(input$survey_omit)) vars <- vars[!vars %in% input$survey_omit]
+
+    isolate({
+      if(!is.null(input$survey_factors)) {
+        s <- vars[vars %in% input$survey_factors]
+      } else s <- NULL
+    })
+
     selectInput("survey_factors",
                 label = "Convert integer to categorical",
-                choices = vars, multiple = TRUE)
+                choices = vars, selected = s, multiple = TRUE)
   })
+
 
   # Filtering --------------------------------------
   output$filters <- renderUI({
@@ -87,6 +112,8 @@ server <- function(input, output, session) {
     if(!is.null(input$survey_factors)) {
       s <- mutate(s, across(input$survey_factors, as.factor))
     }
+
+    if(!is.null(input$survey_omit)) s <- select(s, -all_of(input$survey_omit))
 
     # Apply filtering
     mc_update_total(s)

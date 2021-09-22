@@ -53,6 +53,9 @@ opts_tooltip <- list(
   "wscale" = "How much to weight influential observations. 0 produces equal weights",
   "sightability" = "Detection probability used to correct total Moose results")
 
+survey_tooltip <- list(
+  "omit" = "These variables are potentially categorical (either text or integer) for which some levels are missing from surveyed data. Therefore predictions cannot be made they should be omitted. Override this by removing variables from this list.")
+
 
 select_explanatory <- function(id, name, x, multiple = FALSE) {
   req(x)

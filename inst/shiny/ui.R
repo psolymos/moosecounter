@@ -82,6 +82,8 @@ ui_data <- fluidRow(
                   accept = c("text/csv",
                              "text/comma-separated-values,text/plain",
                              ".csv")),
+        uiOutput("survey_omit"),
+        bsTooltip("survey_omit", survey_tooltip$omit),
         uiOutput("survey_factors"),
         h3("Filter data"),
         uiOutput("filters")),
