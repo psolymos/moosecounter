@@ -4,12 +4,14 @@
 \alias{mc_plot_multivariate}
 \title{Multivariate Exploration}
 \usage{
-mc_plot_multivariate(vars, x)
+mc_plot_multivariate(vars, x, alpha = NULL)
 }
 \arguments{
 \item{vars}{column names from `x` to be used as a predictor}
 
 \item{x}{data frame with Moose data}
+
+\item{alpha}{alpha level defining mincriterion = 1 - alpha}
 }
 \description{
 Multivariate Exploration

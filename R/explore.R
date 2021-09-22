@@ -35,7 +35,7 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
         d_uns <- table(z[!srv])/sum(!srv)
         ylim <- c(0, max(max(d_srv), max(d_uns)))
 
-        barplot(rbind(d, d_srv), main="Density", beside=TRUE, col=1:2)
+        graphics::barplot(rbind(d, d_srv), main="Density", beside=TRUE, col=1:2)
         graphics::legend("topleft", bty="n", fill=c(1,2),
             legend=c("All","Surveyed"))
 
@@ -84,6 +84,7 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
 #'
 #' @param vars column names from `x` to be used as a predictor
 #' @param x data frame with Moose data
+#' @param alpha alpha level defining mincriterion = 1 - alpha
 #'
 #' @export
 mc_plot_multivariate <- function(vars, x, alpha=NULL) {
