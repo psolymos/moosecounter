@@ -152,7 +152,7 @@ ui_addmodel <- fluidRow(
         uiOutput("model_delete"),
         hr(),
         h4("AIC Model Comparison"),
-        tableOutput("model_aic1"))
+        div(style = "overflow-x: scroll", tableOutput("model_aic1")))
   )
 )
 
@@ -162,7 +162,7 @@ ui_residuals <- fluidRow(
     h2("Residuals"),
     box(width = 12,
         h4("AIC Model Comparison"),
-        tableOutput("model_aic2"),
+        div(style = "overflow-x: scroll", tableOutput("model_aic2")),
         uiOutput("resid_models"),
         plotOutput("resid_plot"))
   )
