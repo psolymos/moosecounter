@@ -58,12 +58,14 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
 #' @param x data frame with Moose data
 #'
 #' @export
-mc_plot_multivariate <- function(vars, x) {
+mc_plot_multivariate <- function(vars, x, alpha=NULL) {
     opts <- getOption("moose_options")
+    if (is.null(alpha))
+        alpha <- opts$alpha
     z <- data.frame(Y=x[[opts$Ntot]], x[,vars])[x$srv,]
     tr <- partykit::ctree(Y ~ ., z,
         control = partykit::ctree_control(
-            mincriterion = 1 - opts$alpha))
+            mincriterion = 1 - alpha))
     plot(tr)
 }
 
