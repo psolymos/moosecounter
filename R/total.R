@@ -390,7 +390,7 @@ mc_plot_residuals <- function(model_id, ml, x) {
 
     op <- graphics::par(mfrow=c(1,2))
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
-      xlab="Longitude", ylab="Latitude",
+      xlab="Longitude", ylab="Latitude", asp=1,
       main=paste("Residuals for Model ID:", model_id),
       ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
     graphics::points(x[!srv,opts$xy], pch="+", col="grey")
@@ -449,7 +449,7 @@ mc_plot_predpi <- function(PI) {
     ModID <- if (length(unique(PI$model_select_id))>1)
         "Avg" else unique(PI$model_select_id)
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
-        xlab="Longitude", ylab="Latitude",
+        xlab="Longitude", ylab="Latitude", asp=1,
         main=paste("Residuals for Model ID:", ModID),
         ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
     graphics::points(x[!srv,opts$xy], pch="+", col="grey")
@@ -489,7 +489,7 @@ mc_plot_predpi <- function(PI) {
 
     plot(xy, pch=19, col=Col[czAcc], cex=1+zAcc*1,
       ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0),
-      xlab="Longitude", ylab="Latitude",
+      xlab="Longitude", ylab="Latitude", asp=1,
       main=paste("Accuracy for Model ID:", ModID))
     graphics::points(x[srv,opts$xy], pch="+", col="grey")
 #    text(x[!srv,opts$xy][AccRank <= Min,], labels=AccRank[AccRank <= Min], cex=1)
