@@ -119,6 +119,9 @@ ui_multivar <- fluidRow(
   column(width = 12,
     h2("Multivariate Exploration"),
     box(width = 6, uiOutput("multi_var")),
+    box(width = 6, sliderInput("multi_alpha", label = "alpha",
+                               value = 0.10,
+                               min = 0.001, max = 0.999, step = 0.01)),
     box(width = 12, plotOutput("multi_graph"))
   )
 )

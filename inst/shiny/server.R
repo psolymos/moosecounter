@@ -146,11 +146,10 @@ server <- function(input, output, session) {
   })
 
   output$multi_graph <- renderPlot({
-    req(input$multi_var)
-    req(input$multi_var != "none")
-    req(opts())
+    req(input$multi_var != "none", opts(), input$multi_alpha)
 
-    mc_plot_multivariate(input$multi_var, survey_sub())
+    mc_plot_multivariate(vars = input$multi_var, x = survey_sub(),
+                         alpha = input$multi_alpha)
   }, res = 100)
 
 
