@@ -102,8 +102,12 @@ pred_density_moose <- function(fit, x){
     srv <- x$srv
     Ntot <- pred_total_moose(x, srv, fit)
     A_all <- sum(x$AREA_KM)
-    Density <- Ntot$Ntot_all / A_all
-    c(N=Ntot$Ntot_all, A=A_all, D=Density)
+    Density <- Ntot$Ntot_all / (1000*A_all)
+    out <- c(N=Ntot$Ntot_all, A=A_all, D=Density)
+    names(out) <- sprintf(
+        c("%s Moose", "Total Area (km2)", "Density (%s/1000km2)"),
+        if (opts$response == "total") "Total" else "Cows")
+    out
 }
 
 
