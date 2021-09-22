@@ -389,6 +389,8 @@ mc_plot_residuals <- function(model_id, ml, x) {
     ctz <- cut(z, br)
 
     op <- graphics::par(mfrow=c(1,2))
+    on.exit(graphics::par(op))
+
     plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
       xlab="Longitude", ylab="Latitude", asp=1,
       main=paste("Residuals for Model ID:", model_id),
@@ -408,7 +410,7 @@ mc_plot_residuals <- function(model_id, ml, x) {
 
     graphics::hist(z, xlab="Standardized Residuals", col=Col, breaks=br,
       main=paste("Model ID:", model_id))
-    graphics::par(op)
+
     invisible(z)
 }
 
@@ -445,6 +447,7 @@ mc_plot_predpi <- function(PI) {
     ctz <- cut(z, br)
 
     op <- graphics::par(mfrow=c(1,3))
+    on.exit(graphics::par(op))
 
     ModID <- if (length(unique(PI$model_select_id))>1)
         "Avg" else unique(PI$model_select_id)
@@ -496,7 +499,6 @@ mc_plot_predpi <- function(PI) {
     graphics::text(x[!srv,opts$xy][AccRank <= Min,], labels=x[!srv,"SU_ID"][AccRank <= Min], cex=1)
     graphics::legend("bottomleft", pch=19, col=Col[c(5,3,1)],
       bty="n", legend=c("+++", "++", "+"))
-    graphics::par(op)
 
     invisible(PI)
 }
