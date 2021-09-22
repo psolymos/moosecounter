@@ -11,13 +11,13 @@ Imports:
     MASS (>= 7.3.54),
     pbapply (>= 1.4.3),
     shiny (>= 1.6.0),
-    Matrix (>= 1.3.4),
-    purrr (>= 0.3.4),
-    magrittr
+    Matrix (>= 1.3.4)
 Suggests: 
     dplyr (>= 1.0.7),
     DT (>= 0.18),
     kableExtra (>= 1.3.4),
+    magrittr,
+    purrr (>= 0.3.4),
     shinyBS (>= 0.61),
     shinydashboard (>= 0.7.1)
 License: GPL-2
