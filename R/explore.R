@@ -91,7 +91,7 @@ mc_plot_multivariate <- function(vars, x, alpha=NULL) {
     opts <- getOption("moose_options")
     if (is.null(alpha))
         alpha <- opts$alpha
-    z <- data.frame(Y=x[[opts$Ntot]], x[,vars])[x$srv,]
+    z <- data.frame(Y=x[[opts$Ntot]], x[,vars,drop=FALSE])[x$srv,]
     tr <- partykit::ctree(Y ~ ., z,
         control = partykit::ctree_control(
             mincriterion = 1 - alpha))
