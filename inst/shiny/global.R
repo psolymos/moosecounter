@@ -9,6 +9,8 @@ library(shiny)
 library(shinydashboard)
 
 library(dplyr)
+library(ggplot2)
+library(ggiraph)
 library(purrr)
 library(DT)
 library(shinyBS)

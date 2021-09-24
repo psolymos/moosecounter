@@ -196,9 +196,26 @@ ui_pi <- fluidRow(
     tabBox(width = 12,
            tabPanel("Diagnostic Plots", plotOutput("pred_predpi")),
            tabPanel("Moose Predictions",
-                    plotOutput("pred_pidistr")))
+                    plotOutput("pred_pidistr")),
+           tabPanel("Full Bootstraps",
+                    div(style = "overflow-x: scroll", DTOutput("pred_boot"))))
   )
 )
+
+# Explore PI -----------------------------------------------------------------
+ui_pi_map <- fluidRow(
+  column(width=12,
+         h2("Exploring Predictions"),
+         box(width = 6,
+             h4("Data"),
+             div(style = "overflow-x: scroll", DTOutput("pred_data"))),
+         box(width = 6,
+             h4("Map"),
+             girafeOutput("pred_map"))
+  )
+)
+
+
 
 
 dashboardPage(
@@ -217,7 +234,8 @@ dashboardPage(
       menuItem("Total", tabName = "total", icon=icon("circle"),
         menuSubItem("Models", tabName = "addmodel"),
         menuSubItem("Residuals", tabName = "residuals"),
-        menuSubItem("Prediction Intervals", tabName = "pi")
+        menuSubItem("Prediction Intervals", tabName = "pi"),
+        menuSubItem("Explore Predictions", tabName = "pi_map")
       ),
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
     )
@@ -232,7 +250,8 @@ dashboardPage(
       tabItem("multivar", ui_multivar),
       tabItem("addmodel", ui_addmodel),
       tabItem("residuals", ui_residuals),
-      tabItem("pi", ui_pi)
+      tabItem("pi", ui_pi),
+      tabItem("pi_map", ui_pi_map)
     )
   )
 )

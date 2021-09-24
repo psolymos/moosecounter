@@ -437,5 +437,33 @@ server <- function(input, output, session) {
   }, res = 100)
 
 
-}
+  # Explore PI ----------------------------------------------------
 
+  output$pred_data <- renderDT(datatable(mc_get_pred(pi()$pi)$data))
+  output$pred_boot <- renderDT(datatable(mc_get_pred(pi()$pi)$boot_full))
+
+
+  observeEvent(input$pred_data_rows_selected, {
+    session$sendCustomMessage(type = 'pred_map_set', message = input$pred_data_rows_selected)
+  })
+
+  output$pred_map <- renderGirafe({
+    req(pi())
+
+    d <- mc_get_pred(pi()$pi)$data %>%
+      mutate(cell = 1:n(),
+             tooltip = paste0("Cell = ", cell,
+                              "<br>Observed = ", observed_values))
+
+    g <- ggplot(data = d, aes(x = CENTRLON, y = CENTRLAT,
+                              fill = observed_values, data_id = cell)) +
+      geom_tile_interactive(aes(tooltip = tooltip))+
+      coord_map() +
+      scale_fill_viridis_c()
+
+    girafe(ggobj = g,
+           options = list(opts_selection(type = "single")))
+  })
+
+
+}
