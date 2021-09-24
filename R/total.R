@@ -72,6 +72,7 @@ get_coefs <- function(ML) {
     for (i in seq_len(length(ML))) {
         M[i,] <- l[[i]][match(cfn, names(l[[i]]))]
     }
+    colnames(M) <- gsub("(", "", gsub(")", "", colnames(M), fixed=TRUE), fixed=TRUE)
     M
 }
 
@@ -121,11 +122,13 @@ pred_density_moose <- function(fit, x){
     srv <- x$srv
     Ntot <- pred_total_moose(x, srv, fit)
     A_all <- sum(x$AREA_KM)
-    Density <- Ntot$Ntot_all / (1000*A_all)
+    Density <- Ntot$Ntot_all / (1*A_all)
     out <- c(N=Ntot$Ntot_all, A=A_all, D=Density)
-    names(out) <- sprintf(
-        c("%s_Moose", "Total_Area_km2", "Density_%s_Per1000km2"),
-        if (opts$response == "total") "Total" else "Cows")
+    names(out) <- if (opts$response == "total") {
+        c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2")
+    } else {
+        c("Total_Cows", "Total_Area_km2", "Density_Cows_Per_km2")
+    }
     out
 }
 
@@ -322,7 +325,12 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
         stats::quantile(csfull, c(alpha/2, (1-alpha/2))))
     out$total <- rbind(N=tmPI,
         A=sum(x_full[[opts$Area]]),
-        D=tmPI/sum(x_full[[opts$Area]]))
+        D=tmPI / (1 * sum(x_full[[opts$Area]])))
+    rownames(out$total) <- if (opts$response == "total") {
+        c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2")
+    } else {
+        c("Total_Cows", "Total_Area_km2", "Density_Cows_Per_km2")
+    }
     out
 }
 
@@ -580,31 +588,38 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
 
 .mc_plot_pidistrcell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
     csfull <- PI$boot_full[id,]
+    is_srv <- PI$data$srv[id]
     if (plot) {
-        h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
-        h$density <- h$counts * 100 / sum(h$counts)
-        if (length(unique(csfull)) == 1) {
-            h$mids <- unique(csfull)
-            h$breaks <- unique(csfull) + c(-0.5, 0.5)
+        if (is_srv) {
+            plot.new()
+            title(main=paste("Moose PI for Cell", id))
+            text(0.5, 0.5, paste("Observed Count =", csfull[1]))
+        } else {
+            h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
+            h$density <- h$counts * 100 / sum(h$counts)
+            if (length(unique(csfull)) == 1) {
+                h$mids <- unique(csfull)
+                h$breaks <- unique(csfull) + c(-0.5, 0.5)
+            }
+            d <- stats::density(csfull)
+            d$y <- max(h$density) * d$y / max(d$y)
+            plot(h,
+                freq=FALSE, col="lightgrey",
+                main=paste("Moose PI for Cell", id),
+                xlab="Predicted Total Moose in cell", ylab="Percent",
+                border="darkgrey",
+                ylim=c(0, max(h$density, d$y)))
+            graphics::lines(d)
+            graphics::rug(csfull, col=1)
+            graphics::abline(v=PI$data[id, "Cell.mean"], col=2)
+            graphics::abline(v=PI$data[id, "Cell.pred"], col=3)
+            graphics::abline(v=PI$data[id, "Cell.mode"], col=4)
+            graphics::abline(v=PI$data[id, c("Cell.PIL", "Cell.PIU")], col="darkgrey", lty=2)
+            TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
+                round(PI$data[id, c("Cell.mean", "Cell.pred", "Cell.mode")]))
+            graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
+                legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
         }
-        d <- stats::density(csfull)
-        d$y <- max(h$density) * d$y / max(d$y)
-        plot(h,
-            freq=FALSE, col="lightgrey",
-            main=paste("Moose PI for Cell", id),
-            xlab="Predicted Total Moose in cell", ylab="Percent",
-            border="darkgrey",
-            ylim=c(0, max(h$density, d$y)))
-        graphics::lines(d)
-        graphics::rug(csfull, col=1)
-        graphics::abline(v=PI$data[id, "Cell.mean"], col=2)
-        graphics::abline(v=PI$data[id, "Cell.pred"], col=3)
-        graphics::abline(v=PI$data[id, "Cell.mode"], col=4)
-        graphics::abline(v=PI$data[id, c("Cell.PIL", "Cell.PIU")], col="darkgrey", lty=2)
-        TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
-            round(PI$data[id, c("Cell.mean", "Cell.pred", "Cell.mode")]))
-        graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
-            legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
     }
     invisible(csfull)
 }
