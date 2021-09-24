@@ -185,11 +185,11 @@ ui_pi <- fluidRow(
                        selected = TRUE)),
           uiOutput("pred_cell"))),
 
-    box(width = 4, height = "200px",
+    box(width = 5, height = "200px",
         title = "Summary",
         tableOutput("pred_density")),
 
-    box(width = 4, height = "200px",
+    box(width = 3, height = "200px",
         title = "Options",
         tableOutput("pred_options")),
 

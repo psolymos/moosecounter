@@ -392,9 +392,17 @@ server <- function(input, output, session) {
   })
 
   # Tables
-  output$pred_density <- renderTable({
-    pred_density_moose_PI(pi()$pi)
-  }, rownames = TRUE)
+  output$pred_density <- function() {
+    req(pi())
+    pred_density_moose_PI(pi()$pi) %>%
+      as.data.frame() %>%
+      mutate(" " = c("Total Moose",
+                     "Total Area (km<sup>2</sup>)",
+                     "Density (Moose/km<sup>2</sup>)")) %>%
+      select(` `, everything()) %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrrrr") %>%
+      kable_styling(bootstrap_options = "condensed")
+  }
 
   output$pred_options <- function() {
     req(pi())
@@ -404,16 +412,14 @@ server <- function(input, output, session) {
     i <- paste0(pi$issues, collapse = "; ")
 
     tibble(Issues = if_else(i == "", "None", i),
-           Bootstraps = ncol(pi$boot_full),
+           B = ncol(pi$boot_full),
            Method = pi()$opts$method,
            Response = if_else(pi()$opts$response == "total",
                               "MOOSE_TOTA",
                               "COW_TOTA")) %>%
       kable() %>%
-      kable_styling()
+      kable_styling(bootstrap_options = "condensed")
   }
-
-
 
   # Plots
   output$pred_predpi <- renderPlot(mc_plot_predpi(pi()$pi), res = 125)
