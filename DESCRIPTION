@@ -2,11 +2,27 @@ Package: moosecounter
 Version: 0.4-0
 Date: 2021-08-19
 Title: Adaptive Moose Surveys
-Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos
+Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos, Steffi LaZerte
 Maintainer: Peter Solymos <psolymos@gmail.com>
 Description: Adaptive Moose surveys.
-Imports: pscl, partykit, MASS, pbapply, shiny, Matrix
-Suggests: shinyBS, shinydashboard, plotly, knitr
+Imports: 
+    pscl (>= 1.5.5),
+    partykit (>= 1.2.15),
+    MASS (>= 7.3.54),
+    pbapply (>= 1.4.3),
+    shiny (>= 1.6.0),
+    magrittr,
+    Matrix (>= 1.3.4)
+Suggests: 
+    ggiraph (>= 0.7.10),
+    ggplot2 (>= 3.3.5),
+    dplyr (>= 1.0.7),
+    DT (>= 0.18),
+    kableExtra (>= 1.3.4),
+    mapproj (>= 1.2.7),
+    purrr (>= 0.3.4),
+    shinyBS (>= 0.61),
+    shinydashboard (>= 0.7.1)
 License: GPL-2
 RoxygenNote: 7.1.1
 Encoding: UTF-8

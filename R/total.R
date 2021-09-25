@@ -183,8 +183,14 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     mid <- character(B)
     b <- 1
 
+    # Progress bars setup
+    if(requireNamespace("shiny") && shiny::isRunning()) {
+      pbapply::pboptions(type = "shiny",
+                         title = "Calculating prediction intervals")
+    }
     pb <- pbapply::startpb(0, B)
     on.exit(pbapply::closepb(pb))
+
     ISSUES <- list()
 
     while (b <= B) {
@@ -566,14 +572,15 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
             xlab="Predicted Total Moose", ylab="Percent",
             border="darkgrey",
             ylim=c(0, max(h$density, d$y)))
+
         graphics::lines(d)
         graphics::rug(csfull, col=1)
-        graphics::abline(v=PI$total["N", "Mean"], col=2)
-        graphics::abline(v=PI$total["N", "Median"], col=3)
-        graphics::abline(v=PI$total["N", "Mode"], col=4)
-        graphics::abline(v=PI$total["N", 4:5], col="darkgrey", lty=2)
+        graphics::abline(v=PI$total["Total_Moose", "Mean"], col=2)
+        graphics::abline(v=PI$total["Total_Moose", "Median"], col=3)
+        graphics::abline(v=PI$total["Total_Moose", "Mode"], col=4)
+        graphics::abline(v=PI$total["Total_Moose", 4:5], col="darkgrey", lty=2)
         TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
-            round(PI$total["N", c("Mean", "Median", "Mode")]))
+            round(PI$total["Total_Moose", c("Mean", "Median", "Mode")]))
         graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
             legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
     }
