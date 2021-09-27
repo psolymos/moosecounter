@@ -44,7 +44,7 @@ server <- function(input, output, session) {
     d
   })
 
-  output$survey_omit <- renderUI({
+  output$survey_omit_ui <- renderUI({
     req(survey_data())
 
     vars <- survey_data() %>%
@@ -60,7 +60,7 @@ server <- function(input, output, session) {
                 selected = vars, choices = vars, multiple = TRUE)
   })
 
-  output$survey_factors <- renderUI({
+  output$survey_factors_ui <- renderUI({
     req(survey_data())
 
     vars <- survey_data() %>%
@@ -83,7 +83,7 @@ server <- function(input, output, session) {
 
 
   # Filtering --------------------------------------
-  output$filters <- renderUI({
+  output$filters_ui <- renderUI({
     req(survey_data())
 
     lapply(var_filter,
@@ -144,7 +144,7 @@ server <- function(input, output, session) {
 
 
   # Univariate Exploration ---------------------------
-  output$uni_var <- renderUI({
+  output$uni_var_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
 
@@ -163,7 +163,7 @@ server <- function(input, output, session) {
 
 
   # Multivariate Exploration ---------------------
-  output$multi_var <- renderUI({
+  output$multi_var_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
     select_explanatory("multi_var",
@@ -183,7 +183,7 @@ server <- function(input, output, session) {
 
   # Add models -----------------------------------
 
-  output$model_id <- renderUI({
+  output$model_id_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
 
@@ -196,7 +196,7 @@ server <- function(input, output, session) {
     textInput("model_id", "Model ID", value = val)
   })
 
-  output$model_var_count <- renderUI({
+  output$model_var_count_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
     select_explanatory("model_var_count",
@@ -205,7 +205,7 @@ server <- function(input, output, session) {
                        multiple = TRUE)
   })
 
-  output$model_var_zero <- renderUI(select_explanatory("model_var_zero",
+  output$model_var_zero_ui <- renderUI(select_explanatory("model_var_zero",
                                                        "Zero Variables",
                                                        survey_sub(),
                                                        multiple = TRUE))
@@ -292,7 +292,7 @@ server <- function(input, output, session) {
   }
 
   # Dynamically create delete buttons for each model
-  output$model_delete <- renderUI({
+  output$model_delete_ui <- renderUI({
     req(length(models()) > 0)
 
     m <- models()[order(names(models()))]
@@ -339,7 +339,7 @@ server <- function(input, output, session) {
 
   # Model residuals / diagnostics ------------------------------
 
-  output$resid_models <- renderUI({
+  output$resid_models_ui <- renderUI({
     validate(need(length(models_list$m) > 0,
                   "First create models in the \"Models\" tab"))
     validate_models(models())
@@ -361,7 +361,7 @@ server <- function(input, output, session) {
   # Prediction Intervals ----------------------------------------------------
 
   # UI elements
-  output$pred_models <- renderUI({
+  output$pred_models_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab") %then%
                need(length(models_list$m) > 0,
@@ -371,7 +371,7 @@ server <- function(input, output, session) {
                 choices = names(models()), multiple = TRUE)
   })
 
-  output$pred_cell <- renderUI({
+  output$pred_cell_ui <- renderUI({
     numericInput("pred_cell", label = "Cell to plot for predictions",
                  value = 1, min = 1, max = nrow(pi()$pi$data), step = 1)
   })
