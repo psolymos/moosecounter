@@ -409,9 +409,8 @@ server <- function(input, output, session) {
 
     pi <- pi()$pi
 
-    i <- paste0(pi$issues, collapse = "; ")
-
-    tibble(Issues = if_else(i == "", "None", i),
+    tibble(Issues = if_else(length(pi$issues) == 0, "None",
+                            as.character(length(pi$issues))),
            B = ncol(pi$boot_full),
            Method = pi()$opts$method,
            Response = if_else(pi()$opts$response == "total",
