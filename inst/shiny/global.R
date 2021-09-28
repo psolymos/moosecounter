@@ -15,8 +15,7 @@ library(purrr)
 library(DT)
 library(shinyBS)
 library(kableExtra)
-#library(openxlsx)
-#library(reactable)
+library(openxlsx)
 
 ver <- read.dcf(
     file = system.file("DESCRIPTION", package = "moosecounter"),

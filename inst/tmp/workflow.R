@@ -1,3 +1,4 @@
+#remotes::install_github("psolymos/moosecounter")
 library(moosecounter)
 
 ## modify options as needed
@@ -51,6 +52,35 @@ mc_plot_pidistr(PI, id=1)
 run_app()
 
 shiny::runApp("inst/shiny")
+
+## PI
+
+library(moosecounter)
+mc_options(B=20)
+x <- read.csv("inst/extdata/MayoMMU_QuerriedData.csv")
+switch_response("total")
+x <- mc_update_total(x)
+vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
+    "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
+    "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
+ML <- list()
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+PI <- mc_predict_total(
+    model_id=c("Model 1", "Model 3"),
+    ml=ML,
+    x=x,
+    do_boot=TRUE, do_avg=TRUE)
+
+head(mc_get_pred(PI)$data)
+
+pred_density_moose_PI(PI)
+mc_plot_predpi(PI)
+mc_plot_pidistr(PI)
+mc_plot_pidistr(PI, id=2)
+
 
 ## --
 set.seed(1)

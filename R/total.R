@@ -363,6 +363,7 @@ mc_get_pred <- function(PI, ss=NULL) {
     PIout <- PI
     PIout$boot_full <- PI$boot_full[ss,,drop=FALSE]
     PIout$data <- PI$data[ss,,drop=FALSE]
+    PIout$data$Residuals <- PIout$data$fitted_values - PIout$data$observed_values
 #    PIout$fit_matrix <- NULL
     Rank <- PIout$data$Rank[]
     PIout$data$Rank[!PIout$data$srv] <- as.integer(as.factor(
@@ -592,9 +593,9 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
     is_srv <- PI$data$srv[id]
     if (plot) {
         if (is_srv) {
-            plot.new()
-            title(main=paste("Moose PI for Cell", id))
-            text(0.5, 0.5, paste("Observed Count =", csfull[1]))
+            graphics::plot.new()
+            graphics::title(main=paste("Moose PI for Cell", id))
+            graphics::text(0.5, 0.5, paste("Observed Count =", csfull[1]))
         } else {
             h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
             h$density <- h$counts * 100 / sum(h$counts)

@@ -24,6 +24,7 @@ Suggests:
     shinyBS (>= 0.61),
     shinydashboard (>= 0.7.1),
     shinytest (>= 1.5.1)
+    openxlsx
 License: GPL-2
 RoxygenNote: 7.1.1
 Encoding: UTF-8
