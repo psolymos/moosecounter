@@ -60,7 +60,11 @@ ui_settings <- fluidRow(
              sliderInput("opts_sightability",
                          label = "Sightability",
                          value = 1, min = 0, max = 1, step = 0.1),
-             bsTooltip("opts_sightability", opts_tooltip$sightability)
+             bsTooltip("opts_sightability", opts_tooltip$sightability),
+             numericInput("opts_seed",
+                          label = "Random seed",
+                          value = 4323, min = 1, max = 10000),
+             bsTooltip("opts_seed", opts_tooltip$seed)
            )),
          box(width = 12, title = "Current Settings",
              tableOutput("opts"))

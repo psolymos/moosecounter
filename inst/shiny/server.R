@@ -31,6 +31,8 @@ server <- function(input, output, session) {
                                FUN = function(x) paste(x, collapse = ", ")))
   })
 
+  observeEvent(input$opts_seed, set.seed(input$opts_seed))
+
 
   # Data ---------------------------------------
 
@@ -454,6 +456,8 @@ server <- function(input, output, session) {
   # PI/bootstrap download
   get_xlslist <- reactive({
     req(input$survey_file, pi())
+    o <- mc_options()
+    o <- append(o, c("random seed" = input$opts_seed))
     list(
       Info=data.frame(moosecounter=paste0(
         c("R package version: ", "Date of analysis: ", "File: "),
