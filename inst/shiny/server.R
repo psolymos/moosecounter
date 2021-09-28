@@ -115,7 +115,7 @@ server <- function(input, output, session) {
       s <- mutate(s, across(input$survey_factors, as.factor))
     }
 
-    if(!is.null(input$survey_omit)) s <- select(s, -all_of(input$survey_omit))
+    if(!is.null(input$survey_omit)) s <- select(s, -any_of(input$survey_omit))
 
     # Apply filtering
     mc_update_total(s)
