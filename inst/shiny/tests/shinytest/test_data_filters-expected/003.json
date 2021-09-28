@@ -11,7 +11,7 @@
     "model_weighted": "FALSE",
     "multi_alpha": 0.1,
     "opts_alpha": "0.01",
-    "opts_b": 100,
+    "opts_b": 500,
     "opts_method": "Nelder-Mead",
     "opts_response": "total",
     "opts_sightability": 1,

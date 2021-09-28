@@ -34,7 +34,7 @@
     "opts_response": "total",
     "opts_sightability": 1,
     "opts_wscale": 1,
-    "pi_panel": "Full Bootstraps",
+    "pi_panel": "Bootstrap Results",
     "pred_average": "FALSE",
     "pred_boot_cell_clicked": {
 
