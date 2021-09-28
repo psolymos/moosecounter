@@ -1,5 +1,5 @@
-app <- ShinyDriver$new("../../")
-app$snapshotInit("Test Full Mayo Data")
+app <- ShinyDriver$new("../../", seed = 4323)
+app$snapshotInit("test_full_mayo")
 
 
 # Settings ----------------------------------------------------------------
@@ -39,7 +39,7 @@ app$setInputs(multi_alpha = 0.001)
 
 # Models ------------------------------------------------------------------
 app$setInputs(sidebarItemExpanded = "Total")
-app$setInputs(menu = "addmodels")
+app$setInputs(menu = "addmodel")
 app$setInputs(model_var_count = c("Fire1982_2012", "NALC_Needle", "Subalp_Shrub_250buf"))
 app$setInputs(model_add = "click")
 app$setInputs(model_var_zero = c("ELCSub_Fire8212DEM815", "NALC_Shrub", "NALC_Needle"))
@@ -68,19 +68,14 @@ app$snapshot()
 # Prediction Intervals ----------------------------------------------------
 app$setInputs(menu = "pi")
 
-# Test prediction intervals with A/B/C/D/E
-app$setInputs(pred_models = c("A", "B", "C", "D", "E"))
-app$setInputs(pred_calc = "click")
-app$snapshot()
-
 # Test prediction intervals with A/B/C
 app$setInputs(pred_models = c("A", "B", "C"))
-app$setInputs(pred_calc = "click")
+app$setInputs(pred_calc = "click", timeout_ = 10000)
 app$snapshot()
 
 # Test with non-averaged
 app$setInputs(pred_average = "FALSE")
-app$setInputs(pred_calc = "click")
+app$setInputs(pred_calc = "click", timeout_ = 7000)
 app$snapshot()
 
 # Test figures
