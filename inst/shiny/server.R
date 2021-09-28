@@ -437,10 +437,44 @@ server <- function(input, output, session) {
   }, res = 100)
 
 
+
+
   # Explore PI ----------------------------------------------------
 
-  output$pred_data <- renderDT(datatable(mc_get_pred(pi()$pi)$data))
+  output$pred_data <- renderDT({
+    d <- mc_get_pred(pi()$pi)$data
+    v <- c("observed_values", "fitted_values",
+      "Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
+      "Cell.accuracy", "Residuals",
+      "srv", "area_srv", "sort_id")
+    datatable(d[,c(v, setdiff(colnames(d), v))])
+  })
   output$pred_boot <- renderDT(datatable(mc_get_pred(pi()$pi)$boot_full))
+
+
+  # PI/bootstrap download
+  get_xlslist <- reactive({
+    req(input$survey_file, pi())
+    list(
+      Info=data.frame(moosecounter=paste0(
+        c("R package version: ", "Date of analysis: ", "File: "),
+        c(ver, format(Sys.time(), "%Y-%m-%d"), input$survey_file$name))),
+      Settings=data.frame(
+        Option=names(o),
+        Value=sapply(o, paste, sep="", collapse=", ")),
+      Summary=pred_density_moose_PI(pi()$pi),
+      Data=mc_get_pred(pi()$pi)$data,
+      Boot=mc_get_pred(pi()$pi)$boot_full)
+  })
+  output$boot_download <- downloadHandler(
+        filename = function() {
+            paste0("Moose_Total_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
+        },
+        content = function(file) {
+            write.xlsx(get_xlslist(), file=file, overwrite=TRUE)
+        },
+        contentType="application/octet-stream"
+  )
 
 
   observeEvent(input$pred_data_rows_selected, {
