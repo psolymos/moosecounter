@@ -437,12 +437,22 @@ server <- function(input, output, session) {
     par(op)
   }, res = 100)
 
+  # Bootstraps table
+  output$pred_boot <- renderDT(datatable(mc_get_pred(pi()$pi)$boot_full))
+
 
 
 
   # Explore PI ----------------------------------------------------
 
   output$pred_data <- renderDT({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(!is.null(input$pred_models),
+             "First create the predictions in the \"Prediction Intervals\" tab"))
     d <- mc_get_pred(pi()$pi)$data
     v <- c("observed_values", "fitted_values",
       "Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
@@ -450,8 +460,47 @@ server <- function(input, output, session) {
       "srv", "area_srv", "sort_id")
     datatable(d[,c(v, setdiff(colnames(d), v))])
   })
-  output$pred_boot <- renderDT(datatable(mc_get_pred(pi()$pi)$boot_full))
 
+  # Setup table and table proxy
+  pred_data_proxy <- dataTableProxy("pred_data")
+
+  # Render map
+  output$pred_map <- renderGirafe({
+    req(pi())
+
+    d <- mc_get_pred(pi()$pi)$data %>%
+      mutate(cell = 1:n(),
+             tooltip = paste0("Cell = ", cell,
+                              "<br>Observed = ", observed_values))
+
+    g <- ggplot(data = d, aes(x = CENTRLON, y = CENTRLAT,
+                              fill = observed_values, data_id = cell)) +
+      geom_tile_interactive(aes(tooltip = tooltip))+
+      coord_map() +
+      scale_fill_viridis_c()
+
+    girafe(ggobj = g,
+           options = list(opts_selection(type = "multiple")))
+  })
+
+
+  # Select map cells when table rows selected
+  observe({
+
+    input$pred_data_rows_selected # Click on row
+    input$pred_map_selected       # Click on map
+
+    # Either way, highlights row selection
+    isolate({
+      session$sendCustomMessage(
+        type = 'pred_map_set',
+        message = as.character(input$pred_data_rows_selected))
+    })
+  })
+
+  observeEvent(input$pred_reset, {
+    pred_data_proxy %>% selectRows(NULL)
+  })
 
   # PI/bootstrap download
   get_xlslist <- reactive({
@@ -469,6 +518,7 @@ server <- function(input, output, session) {
       Data=mc_get_pred(pi()$pi)$data,
       Boot=mc_get_pred(pi()$pi)$boot_full)
   })
+
   output$boot_download <- downloadHandler(
         filename = function() {
             paste0("Moose_Total_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
@@ -478,29 +528,5 @@ server <- function(input, output, session) {
         },
         contentType="application/octet-stream"
   )
-
-
-  observeEvent(input$pred_data_rows_selected, {
-    session$sendCustomMessage(type = 'pred_map_set', message = input$pred_data_rows_selected)
-  })
-
-  output$pred_map <- renderGirafe({
-    req(pi())
-
-    d <- mc_get_pred(pi()$pi)$data %>%
-      mutate(cell = 1:n(),
-             tooltip = paste0("Cell = ", cell,
-                              "<br>Observed = ", observed_values))
-
-    g <- ggplot(data = d, aes(x = CENTRLON, y = CENTRLAT,
-                              fill = observed_values, data_id = cell)) +
-      geom_tile_interactive(aes(tooltip = tooltip))+
-      coord_map() +
-      scale_fill_viridis_c()
-
-    girafe(ggobj = g,
-           options = list(opts_selection(type = "single")))
-  })
-
 
 }

@@ -222,6 +222,7 @@ ui_pi_map <- fluidRow(
              div(style = "overflow-x: scroll", DTOutput("pred_data"))),
          box(width = 6,
              h4("Map"),
+             bsButton("pred_reset", "Reset selection", style = "primary"),
              girafeOutput("pred_map"))
   )
 )
