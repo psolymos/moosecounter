@@ -72,7 +72,7 @@
 # Version 0.2-6 -- April 4, 2018
 
 * ZIP added as option beside ZINB (univariate exploration and model fitting).
-* Weighted modeling option added to minimize influece on predictions.
+* Weighted modeling option added to minimize influence on predictions.
 * Histograms show % instead of density (%=100*density).
 * Residual plot labels +/- 1.5*SD points and uses symmetric divergent coloring.
 
@@ -96,7 +96,7 @@
 # Version 0.2-3 -- March 12, 2018
 
 * Fixed alpha level: was not available for some functions from options.
-* Null ZINB model in model diagoge fixed (length=0, not =="")
+* Null ZINB model in model dialogue fixed (length=0, not =="")
 
 # Version 0.2-2 -- February 28, 2018
 
@@ -111,7 +111,7 @@
 * Added multi-model averaging to PI simulation:
   use weights from model table to select models to refit
   and the option is added to the UI dialog.
-* Checked and updated help dialogs to reflect updates.
+* Checked and updated help dialogues to reflect updates.
 * Added mode to total moose PI table.
 * Added plot of PI distribution (PI) to UI: 
   called 'Plot pred. distribution' in the menu,
