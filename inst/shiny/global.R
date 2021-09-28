@@ -7,15 +7,15 @@
 library(moosecounter)
 library(shiny)
 library(shinydashboard)
+library(shinyBS)
 
 library(dplyr)
-library(ggplot2)
-library(ggiraph)
-library(purrr)
 library(DT)
-library(shinyBS)
+library(ggiraph)
+library(ggplot2) # Requires package mapproj for coord_map()
 library(kableExtra)
 library(openxlsx)
+library(purrr)
 
 ver <- read.dcf(
     file = system.file("DESCRIPTION", package = "moosecounter"),
