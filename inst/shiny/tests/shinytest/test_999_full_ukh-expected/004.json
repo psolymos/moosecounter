@@ -1,0 +1,755 @@
+{
+  "input": {
+    "data_panel": "Interactive table",
+    "filter_SURVEY_ID": null,
+    "filter_SURVEY_NAM": null,
+    "filter_SURVEY_YEA": null,
+    "menu": "multivar",
+    "model_add": 0,
+    "model_dist": "P",
+    "model_weighted": "FALSE",
+    "multi_alpha": 0.1,
+    "multi_var": [
+      "Fire8212_DEM815_Sub",
+      "NALC_AllNeedleWet",
+      "DShMiFires815_Sub"
+    ],
+    "opts_alpha": "0.01",
+    "opts_b": 100,
+    "opts_method": "Nelder-Mead",
+    "opts_response": "total",
+    "opts_seed": 4323,
+    "opts_sightability": 1,
+    "opts_wscale": 1,
+    "pi_panel": "Diagnostic Plots",
+    "pred_average": "TRUE",
+    "pred_calc": 0,
+    "pred_col": "observed_values",
+    "pred_reset": 0,
+    "sidebarCollapsed": false,
+    "sidebarItemExpanded": "Explore",
+    "survey_factors": null,
+    "survey_file": {
+      "name": [
+        "UKH_2017_QuerriedSU_Final_Corrected_for_Analysis.csv"
+      ],
+      "size": [
+        48812
+      ],
+      "type": [
+        "text/csv"
+      ],
+      "datapath": [
+        "0.csv"
+      ]
+    },
+    "survey_omit": null,
+    "survey_preview_cell_clicked": {
+
+    },
+    "survey_preview_cells_selected": [
+
+    ],
+    "survey_preview_columns_selected": null,
+    "survey_preview_rows_all": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188,
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      223,
+      224,
+      225,
+      226,
+      227,
+      228,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      275,
+      276,
+      277,
+      278,
+      279,
+      280,
+      281,
+      282,
+      283,
+      284,
+      285,
+      286,
+      287,
+      288,
+      289,
+      290,
+      291,
+      292,
+      293,
+      294,
+      295,
+      296,
+      297,
+      298,
+      299,
+      300,
+      301,
+      302,
+      303,
+      304,
+      305,
+      306,
+      307,
+      308,
+      309,
+      310,
+      311,
+      312,
+      313,
+      314,
+      315,
+      316,
+      317,
+      318,
+      319,
+      320,
+      321,
+      322,
+      323,
+      324,
+      325,
+      326,
+      327,
+      328,
+      329,
+      330,
+      331,
+      332,
+      333,
+      334,
+      335,
+      336,
+      337,
+      338,
+      339,
+      340,
+      341,
+      342,
+      343,
+      344,
+      345,
+      346,
+      347,
+      348,
+      349,
+      350,
+      351,
+      352,
+      353,
+      354,
+      355,
+      356,
+      357,
+      358,
+      359,
+      360,
+      361,
+      362,
+      363,
+      364,
+      365,
+      366,
+      367,
+      368,
+      369,
+      370,
+      371,
+      372,
+      373,
+      374,
+      375,
+      376,
+      377,
+      378,
+      379,
+      380,
+      381,
+      382,
+      383
+    ],
+    "survey_preview_rows_current": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "survey_preview_rows_selected": null,
+    "survey_preview_search": "",
+    "survey_preview_state": null,
+    "uni_dist": "P",
+    "uni_var": "Fire8212_DEM815_Sub"
+  },
+  "output": {
+    "filters_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"filter_SURVEY_NAM-label\" for=\"filter_SURVEY_NAM\">Survey Name (<code>SURVEY_NAM<\/code>)<\/label>\n  <div>\n    <select id=\"filter_SURVEY_NAM\" multiple=\"multiple\"><option value=\"Upper Klondike Highway\">Upper Klondike Highway<\/option><\/select>\n    <script type=\"application/json\" data-for=\"filter_SURVEY_NAM\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>\n<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"filter_SURVEY_YEA-label\" for=\"filter_SURVEY_YEA\">Survey Year (<code>SURVEY_YEA<\/code>)<\/label>\n  <div>\n    <select id=\"filter_SURVEY_YEA\" multiple=\"multiple\"><option value=\"2017\">2017<\/option><\/select>\n    <script type=\"application/json\" data-for=\"filter_SURVEY_YEA\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>\n<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"filter_SURVEY_ID-label\" for=\"filter_SURVEY_ID\">Survey ID (<code>SURVEY_ID<\/code>)<\/label>\n  <div>\n    <select id=\"filter_SURVEY_ID\" multiple=\"multiple\"><option value=\"3\">3<\/option><\/select>\n    <script type=\"application/json\" data-for=\"filter_SURVEY_ID\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "selectize",
+          "version": "0.12.4",
+          "src": {
+            "href": "shared/selectize"
+          },
+          "meta": null,
+          "script": [
+            "js/selectize.min.js",
+            "accessibility/js/selectize-plugin-a11y.min.js"
+          ],
+          "stylesheet": "css/selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    },
+    "multi_graph": {
+      "src": "[image data sha1: 379486b37dd7e4b3ddbc89bd8a105c1e71df0032]",
+      "width": 682,
+      "height": 400,
+      "alt": "Plot object",
+      "coordmap": {
+        "panels": [
+          {
+            "domain": {
+              "left": -0.04,
+              "right": 1.04,
+              "bottom": -0.04,
+              "top": 1.04
+            },
+            "range": {
+              "left": 0,
+              "right": 682,
+              "bottom": 399,
+              "top": -1
+            },
+            "log": {
+              "x": null,
+              "y": null
+            },
+            "mapping": {
+
+            }
+          }
+        ],
+        "dims": {
+          "width": 682,
+          "height": 400
+        }
+      }
+    },
+    "multi_var_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"multi_var-label\" for=\"multi_var\">Multivariate variables to explore<\/label>\n  <div>\n    <select id=\"multi_var\" multiple=\"multiple\"><option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option>\n<option value=\"NALC_AllNeedleWet\">NALC_AllNeedleWet<\/option>\n<option value=\"DShMiFires815_Sub\">DShMiFires815_Sub<\/option>\n<option value=\"Fire8212_DEM815_Sub\">Fire8212_DEM815_Sub<\/option><\/select>\n    <script type=\"application/json\" data-for=\"multi_var\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "selectize",
+          "version": "0.12.4",
+          "src": {
+            "href": "shared/selectize"
+          },
+          "meta": null,
+          "script": [
+            "js/selectize.min.js",
+            "accessibility/js/selectize-plugin-a11y.min.js"
+          ],
+          "stylesheet": "css/selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    },
+    "opts": "<table  class = 'table shiny-table table- spacing-s' style = 'width:auto;'>\n<thead> <tr> <th style='text-align: left;'> option <\/th> <th style='text-align: left;'> values <\/th>  <\/tr> <\/thead> <tbody>\n  <tr> <td> method <\/td> <td> Nelder-Mead <\/td> <\/tr>\n  <tr> <td> B <\/td> <td> 100 <\/td> <\/tr>\n  <tr> <td> MAXCELL <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> alpha <\/td> <td> 0.01 <\/td> <\/tr>\n  <tr> <td> wscale <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> MINCELL <\/td> <td> 10 <\/td> <\/tr>\n  <tr> <td> Ntot <\/td> <td> MOOSE_TOTA <\/td> <\/tr>\n  <tr> <td> srv_name <\/td> <td> Sampled <\/td> <\/tr>\n  <tr> <td> srv_value <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> area_srv <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> Area <\/td> <td> AREA_KM <\/td> <\/tr>\n  <tr> <td> sightability <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> response <\/td> <td> total <\/td> <\/tr>\n  <tr> <td> xy <\/td> <td> CENTRLON, CENTRLAT <\/td> <\/tr>\n  <tr> <td> composition <\/td> <td> BULL_SMALL, BULL_LARGE, LONE_COW, COW_1C, COW_2C, LONE_CALF, UNKNOWN_AG <\/td> <\/tr>\n   <\/tbody> <\/table>",
+    "survey_factors_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"survey_factors-label\" for=\"survey_factors\">Convert integer to categorical<\/label>\n  <div>\n    <select id=\"survey_factors\" multiple=\"multiple\"><option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option><\/select>\n    <script type=\"application/json\" data-for=\"survey_factors\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "selectize",
+          "version": "0.12.4",
+          "src": {
+            "href": "shared/selectize"
+          },
+          "meta": null,
+          "script": [
+            "js/selectize.min.js",
+            "accessibility/js/selectize-plugin-a11y.min.js"
+          ],
+          "stylesheet": "css/selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    },
+    "survey_omit_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"survey_omit-label\" for=\"survey_omit\">Omit variables with too few surveyed levels<\/label>\n  <div>\n    <select id=\"survey_omit\" multiple=\"multiple\"><\/select>\n    <script type=\"application/json\" data-for=\"survey_omit\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "selectize",
+          "version": "0.12.4",
+          "src": {
+            "href": "shared/selectize"
+          },
+          "meta": null,
+          "script": [
+            "js/selectize.min.js",
+            "accessibility/js/selectize-plugin-a11y.min.js"
+          ],
+          "stylesheet": "css/selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    },
+    "survey_preview": {
+      "x": {
+        "filter": "none",
+        "container": "<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>SURVEY_NAM<\/th>\n      <th>SURVEY_YEA<\/th>\n      <th>SURVEY_ID<\/th>\n      <th>S_SET_ID<\/th>\n      <th>SU_ID<\/th>\n      <th>ID<\/th>\n      <th>SUS_<\/th>\n      <th>SUS_ID<\/th>\n      <th>CENTRLAT<\/th>\n      <th>CENTRLON<\/th>\n      <th>AREA_KM<\/th>\n      <th>Sampled<\/th>\n      <th>BULL_SMALL<\/th>\n      <th>BULL_LARGE<\/th>\n      <th>LONE_COW<\/th>\n      <th>COW_1C<\/th>\n      <th>COW_2C<\/th>\n      <th>LONE_CALF<\/th>\n      <th>UNKNOWN_AG<\/th>\n      <th>MOOSE_TOTA<\/th>\n      <th>TotalMoose123<\/th>\n      <th>Phase_1<\/th>\n      <th>TKStrat_01<\/th>\n      <th>NALC_AllNeedleWet<\/th>\n      <th>DShMiFires815_Sub<\/th>\n      <th>Fire8212_DEM815_Sub<\/th>\n      <th>srv<\/th>\n      <th>COW_TOTA<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
+        "options": {
+          "columnDefs": [
+            {
+              "className": "dt-right",
+              "targets": [
+                2,
+                3,
+                4,
+                5,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                28
+              ]
+            },
+            {
+              "orderable": false,
+              "targets": 0
+            }
+          ],
+          "order": [
+
+          ],
+          "autoWidth": false,
+          "orderClasses": false,
+          "ajax": {
+            "type": "POST",
+            "data": "function(d) {\nd.search.caseInsensitive = true;\nd.search.smart = true;\nd.escape = true;\nvar encodeAmp = function(x) { x.value = x.value.replace(/&/g, \"%26\"); }\nencodeAmp(d.search);\n$.each(d.columns, function(i, v) {encodeAmp(v.search);});\n}"
+          },
+          "serverSide": true,
+          "processing": true
+        },
+        "selection": {
+          "mode": "multiple",
+          "selected": null,
+          "target": "row",
+          "selectable": null
+        }
+      },
+      "evals": [
+        "options.ajax.data"
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "dt-core",
+          "version": "1.10.20",
+          "src": {
+            "href": "dt-core-1.10.20"
+          },
+          "meta": null,
+          "script": "js/jquery.dataTables.min.js",
+          "stylesheet": [
+            "css/jquery.dataTables.min.css",
+            "css/jquery.dataTables.extra.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "jquery",
+          "version": "3.5.1",
+          "src": {
+            "href": "jquery-3.5.1"
+          },
+          "meta": null,
+          "script": "jquery.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.1.1",
+          "src": {
+            "href": "crosstalk-1.1.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "uni_graph": {
+      "src": "[image data sha1: bcecad40fe313876586f784a3d3be9d0e287ec16]",
+      "width": 732,
+      "height": 400,
+      "alt": "Plot object",
+      "coordmap": {
+        "panels": [
+          {
+            "domain": {
+              "left": -0.0398328,
+              "right": 1.0356528,
+              "bottom": -1.33238020288199,
+              "top": 29.258579954043
+            },
+            "range": {
+              "left": 202.95,
+              "right": 628.05,
+              "bottom": 314.85,
+              "top": 66.65
+            },
+            "log": {
+              "x": null,
+              "y": null
+            },
+            "mapping": {
+
+            }
+          }
+        ],
+        "dims": {
+          "width": 732,
+          "height": 400
+        }
+      }
+    },
+    "uni_var_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"uni_var-label\" for=\"uni_var\">Univariate variable to explore<\/label>\n  <div>\n    <select id=\"uni_var\"><option value=\"none\" selected>none<\/option>\n<option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option>\n<option value=\"NALC_AllNeedleWet\">NALC_AllNeedleWet<\/option>\n<option value=\"DShMiFires815_Sub\">DShMiFires815_Sub<\/option>\n<option value=\"Fire8212_DEM815_Sub\">Fire8212_DEM815_Sub<\/option><\/select>\n    <script type=\"application/json\" data-for=\"uni_var\" data-nonempty=\"\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "selectize",
+          "version": "0.12.4",
+          "src": {
+            "href": "shared/selectize"
+          },
+          "meta": null,
+          "script": [
+            "js/selectize.min.js",
+            "accessibility/js/selectize-plugin-a11y.min.js"
+          ],
+          "stylesheet": "css/selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    }
+  },
+  "export": {
+
+  }
+}

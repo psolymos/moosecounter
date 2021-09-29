@@ -1,7 +1,7 @@
 
 ## CREATING TESTS
-library(shinytest)
-recordTest("inst/shiny") # Create new test (then can edit)
+library(magrittr)
+#shinytest::recordTest("inst/shiny") # Create new test (then can edit)
 
 # MUST re-build package before testing or shinytests use wrong version
 devtools::build() %>%
@@ -9,12 +9,20 @@ devtools::build() %>%
 
 # Test via shinytest (if adding testthat tests, can use devtools::test())
 shinytest::testApp("inst/shiny/") #all
-shinytest::testApp("inst/shiny/", "test_full_simple.R")
+shinytest::testApp("inst/shiny/", "test_999_full_mayo.R")
 
 # Problems? check, fix, or resolve file-by-file
-shinytest::snapshotCompare("inst/shiny", "test_full_simple")
+shinytest::snapshotCompare("inst/shiny", "test_05_pi_explore")
 
+# Text diffs only
+#shinytest::viewTestDiff("inst/shiny", "test_05_pi_explore", interactive = FALSE)
 
+# Note:
+# There are no snapshots for apps after the PI explore Map has been created
+# This is because it creates a unique svg id every time AND because the map
+# svg is so huge it freezes up the snapshotCompare(). Therefore the app runs through
+# these options but doesn't take snapshots... something to report to shinytest
+# or ggiraph?
 
 
 ## DOCUMENTATION
@@ -33,6 +41,8 @@ devtools::build_readme()
 
 # Check/update URLS
 urlchecker::url_check()
+
+
 
 ## CHECKS
 
