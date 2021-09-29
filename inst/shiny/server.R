@@ -458,7 +458,9 @@ server <- function(input, output, session) {
       "Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy", "Residuals",
       "srv", "area_srv", "sort_id")
-    datatable(d[,c(v, setdiff(colnames(d), v))])
+    datatable(d[,c(v, setdiff(colnames(d), v))]) %>%
+      formatRound(columns = c("fitted_values", "Residuals", "Cell.accuracy"),
+                  digits = 3)
   })
 
   # Setup table and table proxy
