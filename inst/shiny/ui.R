@@ -219,10 +219,15 @@ ui_pi_map <- fluidRow(
   column(width=12,
          box(width = 6,
              h4("Data"),
-             div(style = "overflow-x: scroll", DTOutput("pred_data"))),
+             bsButton("pred_reset", "Reset selection", style = "primary"),
+             div(style = "overflow-x: scroll;margin-top:15px", DTOutput("pred_data"))),
          box(width = 6,
              h4("Map"),
-             bsButton("pred_reset", "Reset selection", style = "primary"),
+                 selectInput("pred_col", label = "Variable to map",
+                             choices = c("observed_values", "fitted_values",
+                                         "Cell.mean", "Cell.mode", "Cell.pred",
+                                         "Cell.PIL", "Cell.PIU",
+                                         "Cell.accuracy", "Residuals")),
              girafeOutput("pred_map"))
   )
 )

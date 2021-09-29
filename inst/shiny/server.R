@@ -472,11 +472,18 @@ server <- function(input, output, session) {
 
     d <- mc_get_pred(pi()$pi)$data %>%
       mutate(cell = 1:n(),
-             tooltip = paste0("Cell = ", cell,
-                              "<br>Observed = ", observed_values))
+             Cell.accuracy = if_else(Cell.accuracy == 0,
+                                     NA_real_,
+                                     Cell.accuracy),
+             tooltip = paste0(
+               "Cell = ", cell,
+               if_else(is.na(observed_values),
+                       paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
+                       paste0("<br>Observed = ", observed_values))))
 
-    g <- ggplot(data = d, aes(x = CENTRLON, y = CENTRLAT,
-                              fill = observed_values, data_id = cell)) +
+    g <- ggplot(data = d,
+                aes_string(x = "CENTRLON", y = "CENTRLAT",
+                           fill = input$pred_col, data_id = "cell")) +
       geom_tile_interactive(aes(tooltip = tooltip))+
       coord_map() +
       scale_fill_viridis_c()
