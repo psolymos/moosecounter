@@ -31,6 +31,8 @@ server <- function(input, output, session) {
                                FUN = function(x) paste(x, collapse = ", ")))
   })
 
+  observeEvent(input$opts_seed, set.seed(input$opts_seed))
+
 
   # Data ---------------------------------------
 
@@ -44,7 +46,7 @@ server <- function(input, output, session) {
     d
   })
 
-  output$survey_omit <- renderUI({
+  output$survey_omit_ui <- renderUI({
     req(survey_data())
 
     vars <- survey_data() %>%
@@ -60,7 +62,7 @@ server <- function(input, output, session) {
                 selected = vars, choices = vars, multiple = TRUE)
   })
 
-  output$survey_factors <- renderUI({
+  output$survey_factors_ui <- renderUI({
     req(survey_data())
 
     vars <- survey_data() %>%
@@ -83,7 +85,7 @@ server <- function(input, output, session) {
 
 
   # Filtering --------------------------------------
-  output$filters <- renderUI({
+  output$filters_ui <- renderUI({
     req(survey_data())
 
     lapply(var_filter,
@@ -113,7 +115,7 @@ server <- function(input, output, session) {
       s <- mutate(s, across(input$survey_factors, as.factor))
     }
 
-    if(!is.null(input$survey_omit)) s <- select(s, -all_of(input$survey_omit))
+    if(!is.null(input$survey_omit)) s <- select(s, -any_of(input$survey_omit))
 
     # Apply filtering
     mc_update_total(s)
@@ -144,7 +146,7 @@ server <- function(input, output, session) {
 
 
   # Univariate Exploration ---------------------------
-  output$uni_var <- renderUI({
+  output$uni_var_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
 
@@ -163,7 +165,7 @@ server <- function(input, output, session) {
 
 
   # Multivariate Exploration ---------------------
-  output$multi_var <- renderUI({
+  output$multi_var_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
     select_explanatory("multi_var",
@@ -183,7 +185,7 @@ server <- function(input, output, session) {
 
   # Add models -----------------------------------
 
-  output$model_id <- renderUI({
+  output$model_id_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
 
@@ -196,7 +198,7 @@ server <- function(input, output, session) {
     textInput("model_id", "Model ID", value = val)
   })
 
-  output$model_var_count <- renderUI({
+  output$model_var_count_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
     select_explanatory("model_var_count",
@@ -205,7 +207,7 @@ server <- function(input, output, session) {
                        multiple = TRUE)
   })
 
-  output$model_var_zero <- renderUI(select_explanatory("model_var_zero",
+  output$model_var_zero_ui <- renderUI(select_explanatory("model_var_zero",
                                                        "Zero Variables",
                                                        survey_sub(),
                                                        multiple = TRUE))
@@ -292,7 +294,7 @@ server <- function(input, output, session) {
   }
 
   # Dynamically create delete buttons for each model
-  output$model_delete <- renderUI({
+  output$model_delete_ui <- renderUI({
     req(length(models()) > 0)
 
     m <- models()[order(names(models()))]
@@ -339,7 +341,7 @@ server <- function(input, output, session) {
 
   # Model residuals / diagnostics ------------------------------
 
-  output$resid_models <- renderUI({
+  output$resid_models_ui <- renderUI({
     validate(need(length(models_list$m) > 0,
                   "First create models in the \"Models\" tab"))
     validate_models(models())
@@ -361,7 +363,7 @@ server <- function(input, output, session) {
   # Prediction Intervals ----------------------------------------------------
 
   # UI elements
-  output$pred_models <- renderUI({
+  output$pred_models_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab") %then%
                need(length(models_list$m) > 0,
@@ -371,7 +373,7 @@ server <- function(input, output, session) {
                 choices = names(models()), multiple = TRUE)
   })
 
-  output$pred_cell <- renderUI({
+  output$pred_cell_ui <- renderUI({
     numericInput("pred_cell", label = "Cell to plot for predictions",
                  value = 1, min = 1, max = nrow(pi()$pi$data), step = 1)
   })
@@ -409,9 +411,8 @@ server <- function(input, output, session) {
 
     pi <- pi()$pi
 
-    i <- paste0(pi$issues, collapse = "; ")
-
-    tibble(Issues = if_else(i == "", "None", i),
+    tibble(Issues = if_else(length(pi$issues) == 0, "None",
+                            as.character(length(pi$issues))),
            B = ncol(pi$boot_full),
            Method = pi()$opts$method,
            Response = if_else(pi()$opts$response == "total",
@@ -436,25 +437,85 @@ server <- function(input, output, session) {
     par(op)
   }, res = 100)
 
+  # Bootstraps table
+  output$pred_boot <- renderDT(datatable(mc_get_pred(pi()$pi)$boot_full))
+
 
 
 
   # Explore PI ----------------------------------------------------
 
   output$pred_data <- renderDT({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(!is.null(input$pred_models),
+             "First create the predictions in the \"Prediction Intervals\" tab"))
     d <- mc_get_pred(pi()$pi)$data
     v <- c("observed_values", "fitted_values",
       "Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy", "Residuals",
       "srv", "area_srv", "sort_id")
-    datatable(d[,c(v, setdiff(colnames(d), v))])
+    datatable(d[,c(v, setdiff(colnames(d), v))]) %>%
+      formatRound(columns = c("fitted_values", "Residuals", "Cell.accuracy"),
+                  digits = 3)
   })
-  output$pred_boot <- renderDT(datatable(mc_get_pred(pi()$pi)$boot_full))
 
+  # Setup table and table proxy
+  pred_data_proxy <- dataTableProxy("pred_data")
+
+  # Render map
+  output$pred_map <- renderGirafe({
+    req(pi())
+
+    d <- mc_get_pred(pi()$pi)$data %>%
+      mutate(cell = 1:n(),
+             Cell.accuracy = if_else(Cell.accuracy == 0,
+                                     NA_real_,
+                                     Cell.accuracy),
+             tooltip = paste0(
+               "Cell = ", cell,
+               if_else(is.na(observed_values),
+                       paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
+                       paste0("<br>Observed = ", observed_values))))
+
+    g <- ggplot(data = d,
+                aes_string(x = "CENTRLON", y = "CENTRLAT",
+                           fill = input$pred_col, data_id = "cell")) +
+      geom_tile_interactive(aes(tooltip = tooltip))+
+      coord_map() +
+      scale_fill_viridis_c()
+
+    girafe(ggobj = g,
+           options = list(opts_selection(type = "multiple")))
+  })
+
+
+  # Select map cells when table rows selected
+  observe({
+
+    input$pred_data_rows_selected # Click on row
+    input$pred_map_selected       # Click on map
+
+    # Either way, highlights row selection
+    isolate({
+      session$sendCustomMessage(
+        type = 'pred_map_set',
+        message = as.character(input$pred_data_rows_selected))
+    })
+  })
+
+  observeEvent(input$pred_reset, {
+    pred_data_proxy %>% selectRows(NULL)
+  })
 
   # PI/bootstrap download
   get_xlslist <- reactive({
     req(input$survey_file, pi())
+    o <- mc_options()
+    o <- append(o, c("random seed" = input$opts_seed))
     list(
       Info=data.frame(moosecounter=paste0(
         c("R package version: ", "Date of analysis: ", "File: "),
@@ -466,6 +527,7 @@ server <- function(input, output, session) {
       Data=mc_get_pred(pi()$pi)$data,
       Boot=mc_get_pred(pi()$pi)$boot_full)
   })
+
   output$boot_download <- downloadHandler(
         filename = function() {
             paste0("Moose_Total_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
@@ -475,29 +537,5 @@ server <- function(input, output, session) {
         },
         contentType="application/octet-stream"
   )
-
-
-  observeEvent(input$pred_data_rows_selected, {
-    session$sendCustomMessage(type = 'pred_map_set', message = input$pred_data_rows_selected)
-  })
-
-  output$pred_map <- renderGirafe({
-    req(pi())
-
-    d <- mc_get_pred(pi()$pi)$data %>%
-      mutate(cell = 1:n(),
-             tooltip = paste0("Cell = ", cell,
-                              "<br>Observed = ", observed_values))
-
-    g <- ggplot(data = d, aes(x = CENTRLON, y = CENTRLAT,
-                              fill = observed_values, data_id = cell)) +
-      geom_tile_interactive(aes(tooltip = tooltip))+
-      coord_map() +
-      scale_fill_viridis_c()
-
-    girafe(ggobj = g,
-           options = list(opts_selection(type = "single")))
-  })
-
 
 }

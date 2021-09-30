@@ -1,0 +1,26 @@
+app <- ShinyDriver$new("../../")
+app$snapshotInit("test_99_settings_pi")
+
+app$setInputs(menu = "settings")
+app$setInputs(opts_b = 100)
+app$setInputs(menu = "data")
+app$uploadFile(survey_file = "../../../extdata/UKH2017_MMU_Querried_data_for_Analysis_Final_3.csv")
+app$setInputs(sidebarItemExpanded = "Total")
+app$setInputs(menu = "addmodel")
+app$setInputs(model_var_count = "AllNeedleWet")
+app$setInputs(model_add = "click")
+app$setInputs(menu = "pi")
+app$setInputs(pred_models = "A")
+app$setInputs(pred_calc = "click")
+app$snapshot()
+
+app$setInputs(menu = "settings")
+app$setInputs(opts_b = 500)
+app$snapshot()
+
+app$setInputs(menu = "pi")
+app$snapshot()
+
+app$setInputs(pred_models = "A")
+app$setInputs(pred_calc = "click", timeout_ = 5000)
+app$snapshot()

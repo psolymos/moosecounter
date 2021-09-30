@@ -60,7 +60,11 @@ ui_settings <- fluidRow(
              sliderInput("opts_sightability",
                          label = "Sightability",
                          value = 1, min = 0, max = 1, step = 0.1),
-             bsTooltip("opts_sightability", opts_tooltip$sightability)
+             bsTooltip("opts_sightability", opts_tooltip$sightability),
+             numericInput("opts_seed",
+                          label = "Random seed",
+                          value = 4323, min = 1, max = 10000),
+             bsTooltip("opts_seed", opts_tooltip$seed)
            )),
          box(width = 12, title = "Current Settings",
              tableOutput("opts"))
@@ -82,14 +86,14 @@ ui_data <- fluidRow(
                   accept = c("text/csv",
                              "text/comma-separated-values,text/plain",
                              ".csv")),
-        uiOutput("survey_omit"),
+        uiOutput("survey_omit_ui"),
         bsTooltip("survey_omit", survey_tooltip$omit),
-        uiOutput("survey_factors"),
+        uiOutput("survey_factors_ui"),
         h3("Filter data"),
-        uiOutput("filters")),
+        uiOutput("filters_ui")),
 
     box(width = 8,
-        tabBox(width = 12,
+        tabBox(width = 12, id = "data_panel",
           tabPanel("Interactive table",
                    div(style = "overflow-x: scroll", DTOutput("survey_preview"))),
           tabPanel("Data Structure",
@@ -108,7 +112,7 @@ ui_data <- fluidRow(
 ui_univar <- fluidRow(
   column(width = 12,
     h2("Univariate Exploration"),
-    box(height = "100px", uiOutput("uni_var")),
+    box(height = "100px", uiOutput("uni_var_ui")),
     box(height = "100px",
         radioButtons("uni_dist", "Distribution", inline = TRUE,
                      choices = c("P", "NB", "ZIP", "ZINB"))),
@@ -120,7 +124,7 @@ ui_univar <- fluidRow(
 ui_multivar <- fluidRow(
   column(width = 12,
     h2("Multivariate Exploration"),
-    box(width = 6, uiOutput("multi_var")),
+    box(width = 6, uiOutput("multi_var_ui")),
     box(width = 6, sliderInput("multi_alpha", label = "alpha",
                                value = 0.10,
                                min = 0.001, max = 0.999, step = 0.01)),
@@ -134,9 +138,9 @@ ui_addmodel <- fluidRow(
     h2("Add model"),
     column(width = 4,
            box(width = 12,
-               uiOutput("model_id"),
-               uiOutput("model_var_count"),
-               uiOutput("model_var_zero"),
+               uiOutput("model_id_ui"),
+               uiOutput("model_var_count_ui"),
+               uiOutput("model_var_zero_ui"),
                radioButtons("model_dist", "Distribution",
                             choices = c("P", "NB", "ZIP", "ZINB"), inline = TRUE),
                radioButtons("model_weighted", NULL,
@@ -149,7 +153,7 @@ ui_addmodel <- fluidRow(
     box(width = 8,
         h4("Current models"),
         tableOutput("model_table"),
-        uiOutput("model_delete"),
+        uiOutput("model_delete_ui"),
         hr(),
         h4("AIC Model Comparison"),
         div(style = "overflow-x: scroll", tableOutput("model_aic1")))
@@ -163,7 +167,7 @@ ui_residuals <- fluidRow(
     box(width = 12,
         h4("AIC Model Comparison"),
         div(style = "overflow-x: scroll", tableOutput("model_aic2")),
-        uiOutput("resid_models"),
+        uiOutput("resid_models_ui"),
         plotOutput("resid_plot"))
   )
 )
@@ -174,7 +178,7 @@ ui_pi <- fluidRow(
     h2("Calculating Prediction Intervals"),
     box(width = 4, height = "200px",
         column(width = 6,
-               uiOutput("pred_models"),
+               uiOutput("pred_models_ui"),
                bsButton("pred_calc", "Calculate PI",
                         style = "primary")),
         column(width = 6, conditionalPanel(
@@ -183,7 +187,7 @@ ui_pi <- fluidRow(
                        choices = c("Use best model" = FALSE,
                                    "Average over models" = TRUE),
                        selected = TRUE)),
-          uiOutput("pred_cell"))),
+          uiOutput("pred_cell_ui"))),
 
     box(width = 5, height = "200px",
         title = "Summary",
@@ -193,7 +197,7 @@ ui_pi <- fluidRow(
         title = "Options",
         tableOutput("pred_options")),
 
-    tabBox(width = 12,
+    tabBox(width = 12, id = "pi_panel",
            tabPanel("Diagnostic Plots", plotOutput("pred_predpi")),
            tabPanel("Moose Predictions",
                     plotOutput("pred_pidistr")),
@@ -215,21 +219,27 @@ ui_pi_map <- fluidRow(
   column(width=12,
          box(width = 6,
              h4("Data"),
-             div(style = "overflow-x: scroll", DTOutput("pred_data"))),
+             bsButton("pred_reset", "Reset selection", style = "primary"),
+             div(style = "overflow-x: scroll;margin-top:15px", DTOutput("pred_data"))),
          box(width = 6,
              h4("Map"),
+                 selectInput("pred_col", label = "Variable to map",
+                             choices = c("observed_values", "fitted_values",
+                                         "Cell.mean", "Cell.mode", "Cell.pred",
+                                         "Cell.PIL", "Cell.PIU",
+                                         "Cell.accuracy", "Residuals")),
              girafeOutput("pred_map"))
   )
 )
 
 
-
+# Combine -------------------------------------------------------------------
 
 dashboardPage(
   dashboardHeader(title = paste("Moose Counter", ver[1])),
   dashboardSidebar(
     tags$script(src = "tips.js"),
-    sidebarMenu(
+    sidebarMenu(id = "menu",
       menuItem("Home", tabName = "home", icon=icon("home")),
       menuItem("Settings", tabName = "settings", icon=icon("cog")),
       menuItem("Data", tabName = "data", icon=icon("table")),
