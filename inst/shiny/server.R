@@ -459,7 +459,7 @@ server <- function(input, output, session) {
       "Cell.accuracy", "Residuals",
       "srv", "area_srv", "sort_id")
     datatable(d[,c(v, setdiff(colnames(d), v))]) %>%
-      formatRound(columns = c("fitted_values", "Residuals", "Cell.accuracy"),
+      formatRound(columns = c("fitted_values", "Residuals", "Cell.accuracy", "Cell.PIL", "Cell.PIU"),
                   digits = 3)
   })
 
