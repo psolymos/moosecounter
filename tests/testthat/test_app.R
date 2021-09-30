@@ -5,5 +5,5 @@ test_that("shiny app tests pass", {
 
   # Use compareImages=FALSE if testing on a different machine (current images from UBUNTU)
   appdir <- system.file(package = "moosecounter", "shiny")
-  expect_pass(testApp(appdir, compareImages = TRUE))
+  expect_pass(testApp(appdir, compareImages = FALSE))
 })
