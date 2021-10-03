@@ -154,7 +154,7 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     ## if some survey area is defined, use dual prediction
     DUAL <- !is.null(opts$area_srv)
     if (DUAL) {
-        eval(parse(text=paste0("x$area_srv <- x$", opts$area_srv)))
+        x$area_srv <- x[[opts$area_srv]]
     } else {
         x$area_srv <- TRUE
     }
