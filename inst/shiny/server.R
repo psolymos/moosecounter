@@ -2,21 +2,21 @@ server <- function(input, output, session) {
 
   # Settings -----------------------------------
   opts <- reactive({
-    input$opts_response
-    input$opts_method
-    input$opts_b
-    input$opts_alpha
-    input$opts_wscale
-    input$opts_sightability
+    req(input$opts_response,
+      input$opts_method,
+      input$opts_b,
+      input$opts_alpha,
+      input$opts_wscale,
+      input$opts_sightability)
 
 
     switch_response(input$opts_response)
-    mc_options(method = input$opts_method)
-    mc_options(B = input$opts_b)
-    mc_options(alpha = as.numeric(input$opts_alpha))
-
-    mc_options(wscale = input$opts_wscale)
-    mc_options(sightability = input$opts_sightability)
+    mc_options(
+      method = input$opts_method,
+      B = input$opts_b,
+      alpha = as.numeric(input$opts_alpha),
+      wscale = input$opts_wscale,
+      sightability = input$opts_sightability)
     #mc_options(srv = "")
     #mc_options(MAXCELL = "")
     #mc_options(area_srv = "")
@@ -26,8 +26,12 @@ server <- function(input, output, session) {
   })
 
   output$opts <- renderTable({
-    data.frame(option = names(opts()),
-               values = sapply(opts(),
+    o <- opts()
+    str(o)
+    data.frame(option = unlist(opts_description[match(names(o),
+                                               names(opts_description))]),
+               name = names(o),
+               values = sapply(o,
                                FUN = function(x) paste(x, collapse = ", ")))
   })
 

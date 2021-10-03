@@ -46,15 +46,32 @@ var_filter <- c("Survey Name" = "SURVEY_NAM",
 opts_tooltip <- list(
   "method" = "Defines the optimization algorithm used by <code>optim</code> for <emph>Prediction Intervals</emph>",
   "response" = "Whether to use all moose spotted (Total) or just Cows",
-  "maxcell" = "",
+  "maxcell" = "Prediction values will be truncated at this value",
   "b" = paste("Number of times to run a simulation when establishing ",
               "Prediction Intervals"),
-  "alpha" = paste("Type I error rate for prediction intervals,",
-                  "as well as for multivariate exploration"),
+  "alpha" = "Type I error rate for prediction intervals",
   "wscale" = "How much to weight influential observations. 0 produces equal weights",
   "sightability" = "Detection probability used to correct total Moose results",
   "seed" = paste("Random seed. Can be changed if running into model errors, ",
                  "but keep note for replicability and error-reporting."))
+
+opts_description <- list(
+  "method" = "Optimization algorithm",
+  "response" = "Response variable",
+  "MAXCELL" = "Max total abundance in cells",
+  "MINCELL" = "Min abundance for composition in cells",
+  "B" = "Number of bootstrap runs",
+  "alpha" = "Type I error rate for PI",
+  "wscale" = "Weight",
+  "sightability" = "Sightability",
+  "seed" = "Random seed",
+  "Ntot"="",
+  "srv_name"="Filtering variable",
+  "srv_value"="Filtering value",
+  "area_srv"="Comun indicating survey areas",
+  "Area"="Area",
+  "xy"="Long/Lat",
+  "composition"="Composition variables")
 
 survey_tooltip <- list(
   "omit" = "These variables are potentially categorical (either text or integer) for which some levels are missing from surveyed data. Therefore predictions cannot be made they should be omitted. Override this by removing variables from this list.")

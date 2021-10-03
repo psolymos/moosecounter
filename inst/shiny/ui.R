@@ -46,11 +46,10 @@ ui_settings <- fluidRow(
            ),
 
            column(width = 6,
-             # Maxcell is optional
-             # sliderInput("opts_maxcell",
-             #             label = "Maximum abundance in cells",
-             #             min = 1, max = 100),
-             # bsTooltip("opts_maxcell", opts_tooltip$maxcell)
+              # sliderInput("opts_maxcell",
+              #            label = "Maximum abundance in cells",
+              #            min = 1, max = 100),
+              # bsTooltip("opts_maxcell", opts_tooltip$maxcell),
 
              sliderInput("opts_wscale",
                          label = "Weighting scale",
@@ -115,7 +114,8 @@ ui_univar <- fluidRow(
     box(height = "100px", uiOutput("uni_var_ui")),
     box(height = "100px",
         radioButtons("uni_dist", "Distribution", inline = TRUE,
-                     choices = c("P", "NB", "ZIP", "ZINB"))),
+                     choices = c("P", "NB", "ZIP", "ZINB"),
+                     selected = "NB")),
     plotOutput("uni_graph", width = "100%")
   )
 )
