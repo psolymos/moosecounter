@@ -41,7 +41,7 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
 
         Col <- rev(grDevices::hcl.colors(length(d), "Set 2"))
         plot(xy, pch=19, col=Col[as.integer(z)], main="Map",
-            xlab="Longitude", ylab="Latitude", asp=1,
+            xlab="Longitude", ylab="Latitude", #asp=1,
             ylim=c(min(xy[,2])-0.2*diff(range(xy[,2])), max(xy[,2])))
 
         plot(jitter(y) ~ z, dat, main="Total moose response",
@@ -66,7 +66,7 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
 
         Col <- rev(grDevices::heat.colors(10))
         plot(xy, pch=19, col=Col[cut(z, 10)], main="Map",
-            xlab="Longitude", ylab="Latitude", asp=1,
+            xlab="Longitude", ylab="Latitude", #asp=1,
             ylim=c(min(xy[,2])-0.2*diff(range(xy[,2])), max(xy[,2])))
         graphics::legend("bottomleft", bty="n", pch=19, col=Col[c(length(Col),1)],
           legend=c("High", "Low"))
