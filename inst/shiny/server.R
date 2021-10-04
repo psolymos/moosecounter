@@ -444,7 +444,11 @@ server <- function(input, output, session) {
   }, res = 100)
 
   # Bootstraps table
-  output$pred_boot <- renderDT(datatable(mc_get_pred(pi()$pi)$boot_full))
+  output$pred_boot <- renderDT({
+    PI <- mc_get_pred(pi()$pi)
+    d <- data.frame(SU_ID=PI$data$SU_ID, PI$boot_full)
+    datatable(d)
+  })
 
 
 
