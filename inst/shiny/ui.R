@@ -170,7 +170,8 @@ ui_residuals <- fluidRow(
         h4("AIC Model Comparison"),
         div(style = "overflow-x: scroll", tableOutput("model_aic2")),
         uiOutput("resid_models_ui"),
-        plotOutput("resid_plot"))
+        plotOutput("resid_plot"),
+        verbatimTextOutput("resid_summary"))
   )
 )
 

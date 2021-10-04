@@ -362,6 +362,17 @@ server <- function(input, output, session) {
       mc_plot_residuals(input$resid_model, ., survey_sub())
   })
 
+  output$resid_summary <- renderPrint({
+    req(length(models()) > 0, input$resid_model)
+    validate_models(models())
+
+    cat("Model:", input$resid_model, "\n")
+    cat("Model type:", models()[[input$resid_model]][["dist"]],
+        if (models()[[input$resid_model]][["weighted"]])
+          "(weighted)" else "", "\n")
+    summary(models()[[input$resid_model]][["model"]])
+  })
+
 
 
   # Prediction Intervals ----------------------------------------------------

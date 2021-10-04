@@ -81,6 +81,7 @@ mc_plot_predpi(PI)
 mc_plot_pidistr(PI)
 mc_plot_pidistr(PI, id=2)
 
+summary(ML[[2]])
 
 ## --
 set.seed(1)
