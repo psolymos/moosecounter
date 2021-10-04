@@ -125,9 +125,9 @@ ui_multivar <- fluidRow(
   column(width = 12,
     h2("Multivariate Exploration"),
     box(width = 6, uiOutput("multi_var_ui")),
-    box(width = 6, sliderInput("multi_alpha", label = "alpha",
-                               value = 0.10,
-                               min = 0.001, max = 0.999, step = 0.01)),
+    box(width = 6, sliderInput("multi_alpha", label = "alpha level for split",
+                               value = 0.01,
+                               min = 0.001, max = 0.5, step = 0.01)),
     box(width = 12, plotOutput("multi_graph"))
   )
 )
@@ -142,7 +142,9 @@ ui_addmodel <- fluidRow(
                uiOutput("model_var_count_ui"),
                uiOutput("model_var_zero_ui"),
                radioButtons("model_dist", "Distribution",
-                            choices = c("P", "NB", "ZIP", "ZINB"), inline = TRUE),
+                            choices = c("P", "NB", "ZIP", "ZINB"),
+                            selected = "NB",
+                            inline = TRUE),
                radioButtons("model_weighted", NULL,
                             c("Non weighted" = FALSE, "Weighted" = TRUE),
                             inline = TRUE),

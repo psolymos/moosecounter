@@ -27,7 +27,6 @@ server <- function(input, output, session) {
 
   output$opts <- renderTable({
     o <- opts()
-    str(o)
     data.frame(option = unlist(opts_description[match(names(o),
                                                names(opts_description))]),
                name = names(o),
@@ -415,13 +414,16 @@ server <- function(input, output, session) {
 
     pi <- pi()$pi
 
-    tibble(Issues = if_else(length(pi$issues) == 0, "None",
+    tibble(Issues
+           = if_else(length(pi$issues) == 0, "None",
                             as.character(length(pi$issues))),
            B = ncol(pi$boot_full),
            Method = pi()$opts$method,
            Response = if_else(pi()$opts$response == "total",
                               "MOOSE_TOTA",
-                              "COW_TOTA")) %>%
+                              "COW_TOTA"),
+           Sightability = pi()$opts$sightability) %>%
+      t() %>%
       kable() %>%
       kable_styling(bootstrap_options = "condensed")
   }
