@@ -1,3 +1,5 @@
 # Welcome to Moose Counter!
 
-Put here intro.
+There will be an intro here.
+
+If you need an example data, [here is one from Mayo](MayoMMU_QuerriedData.csv).
