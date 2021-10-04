@@ -84,14 +84,18 @@ get_coefs <- function(ML) {
 #'
 #' @export
 # was updateModelTab
-mc_models_total <- function(ml, x, coefs=TRUE, aic=TRUE) {
+mc_models_total <- function(ml, x, coefs=TRUE) {
+    aic <- sapply(ml, stats::AIC)
+    bic <- sapply(ml, stats::BIC)
     ic <- data.frame(
-        ic=if (aic) sapply(ml, stats::AIC) else sapply(ml, stats::BIC),
+        ic=aic,
+        BIC=bic,
         df=sapply(ml, function(z) length(stats::coef(z))),
         logLik=sapply(ml, function(z) as.numeric(stats::logLik(z))))
     ic$delta <- ic$ic - min(ic$ic)
     ic$weight <- exp( -0.5 * ic$delta) / sum(exp( -0.5 * ic$delta))
-    colnames(ic)[colnames(ic) == "ic"] <- if (aic) "AIC" else "BIC"
+    colnames(ic)[colnames(ic) == "ic"] <- "AIC"
+
     D <- t(sapply(ml, pred_density_moose, x=x))
     cf <- if (coefs) get_coefs(ml) else NULL
     out <- data.frame(ic, D, cf)
