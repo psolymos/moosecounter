@@ -179,7 +179,7 @@ ui_residuals <- fluidRow(
 ui_pi <- fluidRow(
   column(width=12,
     h2("Calculating Prediction Intervals"),
-    box(width = 4, height = "200px",
+    box(width = 4, height = "225px",
         column(width = 6,
                uiOutput("pred_models_ui"),
                bsButton("pred_calc", "Calculate PI",
@@ -192,11 +192,11 @@ ui_pi <- fluidRow(
                        selected = TRUE)),
           uiOutput("pred_cell_ui"))),
 
-    box(width = 5, height = "200px",
+    box(width = 5, height = "225px",
         title = "Summary",
         tableOutput("pred_density")),
 
-    box(width = 3, height = "200px",
+    box(width = 3, height = "225px",
         title = "Options",
         tableOutput("pred_options")),
 
