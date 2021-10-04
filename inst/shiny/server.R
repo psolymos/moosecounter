@@ -464,6 +464,8 @@ server <- function(input, output, session) {
         need(!is.null(input$pred_models),
              "First create the predictions in the \"Prediction Intervals\" tab"))
     d <- mc_get_pred(pi()$pi)$data
+    d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
+      "Cell.accuracy")] <- NA
     v <- c("observed_values", "fitted_values",
       "Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy", "Residuals",
@@ -480,11 +482,14 @@ server <- function(input, output, session) {
   output$pred_map <- renderGirafe({
     req(pi())
 
-    d <- mc_get_pred(pi()$pi)$data %>%
+    d <- mc_get_pred(pi()$pi)$data
+    d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
+      "Cell.accuracy")] <- NA
+    d <- d %>%
       mutate(cell = 1:n(),
-             Cell.accuracy = if_else(Cell.accuracy == 0,
-                                     NA_real_,
-                                     Cell.accuracy),
+#             Cell.accuracy = if_else(Cell.accuracy == 0,
+#                                     NA_real_,
+#                                     Cell.accuracy),
              tooltip = paste0(
                "Cell = ", cell,
                if_else(is.na(observed_values),
