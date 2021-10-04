@@ -17,6 +17,8 @@ library(kableExtra)
 library(openxlsx)
 library(purrr)
 
+options(DT.options = list(scrollX = TRUE))
+
 ver <- read.dcf(
     file = system.file("DESCRIPTION", package = "moosecounter"),
     fields = "Version")

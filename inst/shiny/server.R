@@ -335,7 +335,8 @@ server <- function(input, output, session) {
   })
 
   output$model_aic1 <- renderTable({
-    model_aic()
+    a <- model_aic()
+    t(a[rev(seq_len(nrow(a))),])
   }, rownames = TRUE)
 
   output$model_aic2 <- renderTable({
