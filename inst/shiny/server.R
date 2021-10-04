@@ -513,7 +513,7 @@ server <- function(input, output, session) {
                            fill = input$pred_col, data_id = "cell")) +
       geom_tile_interactive(aes(tooltip = tooltip))+
       coord_map() +
-      scale_fill_viridis_c()
+      scale_fill_binned(type = "viridis", n.breaks = input$pred_bins)
 
     girafe(ggobj = g,
            options = list(opts_selection(type = "multiple")))
