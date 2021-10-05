@@ -1,3 +1,8 @@
+# Version 0.5-0 -- October 4, 2021
+
+* Total moose estimation is tested and ready to be used in the field.
+* Added `run_app()` function to launch a Shiny app.
+
 # Version 0.4-0 -- August 19, 2021
 
 * Package renamed from DeducerPlugInMoose to moosecounter,
