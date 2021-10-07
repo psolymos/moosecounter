@@ -478,11 +478,11 @@ server <- function(input, output, session) {
     d <- mc_get_pred(pi()$pi)$data
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy")] <- NA
-    v <- c("observed_values", "fitted_values",
+    v <- c("SU_ID", "observed_values", "fitted_values",
       "Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy", "Residuals",
       "srv", "area_srv", "sort_id")
-    datatable(d[,c(v, setdiff(colnames(d), v))]) %>%
+    datatable(d[,c(intersect(colnames(d), v), setdiff(colnames(d), v))]) %>%
       formatRound(columns = c("fitted_values", "Residuals", "Cell.accuracy", "Cell.PIL", "Cell.PIU"),
                   digits = 3)
   })
@@ -495,8 +495,8 @@ server <- function(input, output, session) {
     req(pi())
 
     d <- mc_get_pred(pi()$pi)$data
-    d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
-      "Cell.accuracy")] <- NA
+    d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
+               "Cell.PIL", "Cell.PIU", "Cell.accuracy")] <- NA
     d <- d %>%
       mutate(cell = 1:n(),
 #             Cell.accuracy = if_else(Cell.accuracy == 0,

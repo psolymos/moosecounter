@@ -41,7 +41,8 @@ ui_settings <- fluidRow(
 
              radioButtons("opts_alpha", inline = TRUE,
                           label = "Alpha level",
-                          choices = c(0.01, 0.05, 0.1)),
+                          choices = c(0.01, 0.05, 0.1),
+                          selected = 0.1),
              bsTooltip("opts_alpha", opts_tooltip$alpha)
            ),
 
