@@ -53,6 +53,32 @@ run_app()
 
 shiny::runApp("inst/shiny")
 
+## Composition
+
+# checks comp data (sum of classes should equal total)
+mc_check_comp(x)
+
+# plot univariate comp model
+mc_plot_comp('Fire8212_DEM815', x)
+
+CML <- list()
+CML[['FireDEMSub']] <- mc_fit_comp(~ Fire8212_DEM815, x)
+
+mc_models_comp(CML)
+
+CPI <- mc_predict_comp(
+    total_model_id="Model 3",
+    comp_model_id='FireDEMSub',
+    model_list_total=ML,
+    model_list_comp=CML,
+    x=x,
+    do_avg=FALSE)
+# print results
+pred_density_moose_CPI(CPI)
+
+
+
+
 ## PI
 
 library(moosecounter)
