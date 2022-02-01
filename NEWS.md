@@ -1,3 +1,7 @@
+# Version 0.5-1 -- January 31, 2022
+
+* Composition analysis added to R package.
+
 # Version 0.5-0 -- October 4, 2021
 
 * Total moose estimation is tested and ready to be used in the field.
