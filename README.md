@@ -72,10 +72,10 @@ mc_plot_pidistr(PI, id=2)
 mc_check_comp(x)
 
 # plot univariate comp model
-mc_plot_comp('Fire8212_DEM815', x)
+mc_plot_comp("Fire8212_DEM815", x)
 
 CML <- list()
-CML[['FireDEMSub']] <- mc_fit_comp(~ Fire8212_DEM815, x)
+CML[['FireDEMSub']] <- mc_fit_comp(x, "Fire8212_DEM815")
 
 mc_models_comp(CML)
 

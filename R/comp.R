@@ -26,14 +26,26 @@ mc_check_comp <- function(x) {
 
 #' Fit Composition Model for Total Moose
 #'
-#' @param formula one sided model formula
 #' @param x data frame
+#' @param vars column names of `x` to be used as predictors for the composition model
 #'
 #' @export
 ## fit comp model for total
 ## used to be called fitCompModel
 ## x: MooseData
-mc_fit_comp <- function(formula, x) {
+mc_fit_comp <- function(x, vars=NULL) {
+    opts <- getOption("moose_options")
+    if (is.null(vars)) {
+        CMP <- "1"
+    } else {
+        vars <- vars[!(vars %in% c(opts$Ntot, opts$composition))]
+        CMP <- paste(vars, collapse=" + ")
+    }
+    Form <- stats::as.formula(paste("~", CMP))
+    mc_fit_comp_formula(Form, x)
+}
+
+mc_fit_comp_formula <- function(formula, x) {
   opts <- getOption("moose_options")
   keep <- x$UNKNOWN_AG == 0
   if (any(x$UNKNOWN_AG > 0))
@@ -424,9 +436,9 @@ vlm <- VGAM::vlm
 mc_plot_comp <- function(i, x) {
     NAME <- i
     MooseData <- x
-    formula <- stats::as.formula(paste("~", NAME))
+    #formula <- stats::as.formula(paste("~", NAME))
     #vlm <- VGAM::vlm
-    m <- mc_fit_comp(formula, MooseData)
+    m <- mc_fit_comp(MooseData, NAME)
     mf <- VGAM::model.frame(m)
     pr0 <- VGAM::fitted(m)
     xx <- mf[,NAME]

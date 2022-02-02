@@ -4,12 +4,12 @@
 \alias{mc_fit_comp}
 \title{Fit Composition Model for Total Moose}
 \usage{
-mc_fit_comp(formula, x)
+mc_fit_comp(x, vars = NULL)
 }
 \arguments{
-\item{formula}{one sided model formula}
-
 \item{x}{data frame}
+
+\item{vars}{column names of `x` to be used as predictors for the composition model}
 }
 \description{
 Fit Composition Model for Total Moose
