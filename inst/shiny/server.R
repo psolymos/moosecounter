@@ -565,4 +565,30 @@ server <- function(input, output, session) {
         contentType="application/octet-stream"
   )
 
+
+
+  # Composition --------------------------------------------------------------
+
+  ## Exploration ---------------------------
+  output$comp_explore_ui <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+
+    select_explanatory("comp_explore_var",
+                       "Variable to explore",
+                       survey_sub())
+  })
+
+  output$comp_explore_graph <- renderPlot({
+    req(input$comp_explore_var)
+    req(input$comp_explore_var != "none")
+    req(opts())
+
+    # Check class sums
+    mc_check_comp(survey_sub())
+
+    mc_plot_comp(input$comp_explore_var, survey_sub())
+  }, res = 125)
+
+
 }

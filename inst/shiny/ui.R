@@ -241,6 +241,42 @@ ui_pi_map <- fluidRow(
 )
 
 
+# Composition ------------------------------------------------------------
+
+## Explore -------------------------------------------------------
+ui_comp_explore <- fluidRow(
+  column(width = 12,
+         h2("Composition Exploration"),
+         box(height = "100px", uiOutput("comp_explore_ui")),
+         plotOutput("comp_explore_graph", width = "100%")
+  )
+)
+
+
+## Fit -----------------------------------------------------------
+ui_comp_fit <- fluidRow(
+  column(width = 12,
+         h2("Composition Model Fit")
+  )
+)
+
+## Est Intervals -------------------------------------------------
+ui_comp_int <- fluidRow(
+  column(width = 12,
+         h2("Composition Interval Estimation")
+  )
+)
+
+## Subset/summarize ----------------------------------------------
+# Coming soon!
+ui_comp_sum <- fluidRow(
+  column(width = 12,
+         h2("Composition Summarize")
+  )
+)
+
+
+
 # Combine -------------------------------------------------------------------
 
 dashboardPage(
@@ -262,6 +298,11 @@ dashboardPage(
         menuSubItem("Prediction Intervals", tabName = "pi"),
         menuSubItem("Explore Predictions", tabName = "pi_map")
       ),
+      menuItem("Composition", tabName = "composition", icon = icon("chart-pie"),
+               menuSubItem("Explore", tabName = "comp_explore"),
+               menuSubItem("Fit Models", tabName = "comp_fit"),
+               menuSubItem("Intervals", tabName = "comp_int"),
+               menuSubItem("Summarize", tabName = "comp_sum")),
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
     )
   ),
@@ -276,7 +317,11 @@ dashboardPage(
       tabItem("addmodel", ui_addmodel),
       tabItem("residuals", ui_residuals),
       tabItem("pi", ui_pi),
-      tabItem("pi_map", ui_pi_map)
+      tabItem("pi_map", ui_pi_map),
+      tabItem("comp_explore", ui_comp_explore),
+      tabItem("comp_fit", ui_comp_fit),
+      tabItem("comp_int", ui_comp_int),
+      tabItem("comp_sum", ui_comp_sum)
     )
   )
 )
