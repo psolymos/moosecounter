@@ -74,12 +74,14 @@ mc_fit_comp_formula <- function(formula, x) {
         TOT_CALVES=x_srv$TOT_CALVES)
       ymat[rowSums(ymat)==0,] <- NA
   }
+
   formula <- stats::as.formula(paste("ymat", paste(as.character(formula), collapse=" ")))
-  m <- VGAM::vglm(
-    formula=formula,
-    data=x_srv,
-    family=VGAM::multinomial,
-    na.action=stats::na.omit)
+  m <- eval(bquote(
+    VGAM::vglm(
+      formula=.(formula),
+      data=x_srv,
+      family=VGAM::multinomial,
+      na.action=stats::na.omit)))
   Nam <- names(m@coefficients)
   for (i in seq_len(ncol(ymat)-1L)) {
     j <- grepl(paste0(":", i), Nam)
