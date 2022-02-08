@@ -591,4 +591,130 @@ server <- function(input, output, session) {
   }, res = 125)
 
 
+  ## Add Models -------------------------------------------------------------
+
+  comp_models_list <- reactiveValues(m = list())
+
+  output$comp_model_id_ui <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+
+    if(length(comp_models_list$m) == 0 || is.null(comp_models())) {
+      val <- "A"
+    } else {
+      val <- LETTERS[!LETTERS %in% names(comp_models())][1]
+    }
+
+    textInput("comp_model_id", "Model ID", value = val)
+  })
+
+  output$comp_model_var_ui <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+    select_explanatory("comp_model_var",
+                       "Variables",
+                       survey_sub(),
+                       multiple = TRUE)
+  })
+
+  # Create reactive for using the models, not modifying, models
+  comp_models <- reactive({
+    req(length(comp_models_list$m) > 0)
+    req(opts()) # To invalidate when settings change
+
+    m <- comp_models_list$m
+    m <- m[!map_lgl(m, is.null)]
+    m[order(names(m))]
+
+    # Record a change in comp_models()
+    # isolate({
+    #   if(is.null(input$pred_calc) || input$pred_calc > 0)
+    #     updateButton(session, "pred_calc", style = "warning",
+    #                  label = "Models have changed<br>(re-run)")
+    # })
+
+    # Run and add model and details
+    # Evaluate directly to include args in the call itself, to prevent problems
+    # with stats::update() later in the Prediction Interval steps.
+    # idea from: https://stackoverflow.com/a/57528229/3362144
+    map(m, ~ append(., c("model" = list(
+      try(eval(rlang::expr(mc_fit_comp(x = survey_sub(),
+                                       vars = !!.$var))),
+          silent = TRUE)))))
+  })
+
+  output$comp_model_msgs <- renderUI({
+    m <- map_chr(comp_models(), ~{
+      if("try-error" %in% class(.$model)) .$model[1] else "no problem"})
+    m <- m[m != "no problem"]
+
+    if(length(m) > 0) {
+      msg <- imap(m, ~tagList(span("Problem with model ", strong(.y), ": ",
+                                   class = "alert-danger"), br(),
+                              .x, p())) %>%
+        tagList()
+    } else msg <- tagList()
+
+    msg
+  })
+
+
+  observe({
+    req(input$comp_model_id)
+    comp_models_list$m[[input$comp_model_id]] <- list(var = input$comp_model_var)
+  }) %>%
+    bindEvent(input$comp_model_add)
+
+  output$comp_model_table <- function() {
+    imap_dfr(comp_models(),
+             ~data.frame(Model = .y,
+                         Variables = paste(.x$var, collapse = ", "))) %>%
+      kable() %>%
+      kable_styling() %>%
+      row_spec(which(model_errors(comp_models())), background = "#f2dede")
+  }
+
+  # Dynamically create delete buttons for each model
+  output$comp_model_delete_ui <- renderUI({
+    req(length(comp_models()) > 0)
+
+    m <- comp_models()[order(names(comp_models()))]
+
+    imap(m, ~ bsButton(paste0("comp_delete_model_", .y),
+                       label = .y,
+                       icon = icon("times"),
+                       style = if_else("try-error" %in% class(.x$model),
+                                       "danger",
+                                       "default")))
+  })
+
+  # Dynamically create observeEvents for each model delete button
+  observe({
+    req(length(comp_models()) > 0)
+
+    isolate({
+      map(names(comp_models()), ~ {
+        observeEvent(input[[paste0("comp_delete_model_", .)]], {
+          comp_models_list$m[[.]] <- NULL
+        }, ignoreInit = TRUE)
+      })
+    })
+  })
+
+  comp_model_aic <- reactive({
+    req(length(comp_models()) > 0)
+    req(opts())
+    validate_models(comp_models())
+
+    map(comp_models(), "model") %>%
+      mc_models_comp() %>%
+      as.data.frame() %>%
+      mutate(across(everything(), round, 2))
+  })
+
+  output$comp_model_aic <- renderTable({
+    a <- comp_model_aic()
+    t(a[rev(seq_len(nrow(a))),])
+  }, rownames = TRUE)
+
 }

@@ -253,12 +253,28 @@ ui_comp_explore <- fluidRow(
 )
 
 
-## Fit -----------------------------------------------------------
-ui_comp_fit <- fluidRow(
+## Models -----------------------------------------------------------
+ui_comp_models <- fluidRow(
   column(width = 12,
-         h2("Composition Model Fit")
+         h2("Composition Model Fit"),
+         column(width = 4,
+                box(width = 12,
+                    uiOutput("comp_model_id_ui"),
+                    uiOutput("comp_model_var_ui"),
+                    bsButton("comp_model_add", "Add", style = "primary")),
+                box(width = 12,
+                    h4("Error messages"),
+                    uiOutput("comp_model_msgs"))),
+         box(width = 8,
+             h4("Current models"),
+             tableOutput("comp_model_table"),
+             uiOutput("comp_model_delete_ui"),
+             hr(),
+             h4("AIC Model Comparison"),
+             div(style = "overflow-x: scroll", tableOutput("comp_model_aic")))
   )
 )
+
 
 ## Est Intervals -------------------------------------------------
 ui_comp_int <- fluidRow(
@@ -300,7 +316,7 @@ dashboardPage(
       ),
       menuItem("Composition", tabName = "composition", icon = icon("chart-pie"),
                menuSubItem("Explore", tabName = "comp_explore"),
-               menuSubItem("Fit Models", tabName = "comp_fit"),
+               menuSubItem("Models", tabName = "comp_models"),
                menuSubItem("Intervals", tabName = "comp_int"),
                menuSubItem("Summarize", tabName = "comp_sum")),
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
@@ -319,7 +335,7 @@ dashboardPage(
       tabItem("pi", ui_pi),
       tabItem("pi_map", ui_pi_map),
       tabItem("comp_explore", ui_comp_explore),
-      tabItem("comp_fit", ui_comp_fit),
+      tabItem("comp_models", ui_comp_models),
       tabItem("comp_int", ui_comp_int),
       tabItem("comp_sum", ui_comp_sum)
     )
