@@ -14,9 +14,9 @@ mc_predict_comp(
 )
 }
 \arguments{
-\item{total_model_id}{model ID or model IDs for total moose model (can be multiple from `names(ml)`)}
+\item{total_model_id}{model ID or model IDs for total moose model (can be multiple model IDs from `names(model_list_total)`)}
 
-\item{comp_model_id}{model ID or model IDs for composition model (can be multiple from `names(ml)`)}
+\item{comp_model_id}{model ID or model IDs for composition model (single model ID from `names(model_list_comp)`)}
 
 \item{model_list_total}{named list of total moose models}
 
