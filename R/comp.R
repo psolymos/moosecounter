@@ -108,9 +108,7 @@ mc_models_comp <- function(model_list_comp) {
   CompModelTab$delta <- CompModelTab$AIC - min(CompModelTab$AIC)
   rel <- exp(-0.5*CompModelTab$delta)
   CompModelTab$weight <- rel / sum(rel)
-  CompModelTab <- data.frame(t(CompModelTab))
-  #assign("CompModelTab", CompModelTab, envir=.GlobalEnv)
-  t(CompModelTab)
+  CompModelTab[order(CompModelTab$delta),]
 }
 
 
