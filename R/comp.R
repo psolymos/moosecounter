@@ -86,6 +86,7 @@ mc_fit_comp_formula <- function(formula, x) {
     names(m@coefficients)[j] <- gsub(paste0(":", i),
       paste0(":", colnames(ymat)[i]), names(m@coefficients)[j])
   }
+  m@call$formula <- formula
   m
 }
 
