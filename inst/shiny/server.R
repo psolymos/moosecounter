@@ -717,4 +717,97 @@ server <- function(input, output, session) {
     t(a[rev(seq_len(nrow(a))),])
   }, rownames = TRUE)
 
+
+  ## PI ----------------------------------------------------
+
+  # UI elements
+  output$comp_pi_models_ui <- renderUI({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(models_list$m) > 0,
+             "First create Total Models in the Total > Models tab") %then%
+        need(length(comp_models_list$m) > 0,
+             "First create Composition Models in the Composition > Models tab"))
+
+    tagList(
+      selectInput("comp_pi_models1",
+                  label = "Total model to use",
+                  choices = names(models()), multiple = FALSE),
+      selectInput("comp_pi_models2",
+                  label = "Composition model to use",
+                  choices = names(comp_models()), multiple = FALSE))
+  })
+
+  output$comp_pi_average_ui <- renderUI({
+    req(input$comp_pi_models1, input$comp_pi_models2)
+
+    if(length(input$comp_pi_models1) > 1 |
+       length(input$comp_pi_models2) > 1)  {
+      radioButtons("comp_pi_average", label = "With multiple models...",
+                   choices = c("Use best model" = FALSE,
+                               "Average over models" = TRUE),
+                   selected = TRUE)
+    }
+  })
+
+  comp_pi <- reactive({
+    validate(need(
+      !is.null(input$comp_pi_models1) & !is.null(input$comp_pi_models2),
+      "Please choose your model(s)"))
+
+    validate_models(models())
+    validate_models(comp_models())
+
+    updateButton(session, "comp_pi_calc", style = "primary", label = "Calculate PI")
+
+    if(is.null(input$comp_pi_average)) {
+      do_avg <- FALSE
+    } else {
+      do_avg <- as.logical(input$comp_pi_average)
+    }
+
+    list(
+      comp_pi = mc_predict_comp(
+        total_model_id = input$comp_pi_models1,
+        comp_model_id = input$comp_pi_models2,
+        model_list_total = map(models(), "model"),
+        model_list_comp = map(comp_models(), "model"),
+        x = survey_sub(),
+        do_avg = do_avg),
+      opts = opts())
+  }) %>%
+    bindEvent(input$comp_pi_calc)
+
+  # Tables
+  output$comp_pi_density <- function() {
+    req(comp_pi())
+    pred_density_moose_CPI(comp_pi()$comp_pi) %>%
+      as.data.frame() %>%
+      mutate(type = rownames(.)) %>%
+      select(type, everything()) %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
+      kable_styling(bootstrap_options = "condensed")
+  }
+
+  output$comp_pi_options <- function() {
+    req(comp_pi())
+
+    comp_pi <- comp_pi()$comp_pi
+
+    tibble(Issues = if_else(length(comp_pi$issues) == 0, "None",
+                            as.character(length(comp_pi$issues))),
+           Bootstraps = ncol(comp_pi()$opts$B),
+           alpha = comp_pi()$opts$alpha,
+           Method = comp_pi()$opts$method,
+           Response = if_else(comp_pi()$opts$response == "total",
+                              "MOOSE_TOTA",
+                              "COW_TOTA"),
+           Composition = paste(comp_pi()$opts$composition, collapse = ", "),
+           Sightability = comp_pi()$opts$sightability) %>%
+      t() %>%
+      kable() %>%
+      kable_styling(bootstrap_options = "condensed")
+  }
+
 }

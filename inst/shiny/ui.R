@@ -276,12 +276,27 @@ ui_comp_models <- fluidRow(
 )
 
 
-## Est Intervals -------------------------------------------------
-ui_comp_int <- fluidRow(
+## Prediction Intervals -------------------------------------------------
+ui_comp_pi <- fluidRow(
   column(width = 12,
-         h2("Composition Interval Estimation")
+         h2("Composition Prediction Intervals"),
+
+         box(width = 3,
+             uiOutput("comp_pi_models_ui"),
+             uiOutput("comp_pi_average_ui"),
+             bsButton("comp_pi_calc", "Calculate PI",
+                      style = "primary")),
+
+         box(width = 5,
+                    title = "Summary",
+                    tableOutput("comp_pi_density")),
+
+         box(width = 4,
+             title = "Issues and Options",
+             tableOutput("comp_pi_options"))
   )
 )
+
 
 ## Subset/summarize ----------------------------------------------
 # Coming soon!
@@ -317,7 +332,7 @@ dashboardPage(
       menuItem("Composition", tabName = "composition", icon = icon("chart-pie"),
                menuSubItem("Explore", tabName = "comp_explore"),
                menuSubItem("Models", tabName = "comp_models"),
-               menuSubItem("Intervals", tabName = "comp_int"),
+               menuSubItem("Prediction Intervals", tabName = "comp_pi"),
                menuSubItem("Summarize", tabName = "comp_sum")),
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
     )
@@ -336,7 +351,7 @@ dashboardPage(
       tabItem("pi_map", ui_pi_map),
       tabItem("comp_explore", ui_comp_explore),
       tabItem("comp_models", ui_comp_models),
-      tabItem("comp_int", ui_comp_int),
+      tabItem("comp_pi", ui_comp_pi),
       tabItem("comp_sum", ui_comp_sum)
     )
   )
