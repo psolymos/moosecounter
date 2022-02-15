@@ -609,8 +609,6 @@ server <- function(input, output, session) {
   })
 
   output$comp_model_var_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
     select_explanatory("comp_model_var",
                        "Variables",
                        survey_sub(),
