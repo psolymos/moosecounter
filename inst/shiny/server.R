@@ -506,14 +506,15 @@ server <- function(input, output, session) {
                "Cell.PIL", "Cell.PIU", "Cell.accuracy")] <- NA
     d <- d %>%
       mutate(cell = 1:n(),
-#             Cell.accuracy = if_else(Cell.accuracy == 0,
-#                                     NA_real_,
-#                                     Cell.accuracy),
              tooltip = paste0(
                "Cell = ", cell,
                if_else(is.na(observed_values),
                        paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
                        paste0("<br>Observed = ", observed_values))))
+
+    validate(need(
+      length(unique(na.omit(d[, input$total_pi_col]))) > 1,
+      paste0("Cannot plot. No variability in ", input$total_pi_col)))
 
     g <- ggplot(data = d,
                 aes_string(x = "CENTRLON", y = "CENTRLAT",
