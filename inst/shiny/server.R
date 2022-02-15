@@ -3,11 +3,11 @@ server <- function(input, output, session) {
   # Settings -----------------------------------
   opts <- reactive({
     req(input$opts_response,
-      input$opts_method,
-      input$opts_b,
-      input$opts_alpha,
-      input$opts_wscale,
-      input$opts_sightability)
+        input$opts_method,
+        input$opts_b,
+        input$opts_alpha,
+        input$opts_wscale,
+        input$opts_sightability)
 
 
     switch_response(input$opts_response)
