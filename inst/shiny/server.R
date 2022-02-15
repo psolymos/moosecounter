@@ -731,15 +731,15 @@ server <- function(input, output, session) {
     validate(
       need(input$survey_file,
            "First select a data set in the \"Data\" tab") %then%
-        need(length(models_list$m) > 0,
+        need(length(total_models_list$m) > 0,
              "First create Total Models in the Total > Models tab") %then%
         need(length(comp_models_list$m) > 0,
              "First create Composition Models in the Composition > Models tab"))
 
     tagList(
       selectInput("comp_pi_models1",
-                  label = "Total model to use",
-                  choices = names(models()), multiple = FALSE),
+                  label = "Total model(s) to use",
+                  choices = names(total_models()), multiple = TRUE),
       selectInput("comp_pi_models2",
                   label = "Composition model to use",
                   choices = names(comp_models()), multiple = FALSE))
@@ -748,8 +748,7 @@ server <- function(input, output, session) {
   output$comp_pi_average_ui <- renderUI({
     req(input$comp_pi_models1, input$comp_pi_models2)
 
-    if(length(input$comp_pi_models1) > 1 |
-       length(input$comp_pi_models2) > 1)  {
+    if(length(input$comp_pi_models1) > 1)  {
       radioButtons("comp_pi_average", label = "With multiple models...",
                    choices = c("Use best model" = FALSE,
                                "Average over models" = TRUE),
@@ -762,10 +761,11 @@ server <- function(input, output, session) {
       !is.null(input$comp_pi_models1) & !is.null(input$comp_pi_models2),
       "Please choose your model(s)"))
 
-    validate_models(models())
+    validate_models(total_models())
     validate_models(comp_models())
 
-    updateButton(session, "comp_pi_calc", style = "primary", label = "Calculate PI")
+    updateButton(session, "comp_pi_calc", style = "primary",
+                 label = "Calculate PI")
 
     if(is.null(input$comp_pi_average)) {
       do_avg <- FALSE
@@ -777,7 +777,7 @@ server <- function(input, output, session) {
       comp_pi = mc_predict_comp(
         total_model_id = input$comp_pi_models1,
         comp_model_id = input$comp_pi_models2,
-        model_list_total = map(models(), "model"),
+        model_list_total = map(total_models(), "model"),
         model_list_comp = map(comp_models(), "model"),
         x = survey_sub(),
         do_avg = do_avg),
