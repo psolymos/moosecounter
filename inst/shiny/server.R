@@ -232,10 +232,14 @@ server <- function(input, output, session) {
     # TESTING errors
     #if("C" %in% names(m)) m$C$dist <- "nope"
 
-    # Record a change in models()
+    # Record a change in total_models()
     isolate({
       if(is.null(input$total_pi_calc) || input$total_pi_calc > 0)
         updateButton(session, "total_pi_calc", style = "warning",
+                     label = "Models have changed<br>(re-run)")
+      # Also update comp pi
+      if(is.null(input$comp_pi_calc) || input$comp_pi_calc > 0)
+        updateButton(session, "comp_pi_calc", style = "warning",
                      label = "Models have changed<br>(re-run)")
     })
 
@@ -633,11 +637,11 @@ server <- function(input, output, session) {
     m[order(names(m))]
 
     # Record a change in comp_models()
-    # isolate({
-    #   if(is.null(input$pred_calc) || input$pred_calc > 0)
-    #     updateButton(session, "pred_calc", style = "warning",
-    #                  label = "Models have changed<br>(re-run)")
-    # })
+    isolate({
+      if(is.null(input$comp_pi_calc) || input$comp_pi_calc > 0)
+        updateButton(session, "comp_pi_calc", style = "warning",
+                     label = "Models have changed<br>(re-run)")
+    })
 
     # Run and add model and details
     # Evaluate directly to include args in the call itself, to prevent problems
