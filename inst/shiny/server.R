@@ -254,7 +254,12 @@ server <- function(input, output, session) {
 
   output$total_model_msgs <- renderUI({
     m <- map_chr(total_models(), ~{
-      if("try-error" %in% class(.$model)) .$model[1] else "no problem"})
+      if("try-error" %in% class(.$model)) {
+        .$model[1]
+      } else if(.$model$converged == FALSE) {
+        "did not converge"
+      } else "no problem"
+    })
     m <- m[m != "no problem"]
 
     if(length(m) > 0) {
