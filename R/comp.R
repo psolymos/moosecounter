@@ -86,6 +86,7 @@ mc_fit_comp_formula <- function(formula, x) {
     names(m@coefficients)[j] <- gsub(paste0(":", i),
       paste0(":", colnames(ymat)[i]), names(m@coefficients)[j])
   }
+  m@call$formula <- formula
   m
 }
 
@@ -107,16 +108,14 @@ mc_models_comp <- function(model_list_comp) {
   CompModelTab$delta <- CompModelTab$AIC - min(CompModelTab$AIC)
   rel <- exp(-0.5*CompModelTab$delta)
   CompModelTab$weight <- rel / sum(rel)
-  CompModelTab <- data.frame(t(CompModelTab))
-  #assign("CompModelTab", CompModelTab, envir=.GlobalEnv)
-  t(CompModelTab)
+  CompModelTab[order(CompModelTab$delta),]
 }
 
 
 #' Composition Prediction Intervals
 #'
-#' @param total_model_id model ID or model IDs for total moose model (can be multiple from `names(ml)`)
-#' @param comp_model_id model ID or model IDs for composition model (can be multiple from `names(ml)`)
+#' @param total_model_id model ID or model IDs for total moose model (can be multiple model IDs from `names(model_list_total)`)
+#' @param comp_model_id model ID or model IDs for composition model (single model ID from `names(model_list_comp)`)
 #' @param model_list_total named list of total moose models
 #' @param model_list_comp named list of total composition models
 #' @param x data frame
@@ -175,6 +174,8 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
   total_model_id0 <- total_model_id
   #total_fit <- ModelList[[total_model_id]]
 
+  if (length(comp_model_id) > 1L)
+    stop("comp_model_id must be of length 1")
   if (!(comp_model_id %in% names(model_list_comp)))
     stop(paste(comp_model_id, " model cannot be found"))
   Mult.model <- model_list_comp[[comp_model_id]]

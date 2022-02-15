@@ -80,6 +80,13 @@ CPI <- mc_predict_comp(
 pred_density_moose_CPI(CPI)
 
 
+## Gassaway
+
+y1 <- rpois(20, 50)
+y2 <- rpois(30, 5)
+N1 <- 40
+N2 <- 50
+mc_gassaway(y1, y2, N1, N2)
 
 
 ## PI
