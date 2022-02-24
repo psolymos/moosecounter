@@ -21,3 +21,11 @@ mc_gassaway(y1, y2, N1, N2)
 \description{
 Total Estimate with Gassaway Formula
 }
+\examples{
+y1 <- rpois(20, 50)
+y2 <- rpois(30, 5)
+N1 <- 40
+N2 <- 50
+mc_gassaway(y1, y2, N1, N2)
+
+}
