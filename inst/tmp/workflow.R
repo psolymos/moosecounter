@@ -76,9 +76,12 @@ CPI <- mc_predict_comp(
     model_list_comp=CML,
     x=x,
     do_avg=FALSE)
-# print results
+# print results: all rows
 pred_density_moose_CPI(CPI)
+## results for a subset of rows
+pred_density_moose_CPI(subset_CPI_data(CPI, 1:100))
 
+head(CPI$cells) # this is what we need
 
 ## Gassaway
 
