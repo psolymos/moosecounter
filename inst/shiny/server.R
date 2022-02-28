@@ -34,7 +34,8 @@ server <- function(input, output, session) {
                                FUN = function(x) paste(x, collapse = ", ")))
   })
 
-  observeEvent(input$opts_seed, set.seed(input$opts_seed))
+  observe(set.seed(input$opts_seed)) %>%
+    bindEvent(input$opts_seed)
 
 
   # Data ---------------------------------------
@@ -277,7 +278,7 @@ server <- function(input, output, session) {
   })
 
 
-  observeEvent(input$total_model_add, {
+  observe({
     req(input$total_model_dist, input$total_model_id, input$total_model_weighted)
 
     total_models_list$m[[input$total_model_id]] <- list(
@@ -285,7 +286,8 @@ server <- function(input, output, session) {
       weighted = as.logical(input$total_model_weighted),
       var_count = input$total_model_var_count,
       var_zero = input$total_model_var_zero)
-  })
+  }) %>%
+    bindEvent(input$total_model_add)
 
   output$total_model_table <- function() {
     imap_dfr(total_models(), ~{
@@ -322,15 +324,15 @@ server <- function(input, output, session) {
                                        "default")))
   })
 
-  # Dynamically create observeEvents for each model delete button
+  # Dynamically create observe() %>% bindEvent()s for each model delete button
   observe({
     req(length(total_models()) > 0)
 
     isolate({
       map(names(total_models()), ~ {
-        observeEvent(input[[paste0("total_delete_model_", .)]], {
-          total_models_list$m[[.]] <- NULL
-        }, ignoreInit = TRUE)
+        observe(total_models_list$m[[.]] <- NULL) %>%
+          bindEvent(input[[paste0("total_delete_model_", .)]],
+                    ignoreInit = TRUE)
       })
     })
 
@@ -405,7 +407,7 @@ server <- function(input, output, session) {
                  value = 1, min = 1, max = nrow(total_pi()$pi$data), step = 1)
   })
 
-  total_pi <- eventReactive(input$total_pi_calc, {
+  total_pi <- reactive({
     req(length(total_models()) > 0, input$total_pi_average)
     validate(need(input$total_pi_models, "Please choose your model(s)"))
     validate_models(total_models())
@@ -419,7 +421,8 @@ server <- function(input, output, session) {
                                do_boot = TRUE,
                                do_avg = as.logical(input$total_pi_average)),
          opts = opts())
-  })
+  }) %>%
+    bindEvent(input$total_pi_calc)
 
   # Tables
   output$total_pi_density <- function() {
@@ -546,9 +549,8 @@ server <- function(input, output, session) {
     })
   })
 
-  observeEvent(input$total_pi_reset, {
-    total_pi_data_proxy %>% selectRows(NULL)
-  })
+  observe(total_pi_data_proxy %>% selectRows(NULL)) %>%
+    bindEvent(input$total_pi_reset)
 
   # PI/bootstrap download
   get_xlslist <- reactive({
@@ -698,15 +700,15 @@ server <- function(input, output, session) {
                                        "default")))
   })
 
-  # Dynamically create observeEvents for each model delete button
+  # Dynamically create observe() %>% bindEvent()s for each model delete button
   observe({
     req(length(comp_models()) > 0)
 
     isolate({
       map(names(comp_models()), ~ {
-        observeEvent(input[[paste0("comp_delete_model_", .)]], {
-          comp_models_list$m[[.]] <- NULL
-        }, ignoreInit = TRUE)
+        observe(comp_models_list$m[[.]] <- NULL) %>%
+          bindEvent(input[[paste0("comp_delete_model_", .)]],
+                    ignoreInit = TRUE)
       })
     })
   })
