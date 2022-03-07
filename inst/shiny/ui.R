@@ -303,11 +303,16 @@ ui_comp_pi <- fluidRow(
 )
 
 
-## Subset/summarize ----------------------------------------------
+## Summary ----------------------------------------------
 # Coming soon!
 ui_comp_sum <- fluidRow(
   column(width = 12,
-         h2("Composition Summarize")
+         h2("Composition Summary"),
+         p(downloadButton(
+           "comp_boot_download", "Download results as Excel file")),
+         box(width = 12,
+             DTOutput("comp_pi_summary")
+         )
   )
 )
 
@@ -336,7 +341,7 @@ dashboardPage(
                menuSubItem("Explore", tabName = "comp_explore"),
                menuSubItem("Models", tabName = "comp_models"),
                menuSubItem("Prediction Intervals", tabName = "comp_pi"),
-               menuSubItem("Summarize", tabName = "comp_sum")),
+               menuSubItem("Summary", tabName = "comp_sum")),
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
     )
   ),

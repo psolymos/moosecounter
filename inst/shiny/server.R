@@ -826,4 +826,51 @@ server <- function(input, output, session) {
                comp_pi()$pi$boot_full) %>%
       datatable()
   })
+
+
+
+  ## Summary --------------------------------------------------
+  output$comp_pi_summary <- renderDT({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(comp_models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(input$comp_pi_calc > 0,
+             "First create the predictions in the \"Prediction Intervals\" tab"))
+
+    data.frame(SU_ID = comp_pi()$pi$data$SU_ID,
+               comp_pi()$pi$cells) %>%
+      datatable()
+  })
+
+  # Download summary
+  # PI/bootstrap download
+  comp_summary_xlsx <- reactive({
+    req(input$survey_file, comp_pi())
+    o <- mc_options()
+    o <- append(o, c("random seed" = input$opts_seed))
+
+    list(
+      Info = data.frame(moosecounter = paste0(
+        c("R package version: ", "Date of analysis: ", "File: "),
+        c(ver, format(Sys.time(), "%Y-%m-%d"), input$survey_file$name))),
+      Settings = data.frame(
+        Option = names(o),
+        Value = sapply(o, paste, sep="", collapse=", ")),
+      Summary = pred_density_moose_CPI(comp_pi()$pi),
+      Data = comp_pi()$pi$data,
+      Boot = comp_pi()$pi$boot_full)
+  })
+
+  output$comp_boot_download <- downloadHandler(
+    filename = function() {
+      paste0("Moose_Composition_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
+    },
+    content = function(file) {
+      write.xlsx(comp_summary_xlsx(), file = file, overwrite = TRUE)
+    },
+    contentType = "application/octet-stream"
+  )
+
 }
