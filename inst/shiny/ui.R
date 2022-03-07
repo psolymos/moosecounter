@@ -200,7 +200,7 @@ ui_total_pi <- fluidRow(
         tableOutput("total_pi_density")),
 
     box(width = 3, height = "225px",
-        title = "Options",
+        title = "Issues and Options",
         tableOutput("total_pi_options")),
 
     tabBox(width = 12, id = "total_pi_panel",

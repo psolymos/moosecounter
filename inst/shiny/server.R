@@ -148,8 +148,7 @@ server <- function(input, output, session) {
       str()
   })
 
-
-  # Explore ----------------------------------------------------------------
+  # Total Moose --------------------------------------------------------------
   ## Univariate Exploration --------------------------
   output$uni_var_ui <- renderUI({
     validate(need(input$survey_file,
@@ -187,14 +186,11 @@ server <- function(input, output, session) {
   }, res = 100)
 
 
-  # Total Moose --------------------------------------------------------------
-
   ## Add models -----------------------------------
 
   output$total_model_id_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
-
     if(length(total_models_list$m) == 0 || is.null(total_models())) {
       val <- "A"
     } else {
@@ -782,7 +778,7 @@ server <- function(input, output, session) {
     }
 
     list(
-      comp_pi = mc_predict_comp(
+      pi = mc_predict_comp(
         total_model_id = input$comp_pi_models1,
         comp_model_id = input$comp_pi_models2,
         model_list_total = map(total_models(), "model"),
@@ -796,7 +792,7 @@ server <- function(input, output, session) {
   # Tables
   output$comp_pi_density <- function() {
     req(comp_pi())
-    pred_density_moose_CPI(comp_pi()$comp_pi) %>%
+    pred_density_moose_CPI(comp_pi()$pi) %>%
       as.data.frame() %>%
       mutate(type = rownames(.)) %>%
       select(type, everything()) %>%
@@ -807,7 +803,7 @@ server <- function(input, output, session) {
   output$comp_pi_options <- function() {
     req(comp_pi())
 
-    comp_pi <- comp_pi()$comp_pi
+    comp_pi <- comp_pi()$pi
 
     tibble(Issues = if_else(length(comp_pi$issues) == 0, "None",
                             as.character(length(comp_pi$issues))),
