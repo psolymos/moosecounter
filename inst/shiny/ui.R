@@ -108,33 +108,33 @@ ui_data <- fluidRow(
   )
 )
 
-# Explore -----------------------------------------------------------------
-## Univariate ----------------
-ui_univar <- fluidRow(
-  column(width = 12,
-    h2("Univariate Exploration"),
-    box(height = "100px", uiOutput("uni_var_ui")),
-    box(height = "100px",
-        radioButtons("uni_dist", "Distribution", inline = TRUE,
-                     choices = c("P", "NB", "ZIP", "ZINB"),
-                     selected = "NB")),
-    plotOutput("uni_graph", width = "100%")
-  )
-)
-
-## Multivariate -------------------
-ui_multivar <- fluidRow(
-  column(width = 12,
-    h2("Multivariate Exploration"),
-    box(width = 6, uiOutput("multi_var_ui")),
-    box(width = 6, sliderInput("multi_alpha", label = "alpha level for split",
-                               value = 0.01,
-                               min = 0.001, max = 0.5, step = 0.01)),
-    box(width = 12, plotOutput("multi_graph"))
-  )
-)
-
 # Total --------------------------------------------------------------------
+## Explore - Univariate ----------------
+ui_total_univar <- fluidRow(
+  column(width = 12,
+         h2("Univariate Exploration"),
+         box(height = "100px", uiOutput("uni_var_ui")),
+         box(height = "100px",
+             radioButtons("uni_dist", "Distribution", inline = TRUE,
+                          choices = c("P", "NB", "ZIP", "ZINB"),
+                          selected = "NB")),
+         plotOutput("uni_graph", width = "100%")
+  )
+)
+
+## Explore - Multivariate -------------------
+ui_total_multivar <- fluidRow(
+  column(width = 12,
+         h2("Multivariate Exploration"),
+         box(width = 6, uiOutput("multi_var_ui")),
+         box(width = 6, sliderInput("multi_alpha", label = "alpha level for split",
+                                    value = 0.01,
+                                    min = 0.001, max = 0.5, step = 0.01)),
+         box(width = 12, plotOutput("multi_graph"))
+  )
+)
+
+
 ## Add model -------------------
 ui_total_models <- fluidRow(
   column(width = 12,
@@ -314,22 +314,20 @@ ui_comp_sum <- fluidRow(
 
 dashboardPage(
   dashboardHeader(title = paste("Moose Counter", ver[1])),
+  ## Sidebar ----------------
   dashboardSidebar(
     tags$script(src = "tips.js"),
     sidebarMenu(id = "menu",
       menuItem("Home", tabName = "home", icon=icon("home")),
       menuItem("Settings", tabName = "settings", icon=icon("cog")),
       menuItem("Data", tabName = "data", icon=icon("table")),
-      menuItem("Explore", tabName = "explore",
-               startExpanded=FALSE, icon=icon("chart-bar"),
-        menuSubItem("Univariate", tabName = "univar"),
-        menuSubItem("Multivariate", tabName = "multivar")
-      ),
       menuItem("Total", tabName = "total", icon=icon("circle"),
-        menuSubItem("Models", tabName = "total_models"),
-        menuSubItem("Residuals", tabName = "total_residuals"),
-        menuSubItem("Prediction Intervals", tabName = "total_pi"),
-        menuSubItem("Explore Predictions", tabName = "total_pi_map")
+               menuSubItem("Explore - Univariate", tabName = "total_univar"),
+               menuSubItem("Explore - Multivariate", tabName = "total_multivar"),
+               menuSubItem("Models", tabName = "total_models"),
+               menuSubItem("Residuals", tabName = "total_residuals"),
+               menuSubItem("Prediction Intervals", tabName = "total_pi"),
+               menuSubItem("Explore Predictions", tabName = "total_pi_map")
       ),
       menuItem("Composition", tabName = "composition", icon = icon("chart-pie"),
                menuSubItem("Explore", tabName = "comp_explore"),
@@ -339,14 +337,16 @@ dashboardPage(
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
     )
   ),
+
+  ## Body -----------------------
   dashboardBody(
     tabItems(
       tabItem("home", ui_home),
       tabItem("docs", ui_docs),
       tabItem("data", ui_data),
       tabItem("settings", ui_settings),
-      tabItem("univar", ui_univar),
-      tabItem("multivar", ui_multivar),
+      tabItem("total_univar", ui_total_univar),
+      tabItem("total_multivar", ui_total_multivar),
       tabItem("total_models", ui_total_models),
       tabItem("total_residuals", ui_total_residuals),
       tabItem("total_pi", ui_total_pi),
