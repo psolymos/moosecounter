@@ -396,8 +396,14 @@ mc_summarize_composition <- function(all_ratios_list) {
     list(total=dtot, cells=dcell, raw=d)
 }
 
-# subset comp PI data object
-subsetCpiData <- function(CPI, ss) {
+
+#' Subset composition PI data object
+#'
+#' @param CPI Composition PI output
+#' @param ss a subset of rows (logical or numeric vector)
+#'
+#' @export
+subset_CPI_data <- function(CPI, ss) {
     if (missing(ss))
         ss <- rep(TRUE, nrow(CPI$data))
     opts <- getOption("moose_options")
