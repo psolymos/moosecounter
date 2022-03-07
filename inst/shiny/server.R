@@ -820,4 +820,10 @@ server <- function(input, output, session) {
       kable_styling(bootstrap_options = "condensed")
   }
 
+  # Bootstraps table
+  output$comp_pi_boot <- renderDT({
+    data.frame(SU_ID = comp_pi()$pi$data$SU_ID,
+               comp_pi()$pi$boot_full) %>%
+      datatable()
+  })
 }

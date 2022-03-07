@@ -283,19 +283,22 @@ ui_comp_pi <- fluidRow(
   column(width = 12,
          h2("Composition Prediction Intervals"),
 
-         box(width = 3,
-             uiOutput("comp_pi_models_ui"),
-             uiOutput("comp_pi_average_ui"),
-             bsButton("comp_pi_calc", "Calculate PI",
-                      style = "primary")),
+         column(width = 3,
+                box(width = 12,
+                    uiOutput("comp_pi_models_ui"),
+                    uiOutput("comp_pi_average_ui"),
+                    bsButton("comp_pi_calc", "Calculate PI",
+                             style = "primary")),
+                box(width = 12,
+                    title = "Issues and Options",
+                    tableOutput("comp_pi_options"))),
 
-         box(width = 5,
-                    title = "Summary",
-                    tableOutput("comp_pi_density")),
-
-         box(width = 4,
-             title = "Issues and Options",
-             tableOutput("comp_pi_options"))
+         tabBox(width = 9,
+                tabPanel(title = "Summary",
+                         tableOutput("comp_pi_density")),
+                tabPanel(title = "Bootstrap Results",
+                         DTOutput("comp_pi_boot"))
+         )
   )
 )
 
