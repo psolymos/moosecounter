@@ -330,8 +330,9 @@ server <- function(input, output, session) {
 
     isolate({
       map(names(total_models()), ~ {
-        observe(total_models_list$m[[.]] <- NULL) %>%
-          bindEvent(input[[paste0("total_delete_model_", .)]],
+        m <- .
+        observe(total_models_list$m[[m]] <- NULL) %>%
+          bindEvent(input[[paste0("total_delete_model_", m)]],
                     ignoreInit = TRUE)
       })
     })
@@ -706,8 +707,9 @@ server <- function(input, output, session) {
 
     isolate({
       map(names(comp_models()), ~ {
-        observe(comp_models_list$m[[.]] <- NULL) %>%
-          bindEvent(input[[paste0("comp_delete_model_", .)]],
+        m <- .
+        observe(comp_models_list$m[[m]] <- NULL) %>%
+          bindEvent(input[[paste0("comp_delete_model_", m)]],
                     ignoreInit = TRUE)
       })
     })
