@@ -304,14 +304,13 @@ ui_comp_pi <- fluidRow(
 
 
 ## Summary ----------------------------------------------
-# Coming soon!
 ui_comp_sum <- fluidRow(
   column(width = 12,
          h2("Composition Summary"),
          p(downloadButton(
            "comp_boot_download", "Download results as Excel file")),
-         box(width = 12, height = "100px",
-             DTOutput("comp_pi_summary")
+         box(width = 12,
+             div(DTOutput("comp_pi_summary"), style = "min-height:100px")
          )
   )
 )
