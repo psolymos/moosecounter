@@ -280,59 +280,61 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
             BUnsurvey.data$MOOSE_TOTA <- PUnsurvey.data
             newdata1 <- BUnsurvey.data[BUnsurvey.data$MOOSE_TOTA != 0,]
             NS1 <- nrow(newdata1)
+            if (NS1 > 0) { # loop 4
 
-            pred.prob <- VGAM::predict(Mult.model, newdata=newdata1, type="response")
-            K <- ncol(pred.prob)
+              pred.prob <- VGAM::predict(Mult.model, newdata=newdata1, type="response")
+              K <- ncol(pred.prob)
 
-            pred.numbers1 <- matrix(-100,NS1,K)
+              pred.numbers1 <- matrix(-100,NS1,K)
 
-            for (i in 1:NS1){
-      	       pred.numbers1[i,] <- stats::rmultinom(1, newdata1$MOOSE_TOTA[i], pred.prob[i,])
-             }
+              for (i in 1:NS1){
+        	       pred.numbers1[i,] <- stats::rmultinom(1, newdata1$MOOSE_TOTA[i], pred.prob[i,])
+               }
 
-            pred.numbers <- matrix(0,NS,K)
-            pred.numbers[BUnsurvey.data$MOOSE_TOTA != 0,] <- pred.numbers1
-            if (opts$response == "total") {
-                pred.numbers <- data.frame(
-                  BULL_LARGE = pred.numbers[,1],
-                  BULL_SMALL = pred.numbers[,2],
-                  COW_1C = pred.numbers[,3],
-                  COW_2C = pred.numbers[,4],
-                  LONE_COW = pred.numbers[,5],
-                  TOT_CALVES = pred.numbers[,6])
-            } else {
-                pred.numbers <- data.frame(
-                  BULL_LARGE = 0,
-                  BULL_SMALL = 0,
-                  COW_1C = pred.numbers[,1],
-                  COW_2C = pred.numbers[,2],
-                  LONE_COW = pred.numbers[,3],
-                  TOT_CALVES = pred.numbers[,4])
-            }
+              pred.numbers <- matrix(0,NS,K)
+              pred.numbers[BUnsurvey.data$MOOSE_TOTA != 0,] <- pred.numbers1
+              if (opts$response == "total") {
+                  pred.numbers <- data.frame(
+                    BULL_LARGE = pred.numbers[,1],
+                    BULL_SMALL = pred.numbers[,2],
+                    COW_1C = pred.numbers[,3],
+                    COW_2C = pred.numbers[,4],
+                    LONE_COW = pred.numbers[,5],
+                    TOT_CALVES = pred.numbers[,6])
+              } else {
+                  pred.numbers <- data.frame(
+                    BULL_LARGE = 0,
+                    BULL_SMALL = 0,
+                    COW_1C = pred.numbers[,1],
+                    COW_2C = pred.numbers[,2],
+                    LONE_COW = pred.numbers[,3],
+                    TOT_CALVES = pred.numbers[,4])
+              }
 
-            all_ratios_list$Total.pred[,b] <- c(Survey.data$MOOSE_TOTA,
-                rowSums(pred.numbers))
-            all_ratios_list$Total_LB[,b] <- c(Survey.data$BULL_LARGE,
-                pred.numbers$BULL_LARGE)
-            all_ratios_list$Total_Calves[,b] <- c(Survey.data$TOT_CALVES,
-                pred.numbers$TOT_CALVES)
-            all_ratios_list$Total_Cows[,b] <- c(
-                Survey.data$COW_1C +
-                Survey.data$COW_2C +
-                Survey.data$LONE_COW,
-                pred.numbers$COW_1C + pred.numbers$COW_2C + pred.numbers$LONE_COW)
-            all_ratios_list$Total_SB[,b] <- c(Survey.data$BULL_SMALL,
-                pred.numbers$BULL_SMALL)
-            all_ratios_list$Total_Yrlings[,b] <- 2 * all_ratios_list$Total_SB[,b]
-            all_ratios_list$Total_Mature_Cows[,b] <-
-                all_ratios_list$Total_Cows[,b] - all_ratios_list$Total_SB[,b]
-            all_ratios_list$Total_1C[,b] <- c(Survey.data$COW_1C,
-                pred.numbers$COW_1C)
-            all_ratios_list$Total_2C[,b] <- c(Survey.data$COW_2C,
-                pred.numbers$COW_2C)
+              all_ratios_list$Total.pred[,b] <- c(Survey.data$MOOSE_TOTA,
+                  rowSums(pred.numbers))
+              all_ratios_list$Total_LB[,b] <- c(Survey.data$BULL_LARGE,
+                  pred.numbers$BULL_LARGE)
+              all_ratios_list$Total_Calves[,b] <- c(Survey.data$TOT_CALVES,
+                  pred.numbers$TOT_CALVES)
+              all_ratios_list$Total_Cows[,b] <- c(
+                  Survey.data$COW_1C +
+                  Survey.data$COW_2C +
+                  Survey.data$LONE_COW,
+                  pred.numbers$COW_1C + pred.numbers$COW_2C + pred.numbers$LONE_COW)
+              all_ratios_list$Total_SB[,b] <- c(Survey.data$BULL_SMALL,
+                  pred.numbers$BULL_SMALL)
+              all_ratios_list$Total_Yrlings[,b] <- 2 * all_ratios_list$Total_SB[,b]
+              all_ratios_list$Total_Mature_Cows[,b] <-
+                  all_ratios_list$Total_Cows[,b] - all_ratios_list$Total_SB[,b]
+              all_ratios_list$Total_1C[,b] <- c(Survey.data$COW_1C,
+                  pred.numbers$COW_1C)
+              all_ratios_list$Total_2C[,b] <- c(Survey.data$COW_2C,
+                  pred.numbers$COW_2C)
 
-          pbapply::setpb(pb, b)
-            b <- b + 1
+            pbapply::setpb(pb, b)
+              b <- b + 1
+            } # loop 4
           } # loop 3
         } # loop 2
     } else { # if
