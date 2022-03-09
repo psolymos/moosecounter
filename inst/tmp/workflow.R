@@ -236,3 +236,39 @@ summary(mZINB)
 
 aic <- AIC(mP, mZIP, mNB, mZINB)
 aic$dAIC <- aic$AIC - min(aic$AIC)
+
+## issue
+
+library(moosecounter)
+#> This is moosecounter 0.5-1    2022-01-31
+
+## modify options as needed
+mc_options(B=20)
+
+## load/read data set
+x <- read.csv(system.file("extdata", "UKH2017_MMU_Querried_data_for_Analysis_Final_3.csv", package = "moosecounter"))
+switch_response("total")
+x <- mc_update_total(x)
+
+# Total models
+ML <- list()
+ML[["A"]] <- mc_fit_total(x, c("MMU_ID", "AllNeedleWet", "LKStrat_01", "DEM800to1200m"),
+                          dist="NB", weighted = FALSE)
+ML[["B"]] <- mc_fit_total(x, c("MMU_ID", "AllNeedleWet", "LKStrat_01", "DEM800to1200m"),
+                          zi_vars = c("DEM800to1200m", "Fire1982to2012", "NALC_DesShrMix"),
+                          dist = "NB", weighted = FALSE)
+
+# Comp models
+mc_check_comp(x)
+CML <- list()
+CML[["A"]] <- mc_fit_comp(x, vars = c("DEM800to1200m", "Fire1982to2012", "NALC_DesShrMix"))
+
+# Error
+CPI <- mc_predict_comp(
+  total_model_id = c("A", "B"),
+  comp_model_id = "A",
+  model_list_total = ML,
+  model_list_comp = CML,
+  x=x,
+  do_avg=TRUE)
+
