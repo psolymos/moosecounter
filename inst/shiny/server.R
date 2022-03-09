@@ -201,8 +201,6 @@ server <- function(input, output, session) {
   })
 
   output$total_model_var_count_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
     select_explanatory("total_model_var_count",
                        "Count Variables",
                        survey_sub(),
@@ -874,3 +872,6 @@ server <- function(input, output, session) {
   )
 
 }
+
+
+
