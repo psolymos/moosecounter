@@ -8,13 +8,6 @@ ui_home <- fluidRow(
   )
 )
 
-# Docs -------------------
-ui_docs <- fluidRow(
-  column(width=12,
-    includeMarkdown("docs.md")
-  )
-)
-
 # Setting -------------------
 ui_settings <- fluidRow(
   column(width=12,
@@ -316,6 +309,16 @@ ui_comp_sum <- fluidRow(
 )
 
 
+# Docs -------------------
+ui_docs <- fluidRow(
+  column(width=12,
+         h2("Documentation"),
+         box(width = 12, class = "docs",
+             includeMarkdown("docs.md")
+         )
+  )
+)
+
 
 # Combine -------------------------------------------------------------------
 
@@ -323,6 +326,7 @@ dashboardPage(
   dashboardHeader(title = paste("Moose Counter", ver[1])),
   ## Sidebar ----------------
   dashboardSidebar(
+    tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
     tags$script(src = "tips.js"),
     sidebarMenu(id = "menu",
       menuItem("Home", tabName = "home", icon=icon("home")),
@@ -361,7 +365,8 @@ dashboardPage(
       tabItem("comp_explore", ui_comp_explore),
       tabItem("comp_models", ui_comp_models),
       tabItem("comp_pi", ui_comp_pi),
-      tabItem("comp_sum", ui_comp_sum)
+      tabItem("comp_sum", ui_comp_sum),
+      tabItem("docs", ui_docs)
     )
   )
 )
