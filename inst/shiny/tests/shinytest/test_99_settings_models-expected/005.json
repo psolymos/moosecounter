@@ -1,27 +1,13 @@
 {
   "input": {
+    "comp_model_add": 0,
+    "comp_pi_calc": 0,
     "data_panel": "Interactive table",
-    "delete_model_A": 0,
-    "delete_model_B": 0,
-    "delete_model_C": 0,
-    "delete_model_D": 0,
     "filter_SURVEY_ID": null,
     "filter_SURVEY_NAM": null,
     "filter_SURVEY_YEA": null,
-    "menu": "addmodel",
-    "model_add": 4,
-    "model_dist": "ZINB",
-    "model_id": "E",
-    "model_var_count": [
-      "NALC_AllNeedleWet",
-      "Fire8212_DEM815_Sub"
-    ],
-    "model_var_zero": [
-      "NALC_AllNeedleWet",
-      "DShMiFires815_Sub"
-    ],
-    "model_weighted": "TRUE",
-    "multi_alpha": 0.1,
+    "menu": "total_models",
+    "multi_alpha": 0.01,
     "opts_alpha": "0.1",
     "opts_b": 500,
     "opts_method": "L-BFGS-B",
@@ -29,11 +15,6 @@
     "opts_seed": 4323,
     "opts_sightability": 0.1,
     "opts_wscale": 1,
-    "pi_panel": "Diagnostic Plots",
-    "pred_average": "TRUE",
-    "pred_calc": 0,
-    "pred_col": "observed_values",
-    "pred_reset": 0,
     "sidebarCollapsed": false,
     "sidebarItemExpanded": "Total",
     "survey_factors": null,
@@ -458,8 +439,306 @@
     ],
     "survey_preview_rows_selected": null,
     "survey_preview_search": "",
-    "survey_preview_state": null,
-    "uni_dist": "P"
+    "survey_preview_state": {
+      "time": 1646941783873,
+      "start": 0,
+      "length": 10,
+      "order": [
+
+      ],
+      "search": {
+        "search": "",
+        "smart": true,
+        "regex": false,
+        "caseInsensitive": true
+      },
+      "columns": [
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        }
+      ]
+    },
+    "total_delete_model_A": 0,
+    "total_delete_model_B": 0,
+    "total_delete_model_C": 0,
+    "total_delete_model_D": 0,
+    "total_model_add": 4,
+    "total_model_dist": "ZINB",
+    "total_model_id": "E",
+    "total_model_var_count": [
+      "NALC_AllNeedleWet",
+      "Fire8212_DEM815_Sub"
+    ],
+    "total_model_var_zero": [
+      "NALC_AllNeedleWet",
+      "DShMiFires815_Sub"
+    ],
+    "total_model_weighted": "TRUE",
+    "total_pi_average": "TRUE",
+    "total_pi_bins": 5,
+    "total_pi_calc": 0,
+    "total_pi_col": "observed_values",
+    "total_pi_panel": "Diagnostic Plots",
+    "total_pi_reset": 0,
+    "uni_dist": "NB"
   },
   "output": {
     "filters_ui": {
@@ -484,95 +763,7 @@
         }
       ]
     },
-    "model_aic1": "<table  class = 'table shiny-table table- spacing-s' style = 'width:auto;'>\n<thead> <tr> <th style='text-align: left;'>  <\/th> <th style='text-align: right;'> AIC <\/th> <th style='text-align: right;'> df <\/th> <th style='text-align: right;'> logLik <\/th> <th style='text-align: right;'> delta <\/th> <th style='text-align: right;'> weight <\/th> <th style='text-align: right;'> Total_Cows <\/th> <th style='text-align: right;'> Total_Area_km2 <\/th> <th style='text-align: right;'> Density_Cows_Per_km2 <\/th> <th style='text-align: right;'> count_Intercept <\/th> <th style='text-align: right;'> count_NALC_AllNeedleWet <\/th> <th style='text-align: right;'> count_Fire8212_DEM815_Sub <\/th> <th style='text-align: right;'> zero_Intercept <\/th> <th style='text-align: right;'> zero_NALC_AllNeedleWet <\/th> <th style='text-align: right;'> zero_DShMiFires815_Sub <\/th>  <\/tr> <\/thead> <tbody>\n  <tr> <td> D <\/td> <td align=\"right\"> 471.08 <\/td> <td align=\"right\"> 6.00 <\/td> <td align=\"right\"> -228.54 <\/td> <td align=\"right\"> 0.00 <\/td> <td align=\"right\"> 0.54 <\/td> <td align=\"right\"> 4500.77 <\/td> <td align=\"right\"> 5956.20 <\/td> <td align=\"right\"> 0.76 <\/td> <td align=\"right\"> 0.18 <\/td> <td align=\"right\"> -0.01 <\/td> <td align=\"right\"> 1.29 <\/td> <td align=\"right\"> -5.07 <\/td> <td align=\"right\"> 6.62 <\/td> <td align=\"right\"> -0.07 <\/td> <\/tr>\n  <tr> <td> B <\/td> <td align=\"right\"> 471.36 <\/td> <td align=\"right\"> 6.00 <\/td> <td align=\"right\"> -231.68 <\/td> <td align=\"right\"> 0.28 <\/td> <td align=\"right\"> 0.46 <\/td> <td align=\"right\"> 4625.77 <\/td> <td align=\"right\"> 5956.20 <\/td> <td align=\"right\"> 0.78 <\/td> <td align=\"right\"> 0.47 <\/td> <td align=\"right\"> -1.17 <\/td> <td align=\"right\"> 1.00 <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -100.00 <\/td> <\/tr>\n  <tr> <td> C <\/td> <td align=\"right\"> 520.20 <\/td> <td align=\"right\"> 6.00 <\/td> <td align=\"right\"> -254.10 <\/td> <td align=\"right\"> 49.12 <\/td> <td align=\"right\"> 0.00 <\/td> <td align=\"right\"> 4329.96 <\/td> <td align=\"right\"> 5956.20 <\/td> <td align=\"right\"> 0.73 <\/td> <td align=\"right\"> 0.77 <\/td> <td align=\"right\"> -0.32 <\/td> <td align=\"right\"> 0.84 <\/td> <td align=\"right\"> -0.34 <\/td> <td align=\"right\"> 1.74 <\/td> <td align=\"right\"> -1.58 <\/td> <\/tr>\n  <tr> <td> A <\/td> <td align=\"right\"> 578.18 <\/td> <td align=\"right\"> 6.00 <\/td> <td align=\"right\"> -286.09 <\/td> <td align=\"right\"> 107.10 <\/td> <td align=\"right\"> 0.00 <\/td> <td align=\"right\"> 4542.01 <\/td> <td align=\"right\"> 5956.20 <\/td> <td align=\"right\"> 0.76 <\/td> <td align=\"right\"> 0.40 <\/td> <td align=\"right\"> -1.14 <\/td> <td align=\"right\"> 1.13 <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -100.00 <\/td> <\/tr>\n   <\/tbody> <\/table>",
-    "model_delete_ui": {
-      "html": "<button id=\"delete_model_A\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  A\n<\/button>\n<button id=\"delete_model_B\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  B\n<\/button>\n<button id=\"delete_model_C\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  C\n<\/button>\n<button id=\"delete_model_D\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  D\n<\/button>",
-      "deps": [
-        {
-          "name": "font-awesome",
-          "version": "5.15.3",
-          "src": {
-            "href": "font-awesome-5.15.3"
-          },
-          "meta": null,
-          "script": null,
-          "stylesheet": [
-            "css/all.min.css",
-            "css/v4-shims.min.css"
-          ],
-          "head": null,
-          "attachment": null,
-          "all_files": true
-        },
-        {
-          "name": "shinyBS",
-          "version": "0.61",
-          "src": {
-            "href": "sbs"
-          },
-          "meta": null,
-          "script": "shinyBS.js",
-          "stylesheet": "shinyBS.css",
-          "head": null,
-          "attachment": null,
-          "package": null,
-          "all_files": true
-        }
-      ]
-    },
-    "model_id_ui": {
-      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"model_id-label\" for=\"model_id\">Model ID<\/label>\n  <input id=\"model_id\" type=\"text\" class=\"form-control\" value=\"E\"/>\n<\/div>",
-      "deps": [
-
-      ]
-    },
-    "model_msgs": null,
-    "model_table": "<table class=\"table\" style=\"margin-left: auto; margin-right: auto;\">\n <thead>\n  <tr>\n   <th style=\"text-align:left;\"> Model <\/th>\n   <th style=\"text-align:left;\"> Count.variables <\/th>\n   <th style=\"text-align:left;\"> Zero.variables <\/th>\n   <th style=\"text-align:left;\"> Distribution <\/th>\n   <th style=\"text-align:left;\"> Weighted <\/th>\n   <th style=\"text-align:left;\"> method <\/th>\n   <th style=\"text-align:left;\"> response <\/th>\n  <\/tr>\n <\/thead>\n<tbody>\n  <tr>\n   <td style=\"text-align:left;\"> A <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> P <\/td>\n   <td style=\"text-align:left;\"> FALSE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n  <tr>\n   <td style=\"text-align:left;\"> B <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> NB <\/td>\n   <td style=\"text-align:left;\"> FALSE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n  <tr>\n   <td style=\"text-align:left;\"> C <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> ZIP <\/td>\n   <td style=\"text-align:left;\"> TRUE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n  <tr>\n   <td style=\"text-align:left;\"> D <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> ZINB <\/td>\n   <td style=\"text-align:left;\"> TRUE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n<\/tbody>\n<\/table>",
-    "model_var_count_ui": {
-      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"model_var_count-label\" for=\"model_var_count\">Count Variables<\/label>\n  <div>\n    <select id=\"model_var_count\" multiple=\"multiple\"><option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option>\n<option value=\"NALC_AllNeedleWet\">NALC_AllNeedleWet<\/option>\n<option value=\"DShMiFires815_Sub\">DShMiFires815_Sub<\/option>\n<option value=\"Fire8212_DEM815_Sub\">Fire8212_DEM815_Sub<\/option><\/select>\n    <script type=\"application/json\" data-for=\"model_var_count\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
-      "deps": [
-        {
-          "name": "selectize",
-          "version": "0.12.4",
-          "src": {
-            "href": "shared/selectize"
-          },
-          "meta": null,
-          "script": [
-            "js/selectize.min.js",
-            "accessibility/js/selectize-plugin-a11y.min.js"
-          ],
-          "stylesheet": "css/selectize.bootstrap3.css",
-          "head": null,
-          "attachment": null,
-          "package": null,
-          "all_files": true
-        }
-      ]
-    },
-    "model_var_zero_ui": {
-      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"model_var_zero-label\" for=\"model_var_zero\">Zero Variables<\/label>\n  <div>\n    <select id=\"model_var_zero\" multiple=\"multiple\"><option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option>\n<option value=\"NALC_AllNeedleWet\">NALC_AllNeedleWet<\/option>\n<option value=\"DShMiFires815_Sub\">DShMiFires815_Sub<\/option>\n<option value=\"Fire8212_DEM815_Sub\">Fire8212_DEM815_Sub<\/option><\/select>\n    <script type=\"application/json\" data-for=\"model_var_zero\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
-      "deps": [
-        {
-          "name": "selectize",
-          "version": "0.12.4",
-          "src": {
-            "href": "shared/selectize"
-          },
-          "meta": null,
-          "script": [
-            "js/selectize.min.js",
-            "accessibility/js/selectize-plugin-a11y.min.js"
-          ],
-          "stylesheet": "css/selectize.bootstrap3.css",
-          "head": null,
-          "attachment": null,
-          "package": null,
-          "all_files": true
-        }
-      ]
-    },
-    "opts": "<table  class = 'table shiny-table table- spacing-s' style = 'width:auto;'>\n<thead> <tr> <th style='text-align: left;'> option <\/th> <th style='text-align: left;'> values <\/th>  <\/tr> <\/thead> <tbody>\n  <tr> <td> method <\/td> <td> L-BFGS-B <\/td> <\/tr>\n  <tr> <td> B <\/td> <td> 500 <\/td> <\/tr>\n  <tr> <td> MAXCELL <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> alpha <\/td> <td> 0.1 <\/td> <\/tr>\n  <tr> <td> wscale <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> MINCELL <\/td> <td> 10 <\/td> <\/tr>\n  <tr> <td> Ntot <\/td> <td> COW_TOTA <\/td> <\/tr>\n  <tr> <td> srv_name <\/td> <td> Sampled <\/td> <\/tr>\n  <tr> <td> srv_value <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> area_srv <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> Area <\/td> <td> AREA_KM <\/td> <\/tr>\n  <tr> <td> sightability <\/td> <td> 0.1 <\/td> <\/tr>\n  <tr> <td> response <\/td> <td> cows <\/td> <\/tr>\n  <tr> <td> xy <\/td> <td> CENTRLON, CENTRLAT <\/td> <\/tr>\n  <tr> <td> composition <\/td> <td> LONE_COW, COW_1C, COW_2C <\/td> <\/tr>\n   <\/tbody> <\/table>",
+    "opts": "<table  class = 'table shiny-table table- spacing-s' style = 'width:auto;'>\n<thead> <tr> <th style='text-align: left;'> option <\/th> <th style='text-align: left;'> name <\/th> <th style='text-align: left;'> values <\/th>  <\/tr> <\/thead> <tbody>\n  <tr> <td> Optimization algorithm <\/td> <td> method <\/td> <td> L-BFGS-B <\/td> <\/tr>\n  <tr> <td> Number of bootstrap runs <\/td> <td> B <\/td> <td> 500 <\/td> <\/tr>\n  <tr> <td> Max total abundance in cells <\/td> <td> MAXCELL <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> Type I error rate for PI <\/td> <td> alpha <\/td> <td> 0.1 <\/td> <\/tr>\n  <tr> <td> Weight <\/td> <td> wscale <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> Min abundance for composition in cells <\/td> <td> MINCELL <\/td> <td> 10 <\/td> <\/tr>\n  <tr> <td>  <\/td> <td> Ntot <\/td> <td> COW_TOTA <\/td> <\/tr>\n  <tr> <td> Filtering variable <\/td> <td> srv_name <\/td> <td> Sampled <\/td> <\/tr>\n  <tr> <td> Filtering value <\/td> <td> srv_value <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> Comun indicating survey areas <\/td> <td> area_srv <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> Area <\/td> <td> Area <\/td> <td> AREA_KM <\/td> <\/tr>\n  <tr> <td> Sightability <\/td> <td> sightability <\/td> <td> 0.1 <\/td> <\/tr>\n  <tr> <td> Response variable <\/td> <td> response <\/td> <td> cows <\/td> <\/tr>\n  <tr> <td> Long/Lat <\/td> <td> xy <\/td> <td> CENTRLON, CENTRLAT <\/td> <\/tr>\n  <tr> <td> Composition variables <\/td> <td> composition <\/td> <td> LONE_COW, COW_1C, COW_2C <\/td> <\/tr>\n   <\/tbody> <\/table>",
     "survey_factors_ui": {
       "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"survey_factors-label\" for=\"survey_factors\">Convert integer to categorical<\/label>\n  <div>\n    <select id=\"survey_factors\" multiple=\"multiple\"><option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option><\/select>\n    <script type=\"application/json\" data-for=\"survey_factors\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
       "deps": [
@@ -620,8 +811,10 @@
     "survey_preview": {
       "x": {
         "filter": "none",
+        "vertical": false,
         "container": "<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>SURVEY_NAM<\/th>\n      <th>SURVEY_YEA<\/th>\n      <th>SURVEY_ID<\/th>\n      <th>S_SET_ID<\/th>\n      <th>SU_ID<\/th>\n      <th>ID<\/th>\n      <th>SUS_<\/th>\n      <th>SUS_ID<\/th>\n      <th>CENTRLAT<\/th>\n      <th>CENTRLON<\/th>\n      <th>AREA_KM<\/th>\n      <th>Sampled<\/th>\n      <th>BULL_SMALL<\/th>\n      <th>BULL_LARGE<\/th>\n      <th>LONE_COW<\/th>\n      <th>COW_1C<\/th>\n      <th>COW_2C<\/th>\n      <th>LONE_CALF<\/th>\n      <th>UNKNOWN_AG<\/th>\n      <th>MOOSE_TOTA<\/th>\n      <th>TotalMoose123<\/th>\n      <th>Phase_1<\/th>\n      <th>TKStrat_01<\/th>\n      <th>NALC_AllNeedleWet<\/th>\n      <th>DShMiFires815_Sub<\/th>\n      <th>Fire8212_DEM815_Sub<\/th>\n      <th>srv<\/th>\n      <th>COW_TOTA<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
         "options": {
+          "scrollX": true,
           "columnDefs": [
             {
               "className": "dt-right",
@@ -685,10 +878,23 @@
       ],
       "deps": [
         {
-          "name": "dt-core",
-          "version": "1.10.20",
+          "name": "jquery",
+          "version": "3.6.0",
           "src": {
-            "href": "dt-core-1.10.20"
+            "href": "jquery-3.6.0"
+          },
+          "meta": null,
+          "script": "jquery-3.6.0.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "dt-core",
+          "version": "1.11.3",
+          "src": {
+            "href": "dt-core-1.11.3"
           },
           "meta": null,
           "script": "js/jquery.dataTables.min.js",
@@ -702,29 +908,104 @@
           "all_files": false
         },
         {
-          "name": "jquery",
-          "version": "3.5.1",
+          "name": "crosstalk",
+          "version": "1.2.0",
           "src": {
-            "href": "jquery-3.5.1"
+            "href": "crosstalk-1.2.0"
           },
           "meta": null,
-          "script": "jquery.min.js",
-          "stylesheet": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "total_model_aic1": "<table  class = 'table shiny-table table- spacing-s' style = 'width:auto;'>\n<thead> <tr> <th style='text-align: left;'>  <\/th> <th style='text-align: right;'> A <\/th> <th style='text-align: right;'> C <\/th> <th style='text-align: right;'> B <\/th> <th style='text-align: right;'> D <\/th>  <\/tr> <\/thead> <tbody>\n  <tr> <td> AIC <\/td> <td align=\"right\"> 578.18 <\/td> <td align=\"right\"> 520.20 <\/td> <td align=\"right\"> 471.36 <\/td> <td align=\"right\"> 471.08 <\/td> <\/tr>\n  <tr> <td> BIC <\/td> <td align=\"right\"> 586.90 <\/td> <td align=\"right\"> 537.63 <\/td> <td align=\"right\"> 482.98 <\/td> <td align=\"right\"> 491.42 <\/td> <\/tr>\n  <tr> <td> df <\/td> <td align=\"right\"> 6.00 <\/td> <td align=\"right\"> 6.00 <\/td> <td align=\"right\"> 6.00 <\/td> <td align=\"right\"> 6.00 <\/td> <\/tr>\n  <tr> <td> logLik <\/td> <td align=\"right\"> -286.09 <\/td> <td align=\"right\"> -254.10 <\/td> <td align=\"right\"> -231.68 <\/td> <td align=\"right\"> -228.54 <\/td> <\/tr>\n  <tr> <td> delta <\/td> <td align=\"right\"> 107.10 <\/td> <td align=\"right\"> 49.12 <\/td> <td align=\"right\"> 0.28 <\/td> <td align=\"right\"> 0.00 <\/td> <\/tr>\n  <tr> <td> weight <\/td> <td align=\"right\"> 0.00 <\/td> <td align=\"right\"> 0.00 <\/td> <td align=\"right\"> 0.46 <\/td> <td align=\"right\"> 0.54 <\/td> <\/tr>\n  <tr> <td> Total_Cows <\/td> <td align=\"right\"> 4542.01 <\/td> <td align=\"right\"> 4329.96 <\/td> <td align=\"right\"> 4625.77 <\/td> <td align=\"right\"> 4500.77 <\/td> <\/tr>\n  <tr> <td> Total_Area_km2 <\/td> <td align=\"right\"> 5956.20 <\/td> <td align=\"right\"> 5956.20 <\/td> <td align=\"right\"> 5956.20 <\/td> <td align=\"right\"> 5956.20 <\/td> <\/tr>\n  <tr> <td> Density_Cows_Per_km2 <\/td> <td align=\"right\"> 0.76 <\/td> <td align=\"right\"> 0.73 <\/td> <td align=\"right\"> 0.78 <\/td> <td align=\"right\"> 0.76 <\/td> <\/tr>\n  <tr> <td> count_Intercept <\/td> <td align=\"right\"> 0.40 <\/td> <td align=\"right\"> 0.77 <\/td> <td align=\"right\"> 0.47 <\/td> <td align=\"right\"> 0.18 <\/td> <\/tr>\n  <tr> <td> count_NALC_AllNeedleWet <\/td> <td align=\"right\"> -1.14 <\/td> <td align=\"right\"> -0.32 <\/td> <td align=\"right\"> -1.17 <\/td> <td align=\"right\"> -0.01 <\/td> <\/tr>\n  <tr> <td> count_Fire8212_DEM815_Sub <\/td> <td align=\"right\"> 1.13 <\/td> <td align=\"right\"> 0.84 <\/td> <td align=\"right\"> 1.00 <\/td> <td align=\"right\"> 1.29 <\/td> <\/tr>\n  <tr> <td> zero_Intercept <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -0.34 <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -5.07 <\/td> <\/tr>\n  <tr> <td> zero_NALC_AllNeedleWet <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> 1.74 <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> 6.62 <\/td> <\/tr>\n  <tr> <td> zero_DShMiFires815_Sub <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -1.58 <\/td> <td align=\"right\"> -100.00 <\/td> <td align=\"right\"> -0.07 <\/td> <\/tr>\n   <\/tbody> <\/table>",
+    "total_model_delete_ui": {
+      "html": "<button id=\"total_delete_model_A\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  A\n<\/button>\n<button id=\"total_delete_model_B\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  B\n<\/button>\n<button id=\"total_delete_model_C\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  C\n<\/button>\n<button id=\"total_delete_model_D\" type=\"button\" class=\"btn btn-default action-button\">\n  <i class=\"fa fa-times\" role=\"presentation\" aria-label=\"times icon\"><\/i>\n  D\n<\/button>",
+      "deps": [
+        {
+          "name": "font-awesome",
+          "version": "5.15.3",
+          "src": {
+            "href": "font-awesome-5.15.3"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": [
+            "css/all.min.css",
+            "css/v4-shims.min.css"
+          ],
           "head": null,
           "attachment": null,
           "all_files": true
         },
         {
-          "name": "crosstalk",
-          "version": "1.1.1",
+          "name": "shinyBS",
+          "version": "0.61",
           "src": {
-            "href": "crosstalk-1.1.1"
+            "href": "sbs"
           },
           "meta": null,
-          "script": "js/crosstalk.min.js",
-          "stylesheet": "css/crosstalk.css",
+          "script": "shinyBS.js",
+          "stylesheet": "shinyBS.css",
           "head": null,
           "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    },
+    "total_model_id_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"total_model_id-label\" for=\"total_model_id\">Model ID<\/label>\n  <input id=\"total_model_id\" type=\"text\" class=\"form-control\" value=\"E\"/>\n<\/div>",
+      "deps": [
+
+      ]
+    },
+    "total_model_msgs": null,
+    "total_model_table": "<table class=\"table\" style=\"margin-left: auto; margin-right: auto;\">\n <thead>\n  <tr>\n   <th style=\"text-align:left;\"> Model <\/th>\n   <th style=\"text-align:left;\"> Count.variables <\/th>\n   <th style=\"text-align:left;\"> Zero.variables <\/th>\n   <th style=\"text-align:left;\"> Distribution <\/th>\n   <th style=\"text-align:left;\"> Weighted <\/th>\n   <th style=\"text-align:left;\"> method <\/th>\n   <th style=\"text-align:left;\"> response <\/th>\n  <\/tr>\n <\/thead>\n<tbody>\n  <tr>\n   <td style=\"text-align:left;\"> A <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> P <\/td>\n   <td style=\"text-align:left;\"> FALSE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n  <tr>\n   <td style=\"text-align:left;\"> B <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> NB <\/td>\n   <td style=\"text-align:left;\"> FALSE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n  <tr>\n   <td style=\"text-align:left;\"> C <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> ZIP <\/td>\n   <td style=\"text-align:left;\"> TRUE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n  <tr>\n   <td style=\"text-align:left;\"> D <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, Fire8212_DEM815_Sub <\/td>\n   <td style=\"text-align:left;\"> NALC_AllNeedleWet, DShMiFires815_Sub <\/td>\n   <td style=\"text-align:left;\"> ZINB <\/td>\n   <td style=\"text-align:left;\"> TRUE <\/td>\n   <td style=\"text-align:left;\"> L-BFGS-B <\/td>\n   <td style=\"text-align:left;\"> COW_TOTA <\/td>\n  <\/tr>\n<\/tbody>\n<\/table>",
+    "total_model_var_count_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"total_model_var_count-label\" for=\"total_model_var_count\">Count Variables<\/label>\n  <div>\n    <select id=\"total_model_var_count\" multiple=\"multiple\"><option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option>\n<option value=\"NALC_AllNeedleWet\">NALC_AllNeedleWet<\/option>\n<option value=\"DShMiFires815_Sub\">DShMiFires815_Sub<\/option>\n<option value=\"Fire8212_DEM815_Sub\">Fire8212_DEM815_Sub<\/option><\/select>\n    <script type=\"application/json\" data-for=\"total_model_var_count\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "selectize",
+          "version": "0.12.4",
+          "src": {
+            "href": "shared/selectize"
+          },
+          "meta": null,
+          "script": [
+            "js/selectize.min.js",
+            "accessibility/js/selectize-plugin-a11y.min.js"
+          ],
+          "stylesheet": "css/selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    },
+    "total_model_var_zero_ui": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"total_model_var_zero-label\" for=\"total_model_var_zero\">Zero Variables<\/label>\n  <div>\n    <select id=\"total_model_var_zero\" multiple=\"multiple\"><option value=\"TotalMoose123\">TotalMoose123<\/option>\n<option value=\"Phase_1\">Phase_1<\/option>\n<option value=\"TKStrat_01\">TKStrat_01<\/option>\n<option value=\"NALC_AllNeedleWet\">NALC_AllNeedleWet<\/option>\n<option value=\"DShMiFires815_Sub\">DShMiFires815_Sub<\/option>\n<option value=\"Fire8212_DEM815_Sub\">Fire8212_DEM815_Sub<\/option><\/select>\n    <script type=\"application/json\" data-for=\"total_model_var_zero\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "selectize",
+          "version": "0.12.4",
+          "src": {
+            "href": "shared/selectize"
+          },
+          "meta": null,
+          "script": [
+            "js/selectize.min.js",
+            "accessibility/js/selectize-plugin-a11y.min.js"
+          ],
+          "stylesheet": "css/selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
           "all_files": true
         }
       ]
