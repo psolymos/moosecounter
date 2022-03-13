@@ -1,11 +1,15 @@
 #' Weighted Refitting of Models
 #'
-#' The process finds weights that are related to leverage (how much each observation contributes to the model likelihood). This is a way to account for influential observations.
+#' `wzi` applies a leave-one-out approach to temper influential observations.
+#' The process finds weights that are related to leverage
+#' (how much each observation contributes to the model likelihood).
 #'
 #' @param object a model as returned by `zeroinfl2()`
 #' @param pass_data logical, to pass the data or not
 #' @param ... other params
 #'
+#' @rdname internal
+#' @keywords internal
 #' @export
 ## weighted ZI model to tame influential observations
 wzi <- function(object, pass_data=FALSE, ...) {
@@ -44,7 +48,7 @@ wzi <- function(object, pass_data=FALSE, ...) {
 
 #' Count Models
 #'
-#' This is customized version of the `pscl::zeroinfl()` function, but this also fits the non-ZI counterparts in a way that simplifies downstream analyses (i.e. PI calculations). Intended for internal use.
+#' `zeroinfl2` is a customized version of the `pscl::zeroinfl()` function, but this also fits the non-ZI counterparts in a way that simplifies downstream analyses (i.e. PI calculations). Intended for internal use.
 #'
 #' @param formula model formula as in `pscl::zeroinfl()`
 #' @param data Moose data set
@@ -55,6 +59,8 @@ wzi <- function(object, pass_data=FALSE, ...) {
 #' @param link link function for the zero model
 #' @param ... control arguments
 #'
+#' @rdname internal
+#' @keywords internal
 #' @export
 # poisson=ZIP, negbin=ZINB, P=poisson (non-ZI), NB=negbin (non-ZI)
 zeroinfl2 <- function (formula, data,

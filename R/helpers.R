@@ -1,6 +1,6 @@
-#' Random Numbers From ZINB Distribution
+#' Internal functions
 #'
-#' ZINB = zero inflated negative binomial.
+#' `ZINB` makes zero inflated negative binomial random numbers.
 #'
 #' @param N the number of random numbers to produce
 #' @param mu.nb the mean of the NB distribution
@@ -10,6 +10,8 @@
 #' @examples
 #' table(rZINB(100, 3, 2, 0.5))
 #' table(rZINB(100, 3, NULL, 0.5))
+#' @rdname internal
+#' @keywords internal
 # note: phi.zi is prob of 1 (not 0 as in zeroinfl)
 # theta.nb=NULL gives poisson
 #' @export
@@ -28,7 +30,8 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
 
 #' Robust Matrix Inversion
 #'
-#' This function makes sure that near-positive definite matrices
+#' `solvenear` inverts near-PD matrices.
+#' It function makes sure that near-positive definite matrices
 #' are positive definite. Positive definiteness is needed
 #' for matrix inversion, which in turn is used to find
 #' the Hessian matrix and standard errors for model coefficients
@@ -36,6 +39,8 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
 #'
 #' @param x a symmetric square matrix
 #'
+#' @rdname internal
+#' @keywords internal
 #' @export
 solvenear <- function (x) {
     if (is.null(x))
@@ -46,37 +51,9 @@ solvenear <- function (x) {
     xinv
 }
 
-#' Switch Response
-#'
-#' Switch between total Moose vs. cows only.
-#' This sets the column name for totel Moose estimation.
-#'
-#' @param type type of the response, can be `"total"` or `"cows"`
-#'
-#' @examples
-#'
-#' switch_response("cows")
-#'
-#' @export
-switch_response <- function(type="total") {
-    type <- match.arg(type, c("total", "cows"))
-    opts <- getOption("moose_options")
-    if (type == "total") {
-        opts$Ntot <- "MOOSE_TOTA"
-        opts$composition <- c("BULL_SMALL", "BULL_LARGE", "LONE_COW",
-            "COW_1C", "COW_2C", "LONE_CALF", "UNKNOWN_AG")
-    }
-    if (type == "cows") {
-        opts$Ntot <- "COW_TOTA"
-        opts$composition <- c("LONE_COW", "COW_1C", "COW_2C")
-    }
-    opts$response <- type
-    mc_options(opts)
-}
-
 #' Find Mode
 #'
-#' The function finds the mode of a distribution using
+#' The `find_mode` function finds the mode of a distribution using
 #' one-dimensional kernel density estimation.
 #' The density based estimate is rounded, because
 #' the function is used in the context of count data models
@@ -91,6 +68,8 @@ switch_response <- function(type="total") {
 #' rug(x)
 #' abline(v = find_mode(x), lty=2)
 #'
+#' @rdname internal
+#' @keywords internal
 #' @export
 ## need to use density to get the mode because values tend to
 ## be spread out
@@ -98,3 +77,19 @@ find_mode <- function(x) {
     d <- stats::density(x)
     round(d$x[which.max(d$y)])
 }
+
+#' Pipe operator
+#'
+#' `\%>\%`: imported function,
+#' see \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.
+#'
+#' @name %>%
+#' @rdname internal
+#' @keywords internal
+#' @export
+#' @importFrom magrittr %>%
+#' @usage lhs \%>\% rhs
+#' @param lhs A value or the magrittr placeholder.
+#' @param rhs A function call using the magrittr semantics.
+#' @return The result of calling `rhs(lhs)`.
+NULL

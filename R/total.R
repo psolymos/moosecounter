@@ -1,3 +1,31 @@
+#' Switch Response
+#'
+#' Switch between total Moose vs. cows only.
+#' This sets the column name for totel Moose estimation.
+#'
+#' @param type type of the response, can be `"total"` or `"cows"`
+#'
+#' @examples
+#'
+#' switch_response("cows")
+#'
+#' @export
+switch_response <- function(type="total") {
+    type <- match.arg(type, c("total", "cows"))
+    opts <- getOption("moose_options")
+    if (type == "total") {
+        opts$Ntot <- "MOOSE_TOTA"
+        opts$composition <- c("BULL_SMALL", "BULL_LARGE", "LONE_COW",
+            "COW_1C", "COW_2C", "LONE_CALF", "UNKNOWN_AG")
+    }
+    if (type == "cows") {
+        opts$Ntot <- "COW_TOTA"
+        opts$composition <- c("LONE_COW", "COW_1C", "COW_2C")
+    }
+    opts$response <- type
+    mc_options(opts)
+}
+
 #' Update Moose Data
 #'
 #' @param x data frame

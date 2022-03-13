@@ -1,11 +1,14 @@
-#' Univariate Exploration
+#' Exploration
 #'
-#' Univariate exploration for the total Moose models.
+#' `mc_plot_univariate` implements visual univariate
+#' (sigle predictor) exploration for the total Moose count models.
 #'
 #' @param i column name from `x` to be used as a predictor
 #' @param x data frame with Moose data
 #' @param dist count distribution (P, NB, ZIP, or ZINB)
 #'
+#' @rdname explore
+#' @keywords tree models regression
 #' @export
 ## density plots
 # used to be plotUnivariateExpl
@@ -84,13 +87,17 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
 
 #' Multivariate Exploration
 #'
-#' Multivariate exploration based on regression trees
-#' (recursive partitioning  in a conditional inference framework).
+#' `mc_plot_multivariate` implements visual multivariate
+#' (multiple predictors) exploration based on regression trees
+#' (recursive partitioning  in a conditional inference framework)
+#' for total Moose counts.
 #'
 #' @param vars column names from `x` to be used as a predictor
 #' @param x data frame with Moose data
 #' @param alpha alpha level defining mincriterion = 1 - alpha for `partykit::ctree()`
 #'
+#' @rdname explore
+#' @keywords tree models regression
 #' @export
 mc_plot_multivariate <- function(vars, x, alpha=NULL) {
     opts <- getOption("moose_options")
@@ -103,3 +110,69 @@ mc_plot_multivariate <- function(vars, x, alpha=NULL) {
     plot(tr)
 }
 
+#' Plot Univariate Composition Model
+#'
+#' `mc_plot_comp` implements visual univariate (sigle predictor) exploration
+#' for the multinomial composition models.
+#'
+#' @param i predictor variable name in `x`
+#' @param x moose data frame
+#'
+#' @rdname explore
+#' @keywords tree models regression
+#' @export
+mc_plot_comp <- function(i, x) {
+    NAME <- i
+    MooseData <- x
+    #formula <- stats::as.formula(paste("~", NAME))
+    #vlm <- VGAM::vlm
+    m <- mc_fit_comp(MooseData, NAME)
+    mf <- VGAM::model.frame(m)
+    pr0 <- VGAM::fitted(m)
+    xx <- mf[,NAME]
+
+    col <- c("#7fc97f","#beaed4","#fdc086","#ffff99","#386cb0","#f0027f")
+    if (is.numeric(MooseData[,NAME])) {
+        i <- order(xx)
+        xx <- xx[i]
+        pr0 <- pr0[i,]
+        pr <- t(apply(pr0, 1, cumsum))
+        op <- graphics::par(mfrow=c(1,3), las=1)
+        pr2 <- cbind(0, pr)
+        graphics::matplot(xx, 100*pr2, type="l", lty=1, main="Composition", xlab=NAME,
+            ylab="Percent of Total", col=col, axes=FALSE)
+        graphics::axis(1)
+        graphics::axis(2)
+        for (i in 1:6) {
+            graphics::polygon(c(xx, rev(xx)), 100*c(pr2[,i], rev(pr2[,i+1])), col=col[i])
+        }
+        graphics::matplot(xx, 100*pr[,1:5], type="l", lty=1, col=1, add=TRUE)
+
+        graphics::matplot(xx, 100*pr0, type="l", lty=1, lwd=3, main="", xlab=NAME,
+            ylab="Percent of Total", col=col, ylim=c(0,100*max(pr0)))
+
+        graphics::plot.new()
+        graphics::legend("topleft", fill=rev(col), legend=rev(colnames(mf$ymat)))
+        graphics::par(op)
+    } else {
+        i <- !duplicated(xx)
+        xx <- xx[i]
+        pr0 <- t(pr0[i,])
+        colnames(pr0) <- as.character(xx)
+        op <- graphics::par(mfrow=c(1,3), las=1)
+        graphics::barplot(100*pr0, space=0, names.arg=xx, main="Composition", xlab=NAME,
+            ylab="Percent of Total",col=col)
+
+        graphics::matplot(1:ncol(pr0), 100*t(pr0), type="b", lty=2, lwd=3, main="",
+            xlab=NAME, axes=FALSE, pch=19, xlim=c(0.5, ncol(pr0)+0.5),
+            ylab="Percent of Total", col=col, ylim=c(0,100*max(pr0)))
+        graphics::axis(1, at=1:ncol(pr0), labels=colnames(pr0))
+        graphics::axis(2)
+        graphics::box()
+
+        graphics::plot.new()
+        graphics::legend("topleft", fill=rev(col), legend=rev(colnames(mf$ymat)))
+        graphics::par(op)
+    }
+    invisible(NULL)
+}
