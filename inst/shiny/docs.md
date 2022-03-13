@@ -16,7 +16,7 @@ Next, we will go over these steps in detail.
 
 You can adjust the settings for the analyses by modifying options:
 
--   response (total vs. cows),
+-   response (total vs. cows),
 -   model optimization methods (Nelder-Mead, etc.)
 -   bootstrap iterations
 -   alpha level
