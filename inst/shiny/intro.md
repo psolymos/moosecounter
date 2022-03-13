@@ -4,7 +4,7 @@ This Shiny app is a graphical user interface built with
 {moosecounter} R package. The app and the package
 implements count models to aid in estimating Moose populations
 and composition. Analyses are based on surveyed cells,
-residuals, point predictions, and prediction undertainty
+residuals, point predictions, and prediction uncertainty
 help analysts to adaptively survey sampling units.
 As a result of adaptive sampling, models and estimates
 become more accurate. This improvement enables
