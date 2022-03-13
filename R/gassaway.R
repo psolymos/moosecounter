@@ -12,6 +12,11 @@
 
 #' Total Estimate with Gassaway Formula
 #'
+#' We do the stratification BEFORE the surveys are done using the
+#' fixed wing aircraft. Every cell is stratified as LOW or HIGH.
+#' Then some of the LOW and some of HIGH are surveyed to find how
+#' many moose are there.
+#'
 #' @param y1,y2 surveyed cell-level population counts in the 2 strata
 #' @param N1,N2 total number of cells that were stratified
 #' @param x object to print

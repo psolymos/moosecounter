@@ -19,7 +19,10 @@ mc_gassaway(y1, y2, N1, N2)
 \item{...}{arguments passed to the print method}
 }
 \description{
-Total Estimate with Gassaway Formula
+We do the stratification BEFORE the surveys are done using the
+fixed wing aircraft. Every cell is stratified as LOW or HIGH.
+Then some of the LOW and some of HIGH are surveyed to find how
+many moose are there.
 }
 \examples{
 y1 <- rpois(20, 50)
