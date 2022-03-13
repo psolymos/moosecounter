@@ -1,4 +1,4 @@
-#' Weighted Refitting of Models
+#' Internal Functions: Models
 #'
 #' `wzi` applies a leave-one-out approach to temper influential observations.
 #' The process finds weights that are related to leverage
@@ -8,7 +8,7 @@
 #' @param pass_data logical, to pass the data or not
 #' @param ... other params
 #'
-#' @rdname internal
+#' @rdname models
 #' @keywords internal
 #' @export
 ## weighted ZI model to tame influential observations
@@ -59,7 +59,7 @@ wzi <- function(object, pass_data=FALSE, ...) {
 #' @param link link function for the zero model
 #' @param ... control arguments
 #'
-#' @rdname internal
+#' @rdname models
 #' @keywords internal
 #' @export
 # poisson=ZIP, negbin=ZINB, P=poisson (non-ZI), NB=negbin (non-ZI)
@@ -435,6 +435,8 @@ zeroinfl2 <- function (formula, data,
     return(rval)
 }
 
+#' @rdname models
+#' @keywords internal
 #' @export
 summary.non_zeroinfl <-
 function (object, ...)
@@ -465,6 +467,10 @@ function (object, ...)
     object
 }
 
+#' @rdname models
+#' @keywords internal
+#' @param x A model as returned by `zeroinfl2()`.
+#' @param digits Digits for print method.
 #' @export
 print.summary.non_zeroinfl <-
 function (x, digits = max(3, getOption("digits") - 3), ...)
@@ -498,6 +504,8 @@ function (x, digits = max(3, getOption("digits") - 3), ...)
     invisible(x)
 }
 
+#' @rdname models
+#' @keywords internal
 #' @importFrom stats nobs
 #' @export
 nobs.zeroinfl <- function(object, ...) object$n

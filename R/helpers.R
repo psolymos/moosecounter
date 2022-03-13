@@ -1,4 +1,4 @@
-#' Internal functions
+#' Internal Functions: Helpers
 #'
 #' `ZINB` makes zero inflated negative binomial random numbers.
 #'
@@ -37,7 +37,8 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
 #' the Hessian matrix and standard errors for model coefficients
 #' from numerical optimization.
 #'
-#' @param x a symmetric square matrix
+#' @param x a symmetric square matrix for `solvenear`,
+#'   a numeric vector for `find_mode`
 #'
 #' @rdname internal
 #' @keywords internal
@@ -58,8 +59,6 @@ solvenear <- function (x) {
 #' The density based estimate is rounded, because
 #' the function is used in the context of count data models
 #' and predictions.
-#'
-#' @param x a numeric vector
 #'
 #' @examples
 #' x <- c(1, 2, 1, 3, 4, 3, 2, 3, 5, 6, 10)
