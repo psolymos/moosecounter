@@ -10,5 +10,17 @@ find_mode(x)
 \item{x}{a numeric vector}
 }
 \description{
-Find Mode
+The function finds the mode of a distribution using
+one-dimensional kernel density estimation.
+The density based estimate is rounded, because
+the function is used in the context of count data models
+and predictions.
+}
+\examples{
+x <- c(1, 2, 1, 3, 4, 3, 2, 3, 5, 6, 10)
+find_mode(x)
+plot(density(x))
+rug(x)
+abline(v = find_mode(x), lty=2)
+
 }

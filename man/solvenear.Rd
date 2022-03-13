@@ -10,5 +10,9 @@ solvenear(x)
 \item{x}{a symmetric square matrix}
 }
 \description{
-Robust Matrix Inversion
+This function makes sure that near-positive definite matrices
+are positive definite. Positive definiteness is needed
+for matrix inversion, which in turn is used to find
+the Hessian matrix and standard errors for model coefficients
+from numerical optimization.
 }

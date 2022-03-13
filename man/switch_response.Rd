@@ -10,5 +10,11 @@ switch_response(type = "total")
 \item{type}{type of the response, can be `"total"` or `"cows"`}
 }
 \description{
-Switch Response
+Switch between total Moose vs. cows only.
+This sets the column name for totel Moose estimation.
+}
+\examples{
+
+switch_response("cows")
+
 }

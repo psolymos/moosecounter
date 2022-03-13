@@ -4,7 +4,7 @@
 #'
 #' @param N the number of random numbers to produce
 #' @param mu.nb the mean of the NB distribution
-#' @param theta.nb the dispersion parameter of the NB distribution, a single nonnegative numeric value or `NULL` (this refers to no overdispersion, thus a Poisson or ZIP distribution)
+#' @param theta.nb the dispersion parameter of the NB distribution, a single non-negative numeric value or `NULL` (this refers to no overdispersion, thus a Poisson or ZIP distribution)
 #' @param phi.zi the probability of the non-zero valies in the ZI part
 #' @return A numeric vector of length `N` with random numbers
 #' @examples
@@ -28,6 +28,12 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
 
 #' Robust Matrix Inversion
 #'
+#' This function makes sure that near-positive definite matrices
+#' are positive definite. Positive definiteness is needed
+#' for matrix inversion, which in turn is used to find
+#' the Hessian matrix and standard errors for model coefficients
+#' from numerical optimization.
+#'
 #' @param x a symmetric square matrix
 #'
 #' @export
@@ -42,7 +48,14 @@ solvenear <- function (x) {
 
 #' Switch Response
 #'
+#' Switch between total Moose vs. cows only.
+#' This sets the column name for totel Moose estimation.
+#'
 #' @param type type of the response, can be `"total"` or `"cows"`
+#'
+#' @examples
+#'
+#' switch_response("cows")
 #'
 #' @export
 switch_response <- function(type="total") {
@@ -63,7 +76,20 @@ switch_response <- function(type="total") {
 
 #' Find Mode
 #'
+#' The function finds the mode of a distribution using
+#' one-dimensional kernel density estimation.
+#' The density based estimate is rounded, because
+#' the function is used in the context of count data models
+#' and predictions.
+#'
 #' @param x a numeric vector
+#'
+#' @examples
+#' x <- c(1, 2, 1, 3, 4, 3, 2, 3, 5, 6, 10)
+#' find_mode(x)
+#' plot(density(x))
+#' rug(x)
+#' abline(v = find_mode(x), lty=2)
 #'
 #' @export
 ## need to use density to get the mode because values tend to

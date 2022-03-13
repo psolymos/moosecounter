@@ -11,7 +11,7 @@ rZINB(N, mu.nb, theta.nb, phi.zi)
 
 \item{mu.nb}{the mean of the NB distribution}
 
-\item{theta.nb}{the dispersion parameter of the NB distribution, a single nonnegative numeric value or `NULL` (this refers to no overdispersion, thus a Poisson or ZIP distribution)}
+\item{theta.nb}{the dispersion parameter of the NB distribution, a single non-negative numeric value or `NULL` (this refers to no overdispersion, thus a Poisson or ZIP distribution)}
 
 \item{phi.zi}{the probability of the non-zero valies in the ZI part}
 }
