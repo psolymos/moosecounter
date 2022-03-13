@@ -1,8 +1,12 @@
 Package: moosecounter
-Version: 0.5-1
-Date: 2022-01-31
+Version: 0.6-0
+Date: 2022-03-14
 Title: Adaptive Moose Surveys
-Author: Subhash Lele, Sophie Czetwertynski, Peter Solymos, Steffi LaZerte
+Author: 
+  Subhash Lele [aut],
+  Sophie Czetwertynski [aut],
+  Peter Solymos [aut, cre] (<https://orcid.org/0000-0001-7337-1740>),
+  Steffi LaZerte [aut]
 Maintainer: Peter Solymos <psolymos@gmail.com>
 Description: Adaptive Moose surveys.
 Imports: 

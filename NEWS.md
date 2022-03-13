@@ -1,6 +1,6 @@
-# Version 0.5-1 -- January 31, 2022
+# Version 0.6-0 -- Marcg 14, 2022
 
-* Composition analysis added to R package.
+* Composition analysis added to R package and Shiny app.
 
 # Version 0.5-0 -- October 4, 2021
 
