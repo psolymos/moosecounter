@@ -9,7 +9,7 @@
 #' @param ... other params
 #'
 #' @rdname models
-#' @keywords internal
+#' @keywords internal models regression
 #' @export
 ## weighted ZI model to tame influential observations
 wzi <- function(object, pass_data=FALSE, ...) {

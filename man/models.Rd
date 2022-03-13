@@ -66,3 +66,5 @@ The process finds weights that are related to leverage
 `zeroinfl2` is a customized version of the `pscl::zeroinfl()` function, but this also fits the non-ZI counterparts in a way that simplifies downstream analyses (i.e. PI calculations). Intended for internal use.
 }
 \keyword{internal}
+\keyword{models}
+\keyword{regression}

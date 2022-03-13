@@ -4,6 +4,7 @@
 #'
 #' @param x Moose data object
 #'
+#' @rdname comp
 #' @export
 ## used to be called checkCompData
 ## x: MooseData
@@ -33,6 +34,7 @@ mc_check_comp <- function(x) {
 #' @param x data frame
 #' @param vars column names of `x` to be used as predictors for the composition model
 #'
+#' @rdname comp
 #' @export
 ## fit comp model for total
 ## used to be called fitCompModel
@@ -106,6 +108,7 @@ mc_fit_comp_formula <- function(formula, x) {
 #'
 #' @param model_list_comp composition model list
 #'
+#' @rdname comp
 #' @export
 ## used to be updateCompModelTab
 mc_models_comp <- function(model_list_comp) {
@@ -129,6 +132,7 @@ mc_models_comp <- function(model_list_comp) {
 #' @param x data frame
 #' @param do_avg logical, to do model averaging
 #'
+#' @rdname comp
 #' @export
 #function(Survey.data, Unsurvey.data, B,
 #moose.model, model.B, MAXCELL,
@@ -412,6 +416,7 @@ mc_summarize_composition <- function(all_ratios_list) {
 #' @param CPI Composition PI output
 #' @param ss a subset of rows (logical or numeric vector)
 #'
+#' @rdname comp
 #' @export
 subset_CPI_data <- function(CPI, ss) {
     if (missing(ss))
@@ -435,6 +440,7 @@ subset_CPI_data <- function(CPI, ss) {
 #' @param CPI Composition PI output
 #' @param ... other arts passed to print
 #'
+#' @rdname comp
 #' @export
 pred_density_moose_CPI <- function(CPI, ...){
     out <- round(CPI$total, 2)
