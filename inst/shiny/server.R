@@ -3,11 +3,11 @@ server <- function(input, output, session) {
   # Settings -----------------------------------
   opts <- reactive({
     req(input$opts_response,
-      input$opts_method,
-      input$opts_b,
-      input$opts_alpha,
-      input$opts_wscale,
-      input$opts_sightability)
+        input$opts_method,
+        input$opts_b,
+        input$opts_alpha,
+        input$opts_wscale,
+        input$opts_sightability)
 
 
     switch_response(input$opts_response)
@@ -34,7 +34,8 @@ server <- function(input, output, session) {
                                FUN = function(x) paste(x, collapse = ", ")))
   })
 
-  observeEvent(input$opts_seed, set.seed(input$opts_seed))
+  observe(set.seed(input$opts_seed)) %>%
+    bindEvent(input$opts_seed)
 
 
   # Data ---------------------------------------
@@ -147,8 +148,8 @@ server <- function(input, output, session) {
       str()
   })
 
-
-  # Univariate Exploration ---------------------------
+  # Total Moose --------------------------------------------------------------
+  ## Univariate Exploration --------------------------
   output$uni_var_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
@@ -167,7 +168,7 @@ server <- function(input, output, session) {
   }, res = 125)
 
 
-  # Multivariate Exploration ---------------------
+  ## Multivariate Exploration ---------------------
   output$multi_var_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
@@ -185,54 +186,55 @@ server <- function(input, output, session) {
   }, res = 100)
 
 
+  ## Add models -----------------------------------
 
-  # Add models -----------------------------------
-
-  output$model_id_ui <- renderUI({
+  output$total_model_id_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab"))
-
-    if(length(models_list$m) == 0 || is.null(models())) {
+    if(length(total_models_list$m) == 0 || is.null(total_models())) {
       val <- "A"
     } else {
-      val <- LETTERS[!LETTERS %in% names(models())][1]
+      val <- LETTERS[!LETTERS %in% names(total_models())][1]
     }
 
-    textInput("model_id", "Model ID", value = val)
+    textInput("total_model_id", "Model ID", value = val)
   })
 
-  output$model_var_count_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
-    select_explanatory("model_var_count",
+  output$total_model_var_count_ui <- renderUI({
+    select_explanatory("total_model_var_count",
                        "Count Variables",
                        survey_sub(),
                        multiple = TRUE)
   })
 
-  output$model_var_zero_ui <- renderUI(select_explanatory("model_var_zero",
-                                                       "Zero Variables",
-                                                       survey_sub(),
-                                                       multiple = TRUE))
+  output$total_model_var_zero_ui <- renderUI(
+    select_explanatory("total_model_var_zero",
+                       "Zero Variables",
+                       survey_sub(),
+                       multiple = TRUE))
 
-  models_list <- reactiveValues(m = list())
+  total_models_list <- reactiveValues(m = list())
 
   # Create reactive for using the models, not modifying, models
-  models <- reactive({
-    req(length(models_list$m) > 0)
+  total_models <- reactive({
+    req(length(total_models_list$m) > 0)
     req(opts()) # To invalidate when settings change
 
-    m <- models_list$m
+    m <- total_models_list$m
     m <- m[!map_lgl(m, is.null)]
     m[order(names(m))]
 
     # TESTING errors
     #if("C" %in% names(m)) m$C$dist <- "nope"
 
-    # Record a change in models()
+    # Record a change in total_models()
     isolate({
-      if(is.null(input$pred_calc) || input$pred_calc > 0)
-        updateButton(session, "pred_calc", style = "warning",
+      if(is.null(input$total_pi_calc) || input$total_pi_calc > 0)
+        updateButton(session, "total_pi_calc", style = "warning",
+                     label = "Models have changed<br>(re-run)")
+      # Also update comp pi
+      if(is.null(input$comp_pi_calc) || input$comp_pi_calc > 0)
+        updateButton(session, "comp_pi_calc", style = "warning",
                      label = "Models have changed<br>(re-run)")
     })
 
@@ -249,9 +251,14 @@ server <- function(input, output, session) {
           silent = TRUE)))))
   })
 
-  output$model_msgs <- renderUI({
-    m <- map_chr(models(), ~{
-      if("try-error" %in% class(.$model)) .$model[1] else "no problem"})
+  output$total_model_msgs <- renderUI({
+    m <- map_chr(total_models(), ~{
+      if("try-error" %in% class(.$model)) {
+        .$model[1]
+      } else if(.$model$converged == FALSE) {
+        "did not converge"
+      } else "no problem"
+    })
     m <- m[m != "no problem"]
 
     if(length(m) > 0) {
@@ -265,18 +272,19 @@ server <- function(input, output, session) {
   })
 
 
-  observeEvent(input$model_add, {
-    req(input$model_dist, input$model_id, input$model_weighted)
+  observe({
+    req(input$total_model_dist, input$total_model_id, input$total_model_weighted)
 
-    models_list$m[[input$model_id]] <- list(
-      dist = input$model_dist,
-      weighted = as.logical(input$model_weighted),
-      var_count = input$model_var_count,
-      var_zero = input$model_var_zero)
-  })
+    total_models_list$m[[input$total_model_id]] <- list(
+      dist = input$total_model_dist,
+      weighted = as.logical(input$total_model_weighted),
+      var_count = input$total_model_var_count,
+      var_zero = input$total_model_var_zero)
+  }) %>%
+    bindEvent(input$total_model_add)
 
-  output$model_table <- function() {
-    imap_dfr(models(), ~{
+  output$total_model_table <- function() {
+    imap_dfr(total_models(), ~{
       d <- data.frame(Model = .y,
                       `Count variables` = paste(.x$var_count, collapse = ", "),
                       `Zero variables` = paste(.x$var_zero, collapse = ", "),
@@ -293,16 +301,16 @@ server <- function(input, output, session) {
     }) %>%
       kable() %>%
       kable_styling() %>%
-      row_spec(which(model_errors(models())), background = "#f2dede")
+      row_spec(which(model_errors(total_models())), background = "#f2dede")
   }
 
   # Dynamically create delete buttons for each model
-  output$model_delete_ui <- renderUI({
-    req(length(models()) > 0)
+  output$total_model_delete_ui <- renderUI({
+    req(length(total_models()) > 0)
 
-    m <- models()[order(names(models()))]
+    m <- total_models()[order(names(total_models()))]
 
-    imap(m, ~ bsButton(paste0("delete_model_", .y),
+    imap(m, ~ bsButton(paste0("total_delete_model_", .y),
                        label = .y,
                        icon = icon("times"),
                        style = if_else("try-error" %in% class(.x$model),
@@ -310,108 +318,111 @@ server <- function(input, output, session) {
                                        "default")))
   })
 
-  # Dynamically create observeEvents for each model delete button
+  # Dynamically create observe() %>% bindEvent()s for each model delete button
   observe({
-    req(length(models()) > 0)
+    req(length(total_models()) > 0)
 
     isolate({
-      map(names(models()), ~ {
-        observeEvent(input[[paste0("delete_model_", .)]], {
-          models_list$m[[.]] <- NULL
-        }, ignoreInit = TRUE)
+      map(names(total_models()), ~ {
+        m <- .
+        observe(total_models_list$m[[m]] <- NULL) %>%
+          bindEvent(input[[paste0("total_delete_model_", m)]],
+                    ignoreInit = TRUE)
       })
     })
 
   })
 
-  model_aic <- reactive({
-    req(length(models()) > 0)
+  total_model_aic <- reactive({
+    req(length(total_models()) > 0)
     req(opts())
-    validate_models(models())
+    validate_models(total_models())
 
-    map(models(), "model") %>%
+    map(total_models(), "model") %>%
       mc_models_total(survey_sub()) %>%
       mutate(across(everything(), round, 2))
   })
 
-  output$model_aic1 <- renderTable({
-    a <- model_aic()
+  output$total_model_aic1 <- renderTable({
+    a <- total_model_aic()
     t(a[rev(seq_len(nrow(a))),])
   }, rownames = TRUE)
 
-  output$model_aic2 <- renderTable({
-    model_aic()
+  output$total_model_aic2 <- renderTable({
+    total_model_aic()
   }, rownames = TRUE)
 
-  # Model residuals / diagnostics ------------------------------
+  ## Model residuals / diagnostics ------------------------------
 
-  output$resid_models_ui <- renderUI({
-    validate(need(length(models_list$m) > 0,
+  output$total_resid_models_ui <- renderUI({
+    validate(need(length(total_models_list$m) > 0,
                   "First create models in the \"Models\" tab"))
-    validate_models(models())
+    validate_models(total_models())
 
-    radioButtons("resid_model", label = "Model", inline = TRUE,
-                 choices = sort(names(models())))
+    radioButtons("total_resid_model", label = "Model", inline = TRUE,
+                 choices = sort(names(total_models())))
   })
 
-  output$resid_plot <- renderPlot({
-    req(length(models()) > 0, input$resid_model)
-    validate_models(models())
+  output$total_resid_plot <- renderPlot({
+    req(length(total_models()) > 0, input$total_resid_model)
+    validate_models(total_models())
 
-    map(models(), "model") %>%
-      mc_plot_residuals(input$resid_model, ., survey_sub())
+    map(total_models(), "model") %>%
+      mc_plot_residuals(input$total_resid_model, ., survey_sub())
   })
 
-  output$resid_summary <- renderPrint({
-    req(length(models()) > 0, input$resid_model)
-    validate_models(models())
+  output$total_resid_summary <- renderPrint({
+    req(length(total_models()) > 0, input$total_resid_model)
+    validate_models(total_models())
 
-    cat("Model:", input$resid_model, "\n")
-    cat("Model type:", models()[[input$resid_model]][["dist"]],
-        if (models()[[input$resid_model]][["weighted"]])
+    cat("Model:", input$total_resid_model, "\n")
+    cat("Model type:", total_models()[[input$total_resid_model]][["dist"]],
+        if (total_models()[[input$total_resid_model]][["weighted"]])
           "(weighted)" else "", "\n")
-    summary(models()[[input$resid_model]][["model"]])
+    summary(total_models()[[input$total_resid_model]][["model"]])
   })
 
 
 
-  # Prediction Intervals ----------------------------------------------------
+  ## Prediction Intervals ----------------------------------------------------
 
   # UI elements
-  output$pred_models_ui <- renderUI({
+  output$total_pi_models_ui <- renderUI({
     validate(need(input$survey_file,
                   "First select a data set in the \"Data\" tab") %then%
-               need(length(models_list$m) > 0,
+               need(length(total_models_list$m) > 0,
                     "First create models in the \"Models\" tab"))
-    selectInput("pred_models",
+    selectInput("total_pi_models",
                 label = "Model(s) to use",
-                choices = names(models()), multiple = TRUE)
+                choices = names(total_models()), multiple = TRUE)
   })
 
-  output$pred_cell_ui <- renderUI({
-    numericInput("pred_cell", label = "Cell to plot for predictions",
-                 value = 1, min = 1, max = nrow(pi()$pi$data), step = 1)
+  output$total_pi_cell_ui <- renderUI({
+    numericInput("total_pi_cell", label = "Cell to plot for predictions",
+                 value = 1, min = 1, max = nrow(total_pi()$pi$data), step = 1)
   })
 
-  pi <- eventReactive(input$pred_calc, {
-    req(length(models()) > 0, input$pred_average)
-    validate(need(input$pred_models, "Please choose your model(s)"))
-    validate_models(models())
+  total_pi <- reactive({
+    req(length(total_models()) > 0, input$total_pi_average)
+    validate(need(input$total_pi_models, "Please choose your model(s)"))
+    validate_models(total_models())
 
-    updateButton(session, "pred_calc", style = "primary", label = "Calculate PI")
+    updateButton(session, "total_pi_calc", style = "primary",
+                 label = "Calculate PI")
 
-    list(pi = mc_predict_total(model_id = input$pred_models,
-                               ml = map(models(), "model"),
+    list(pi = mc_predict_total(model_id = input$total_pi_models,
+                               ml = map(total_models(), "model"),
                                x = survey_sub(),
                                do_boot = TRUE,
-                               do_avg = as.logical(input$pred_average)),
+                               do_avg = as.logical(input$total_pi_average)),
          opts = opts())
-  })
+  }) %>%
+    bindEvent(input$total_pi_calc)
 
   # Tables
-  output$pred_density <- function() {
-    req(pi())
-    pred_density_moose_PI(pi()$pi) %>%
+  output$total_pi_density <- function() {
+    req(total_pi())
+    pred_density_moose_PI(total_pi()$pi) %>%
       as.data.frame() %>%
       mutate(" " = c("Total Moose",
                      "Total Area (km<sup>2</sup>)",
@@ -421,61 +432,59 @@ server <- function(input, output, session) {
       kable_styling(bootstrap_options = "condensed")
   }
 
-  output$pred_options <- function() {
-    req(pi())
-
-    pi <- pi()$pi
+  output$total_pi_options <- function() {
+    req(total_pi())
 
     tibble(Issues
-           = if_else(length(pi$issues) == 0, "None",
-                            as.character(length(pi$issues))),
-           B = ncol(pi$boot_full),
-           Method = pi()$opts$method,
-           Response = if_else(pi()$opts$response == "total",
+           = if_else(length(total_pi()$pi$issues) == 0, "None",
+                     as.character(length(total_pi()$pi$issues))),
+           B = ncol(total_pi()$pi$boot_full),
+           Method = total_pi()$opts$method,
+           Response = if_else(total_pi()$opts$response == "total",
                               "MOOSE_TOTA",
                               "COW_TOTA"),
-           Sightability = pi()$opts$sightability) %>%
+           Sightability = total_pi()$opts$sightability) %>%
       t() %>%
       kable() %>%
       kable_styling(bootstrap_options = "condensed")
   }
 
   # Plots
-  output$pred_predpi <- renderPlot(mc_plot_predpi(pi()$pi), res = 125)
-  output$pred_pidistr <- renderPlot({
-    req(input$pred_cell)
-    validate(need(input$pred_cell <= nrow(pi()$pi$data) &
-                    input$pred_cell > 0,
+  output$total_pi_predpi <- renderPlot(mc_plot_predpi(total_pi()$pi), res = 125)
+  output$total_pi_pidistr <- renderPlot({
+    req(input$total_pi_cell)
+    validate(need(input$total_pi_cell <= nrow(total_pi()$pi$data) &
+                    input$total_pi_cell > 0,
                   paste0("Out of cell range: There are only ",
-                         nrow(pi()$pi$data),
+                         nrow(total_pi()$pi$data),
                          " cells in the data")))
     op <- par(mfrow = c(1, 2))
-    mc_plot_pidistr(pi()$pi)
-    mc_plot_pidistr(pi()$pi, id = input$pred_cell)
+    mc_plot_pidistr(total_pi()$pi)
+    mc_plot_pidistr(total_pi()$pi, id = input$total_pi_cell)
     par(op)
   }, res = 100)
 
   # Bootstraps table
-  output$pred_boot <- renderDT({
-    PI <- mc_get_pred(pi()$pi)
-    d <- data.frame(SU_ID=PI$data$SU_ID, PI$boot_full)
+  output$total_pi_boot <- renderDT({
+    PI <- mc_get_pred(total_pi()$pi)
+    d <- data.frame(SU_ID = PI$data$SU_ID, PI$boot_full)
     datatable(d)
   })
 
 
 
 
-  # Explore PI ----------------------------------------------------
+  ## Explore PI ----------------------------------------------------
 
-  output$pred_data <- renderDT({
+  output$total_pi_data <- renderDT({
     validate(
       need(input$survey_file,
            "First select a data set in the \"Data\" tab") %then%
-        need(length(models_list$m) > 0,
+        need(length(total_models_list$m) > 0,
              "First create models in the \"Models\" tab") %then%
-        need(!is.null(input$pred_models),
+        need(!is.null(input$total_pi_models),
              "First create the predictions in the \"Prediction Intervals\" tab"))
-    d <- mc_get_pred(pi()$pi)$data
+    d <- mc_get_pred(total_pi()$pi)$data
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy")] <- NA
     v <- c("SU_ID", "observed_values", "fitted_values",
@@ -488,32 +497,33 @@ server <- function(input, output, session) {
   })
 
   # Setup table and table proxy
-  pred_data_proxy <- dataTableProxy("pred_data")
+  total_pi_data_proxy <- dataTableProxy("total_pi_data")
 
   # Render map
-  output$pred_map <- renderGirafe({
-    req(pi())
+  output$total_pi_map <- renderGirafe({
+    req(total_pi())
 
-    d <- mc_get_pred(pi()$pi)$data
+    d <- mc_get_pred(total_pi()$pi)$data
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
                "Cell.PIL", "Cell.PIU", "Cell.accuracy")] <- NA
     d <- d %>%
       mutate(cell = 1:n(),
-#             Cell.accuracy = if_else(Cell.accuracy == 0,
-#                                     NA_real_,
-#                                     Cell.accuracy),
              tooltip = paste0(
                "Cell = ", cell,
                if_else(is.na(observed_values),
                        paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
                        paste0("<br>Observed = ", observed_values))))
 
+    validate(need(
+      length(unique(na.omit(d[, input$total_pi_col]))) > 1,
+      paste0("Cannot plot. No variability in ", input$total_pi_col)))
+
     g <- ggplot(data = d,
                 aes_string(x = "CENTRLON", y = "CENTRLAT",
-                           fill = input$pred_col, data_id = "cell")) +
+                           fill = input$total_pi_col, data_id = "cell")) +
       geom_tile_interactive(aes(tooltip = tooltip))+
       coord_map() +
-      scale_fill_binned(type = "viridis", n.breaks = input$pred_bins)
+      scale_fill_binned(type = "viridis", n.breaks = input$total_pi_bins)
 
     girafe(ggobj = g,
            options = list(opts_selection(type = "multiple")))
@@ -523,24 +533,23 @@ server <- function(input, output, session) {
   # Select map cells when table rows selected
   observe({
 
-    input$pred_data_rows_selected # Click on row
-    input$pred_map_selected       # Click on map
+    input$total_pi_data_rows_selected # Click on row
+    input$total_pi_map_selected       # Click on map
 
     # Either way, highlights row selection
     isolate({
       session$sendCustomMessage(
-        type = 'pred_map_set',
-        message = as.character(input$pred_data_rows_selected))
+        type = 'total_pi_map_set',
+        message = as.character(input$total_pi_data_rows_selected))
     })
   })
 
-  observeEvent(input$pred_reset, {
-    pred_data_proxy %>% selectRows(NULL)
-  })
+  observe(total_pi_data_proxy %>% selectRows(NULL)) %>%
+    bindEvent(input$total_pi_reset)
 
   # PI/bootstrap download
   get_xlslist <- reactive({
-    req(input$survey_file, pi())
+    req(input$survey_file, total_pi())
     o <- mc_options()
     o <- append(o, c("random seed" = input$opts_seed))
     list(
@@ -550,12 +559,12 @@ server <- function(input, output, session) {
       Settings=data.frame(
         Option=names(o),
         Value=sapply(o, paste, sep="", collapse=", ")),
-      Summary=pred_density_moose_PI(pi()$pi),
-      Data=mc_get_pred(pi()$pi)$data,
-      Boot=mc_get_pred(pi()$pi)$boot_full)
+      Summary=pred_density_moose_PI(total_pi()$pi),
+      Data=mc_get_pred(total_pi()$pi)$data,
+      Boot=mc_get_pred(total_pi()$pi)$boot_full)
   })
 
-  output$boot_download <- downloadHandler(
+  output$total_boot_download <- downloadHandler(
         filename = function() {
             paste0("Moose_Total_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
         },
@@ -565,4 +574,304 @@ server <- function(input, output, session) {
         contentType="application/octet-stream"
   )
 
+
+
+  # Composition of Moose ----------------------------------------------------
+
+  ## Exploration ---------------------------
+  output$comp_explore_ui <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+
+    select_explanatory("comp_explore_var",
+                       "Variable to explore",
+                       survey_sub())
+  })
+
+  output$comp_explore_graph <- renderPlot({
+    req(input$comp_explore_var)
+    req(input$comp_explore_var != "none")
+    req(opts())
+
+    # Check class sums
+    mc_check_comp(survey_sub())
+
+    mc_plot_comp(input$comp_explore_var, survey_sub())
+  }, res = 125)
+
+
+  ## Add Models -------------------------------------------------------------
+
+  comp_models_list <- reactiveValues(m = list())
+
+  output$comp_model_id_ui <- renderUI({
+    validate(need(input$survey_file,
+                  "First select a data set in the \"Data\" tab"))
+
+    if(length(comp_models_list$m) == 0 || is.null(comp_models())) {
+      val <- "A"
+    } else {
+      val <- LETTERS[!LETTERS %in% names(comp_models())][1]
+    }
+
+    textInput("comp_model_id", "Model ID", value = val)
+  })
+
+  output$comp_model_var_ui <- renderUI({
+    select_explanatory("comp_model_var",
+                       "Variables",
+                       survey_sub(),
+                       multiple = TRUE)
+  })
+
+  # Create reactive for using the models, not modifying, models
+  comp_models <- reactive({
+    req(length(comp_models_list$m) > 0)
+    req(opts()) # To invalidate when settings change
+
+    m <- comp_models_list$m
+    m <- m[!map_lgl(m, is.null)]
+    m[order(names(m))]
+
+    # Record a change in comp_models()
+    isolate({
+      if(is.null(input$comp_pi_calc) || input$comp_pi_calc > 0)
+        updateButton(session, "comp_pi_calc", style = "warning",
+                     label = "Models have changed<br>(re-run)")
+    })
+
+    # Run and add model and details
+    # Evaluate directly to include args in the call itself, to prevent problems
+    # with stats::update() later in the Prediction Interval steps.
+    # idea from: https://stackoverflow.com/a/57528229/3362144
+    map(m, ~ append(., c("model" = list(
+      try(eval(rlang::expr(mc_fit_comp(x = survey_sub(),
+                                       vars = !!.$var))),
+          silent = TRUE)))))
+  })
+
+  output$comp_model_msgs <- renderUI({
+    m <- map_chr(comp_models(), ~{
+      if("try-error" %in% class(.$model)) .$model[1] else "no problem"})
+    m <- m[m != "no problem"]
+
+    if(length(m) > 0) {
+      msg <- imap(m, ~tagList(span("Problem with model ", strong(.y), ": ",
+                                   class = "alert-danger"), br(),
+                              .x, p())) %>%
+        tagList()
+    } else msg <- tagList()
+
+    msg
+  })
+
+
+  observe({
+    req(input$comp_model_id)
+    comp_models_list$m[[input$comp_model_id]] <- list(var = input$comp_model_var)
+  }) %>%
+    bindEvent(input$comp_model_add)
+
+  output$comp_model_table <- function() {
+    imap_dfr(comp_models(),
+             ~data.frame(Model = .y,
+                         Variables = paste(.x$var, collapse = ", "))) %>%
+      kable() %>%
+      kable_styling() %>%
+      row_spec(which(model_errors(comp_models())), background = "#f2dede")
+  }
+
+  # Dynamically create delete buttons for each model
+  output$comp_model_delete_ui <- renderUI({
+    req(length(comp_models()) > 0)
+
+    m <- comp_models()[order(names(comp_models()))]
+
+    imap(m, ~ bsButton(paste0("comp_delete_model_", .y),
+                       label = .y,
+                       icon = icon("times"),
+                       style = if_else("try-error" %in% class(.x$model),
+                                       "danger",
+                                       "default")))
+  })
+
+  # Dynamically create observe() %>% bindEvent()s for each model delete button
+  observe({
+    req(length(comp_models()) > 0)
+
+    isolate({
+      map(names(comp_models()), ~ {
+        m <- .
+        observe(comp_models_list$m[[m]] <- NULL) %>%
+          bindEvent(input[[paste0("comp_delete_model_", m)]],
+                    ignoreInit = TRUE)
+      })
+    })
+  })
+
+  comp_model_aic <- reactive({
+    req(length(comp_models()) > 0)
+    req(opts())
+    validate_models(comp_models())
+
+    map(comp_models(), "model") %>%
+      mc_models_comp() %>%
+      as.data.frame() %>%
+      mutate(across(everything(), round, 2))
+  })
+
+  output$comp_model_aic <- renderTable({
+    a <- comp_model_aic()
+    t(a[rev(seq_len(nrow(a))),])
+  }, rownames = TRUE)
+
+
+  ## PI ----------------------------------------------------
+
+  # UI elements
+  output$comp_pi_models_ui <- renderUI({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(total_models_list$m) > 0,
+             "First create Total Models in the Total > Models tab") %then%
+        need(length(comp_models_list$m) > 0,
+             "First create Composition Models in the Composition > Models tab"))
+
+    tagList(
+      selectInput("comp_pi_models1",
+                  label = "Total model(s) to use",
+                  choices = names(total_models()), multiple = TRUE),
+      selectInput("comp_pi_models2",
+                  label = "Composition model to use",
+                  choices = names(comp_models()), multiple = FALSE))
+  })
+
+  output$comp_pi_average_ui <- renderUI({
+    req(input$comp_pi_models1, input$comp_pi_models2)
+
+    if(length(input$comp_pi_models1) > 1)  {
+      radioButtons("comp_pi_average", label = "With multiple models...",
+                   choices = c("Use best model" = FALSE,
+                               "Average over models" = TRUE),
+                   selected = TRUE)
+    }
+  })
+
+  comp_pi <- reactive({
+    validate(need(
+      !is.null(input$comp_pi_models1) & !is.null(input$comp_pi_models2),
+      "Please choose your model(s)"))
+
+    validate_models(total_models())
+    validate_models(comp_models())
+
+    updateButton(session, "comp_pi_calc", style = "primary",
+                 label = "Calculate PI")
+
+    if(is.null(input$comp_pi_average)) {
+      do_avg <- FALSE
+    } else {
+      do_avg <- as.logical(input$comp_pi_average)
+    }
+
+    list(
+      pi = mc_predict_comp(
+        total_model_id = input$comp_pi_models1,
+        comp_model_id = input$comp_pi_models2,
+        model_list_total = map(total_models(), "model"),
+        model_list_comp = map(comp_models(), "model"),
+        x = survey_sub(),
+        do_avg = do_avg),
+      opts = opts())
+  }) %>%
+    bindEvent(input$comp_pi_calc)
+
+  # Tables
+  output$comp_pi_density <- function() {
+    req(comp_pi())
+    pred_density_moose_CPI(comp_pi()$pi) %>%
+      as.data.frame() %>%
+      mutate(type = rownames(.)) %>%
+      select(type, everything()) %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
+      kable_styling(bootstrap_options = "condensed")
+  }
+
+  output$comp_pi_options <- function() {
+    req(comp_pi())
+
+    comp_pi <- comp_pi()$pi
+
+    tibble(Issues = if_else(length(comp_pi$issues) == 0, "None",
+                            as.character(length(comp_pi$issues))),
+           Bootstraps = ncol(comp_pi()$opts$B),
+           alpha = comp_pi()$opts$alpha,
+           Method = comp_pi()$opts$method,
+           Response = if_else(comp_pi()$opts$response == "total",
+                              "MOOSE_TOTA",
+                              "COW_TOTA"),
+           Composition = paste(comp_pi()$opts$composition, collapse = ", "),
+           Sightability = comp_pi()$opts$sightability) %>%
+      t() %>%
+      kable() %>%
+      kable_styling(bootstrap_options = "condensed")
+  }
+
+  # Bootstraps table
+  output$comp_pi_boot <- renderDT({
+    data.frame(SU_ID = comp_pi()$pi$data$SU_ID,
+               comp_pi()$pi$boot_full) %>%
+      datatable()
+  })
+
+
+
+  ## Summary --------------------------------------------------
+  output$comp_pi_summary <- renderDT({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(comp_models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(input$comp_pi_calc > 0,
+             "First create the predictions in the \"Prediction Intervals\" tab"))
+
+    data.frame(SU_ID = comp_pi()$pi$data$SU_ID,
+               comp_pi()$pi$cells) %>%
+      datatable()
+  })
+
+  # Download summary
+  # PI/bootstrap download
+  comp_summary_xlsx <- reactive({
+    req(input$survey_file, comp_pi())
+    o <- mc_options()
+    o <- append(o, c("random seed" = input$opts_seed))
+
+    list(
+      Info = data.frame(moosecounter = paste0(
+        c("R package version: ", "Date of analysis: ", "File: "),
+        c(ver, format(Sys.time(), "%Y-%m-%d"), input$survey_file$name))),
+      Settings = data.frame(
+        Option = names(o),
+        Value = sapply(o, paste, sep="", collapse=", ")),
+      Summary = pred_density_moose_CPI(comp_pi()$pi),
+      Data = comp_pi()$pi$data,
+      Boot = comp_pi()$pi$boot_full)
+  })
+
+  output$comp_boot_download <- downloadHandler(
+    filename = function() {
+      paste0("Moose_Composition_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
+    },
+    content = function(file) {
+      write.xlsx(comp_summary_xlsx(), file = file, overwrite = TRUE)
+    },
+    contentType = "application/octet-stream"
+  )
+
 }
+
+
+

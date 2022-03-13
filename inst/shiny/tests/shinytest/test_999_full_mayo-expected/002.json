@@ -1,27 +1,21 @@
 {
   "input": {
+    "comp_model_add": 0,
+    "comp_pi_calc": 0,
     "data_panel": "Interactive table",
     "filter_SURVEY_ID": null,
     "filter_SURVEY_NAM": null,
     "filter_SURVEY_YEA": null,
     "filter_YT_REGION": null,
     "menu": "data",
-    "model_add": 0,
-    "model_dist": "P",
-    "model_weighted": "FALSE",
-    "multi_alpha": 0.1,
-    "opts_alpha": "0.01",
+    "multi_alpha": 0.01,
+    "opts_alpha": "0.1",
     "opts_b": 100,
     "opts_method": "Nelder-Mead",
     "opts_response": "total",
     "opts_seed": 4323,
     "opts_sightability": 1,
     "opts_wscale": 1,
-    "pi_panel": "Diagnostic Plots",
-    "pred_average": "TRUE",
-    "pred_calc": 0,
-    "pred_col": "observed_values",
-    "pred_reset": 0,
     "sidebarCollapsed": false,
     "sidebarItemExpanded": null,
     "survey_factors": null,
@@ -696,8 +690,410 @@
     ],
     "survey_preview_rows_selected": null,
     "survey_preview_search": "",
-    "survey_preview_state": null,
-    "uni_dist": "P"
+    "survey_preview_state": {
+      "time": 1647025188915,
+      "start": 0,
+      "length": 10,
+      "order": [
+
+      ],
+      "search": {
+        "search": "",
+        "smart": true,
+        "regex": false,
+        "caseInsensitive": true
+      },
+      "columns": [
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        },
+        {
+          "visible": true,
+          "search": {
+            "search": "",
+            "smart": true,
+            "regex": false,
+            "caseInsensitive": true
+          }
+        }
+      ]
+    },
+    "total_model_add": 0,
+    "total_model_dist": "NB",
+    "total_model_weighted": "FALSE",
+    "total_pi_average": "TRUE",
+    "total_pi_bins": 5,
+    "total_pi_calc": 0,
+    "total_pi_col": "observed_values",
+    "total_pi_panel": "Diagnostic Plots",
+    "total_pi_reset": 0,
+    "uni_dist": "NB"
   },
   "output": {
     "filters_ui": {
@@ -722,7 +1118,7 @@
         }
       ]
     },
-    "opts": "<table  class = 'table shiny-table table- spacing-s' style = 'width:auto;'>\n<thead> <tr> <th style='text-align: left;'> option <\/th> <th style='text-align: left;'> values <\/th>  <\/tr> <\/thead> <tbody>\n  <tr> <td> method <\/td> <td> Nelder-Mead <\/td> <\/tr>\n  <tr> <td> B <\/td> <td> 100 <\/td> <\/tr>\n  <tr> <td> MAXCELL <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> alpha <\/td> <td> 0.01 <\/td> <\/tr>\n  <tr> <td> wscale <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> MINCELL <\/td> <td> 10 <\/td> <\/tr>\n  <tr> <td> Ntot <\/td> <td> MOOSE_TOTA <\/td> <\/tr>\n  <tr> <td> srv_name <\/td> <td> Sampled <\/td> <\/tr>\n  <tr> <td> srv_value <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> area_srv <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> Area <\/td> <td> AREA_KM <\/td> <\/tr>\n  <tr> <td> sightability <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> response <\/td> <td> total <\/td> <\/tr>\n  <tr> <td> xy <\/td> <td> CENTRLON, CENTRLAT <\/td> <\/tr>\n  <tr> <td> composition <\/td> <td> BULL_SMALL, BULL_LARGE, LONE_COW, COW_1C, COW_2C, LONE_CALF, UNKNOWN_AG <\/td> <\/tr>\n   <\/tbody> <\/table>",
+    "opts": "<table  class = 'table shiny-table table- spacing-s' style = 'width:auto;'>\n<thead> <tr> <th style='text-align: left;'> option <\/th> <th style='text-align: left;'> name <\/th> <th style='text-align: left;'> values <\/th>  <\/tr> <\/thead> <tbody>\n  <tr> <td> Optimization algorithm <\/td> <td> method <\/td> <td> Nelder-Mead <\/td> <\/tr>\n  <tr> <td> Number of bootstrap runs <\/td> <td> B <\/td> <td> 100 <\/td> <\/tr>\n  <tr> <td> Max total abundance in cells <\/td> <td> MAXCELL <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> Type I error rate for PI <\/td> <td> alpha <\/td> <td> 0.1 <\/td> <\/tr>\n  <tr> <td> Weight <\/td> <td> wscale <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> Min abundance for composition in cells <\/td> <td> MINCELL <\/td> <td> 10 <\/td> <\/tr>\n  <tr> <td>  <\/td> <td> Ntot <\/td> <td> MOOSE_TOTA <\/td> <\/tr>\n  <tr> <td> Filtering variable <\/td> <td> srv_name <\/td> <td> Sampled <\/td> <\/tr>\n  <tr> <td> Filtering value <\/td> <td> srv_value <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> Comun indicating survey areas <\/td> <td> area_srv <\/td> <td>  <\/td> <\/tr>\n  <tr> <td> Area <\/td> <td> Area <\/td> <td> AREA_KM <\/td> <\/tr>\n  <tr> <td> Sightability <\/td> <td> sightability <\/td> <td> 1 <\/td> <\/tr>\n  <tr> <td> Response variable <\/td> <td> response <\/td> <td> total <\/td> <\/tr>\n  <tr> <td> Long/Lat <\/td> <td> xy <\/td> <td> CENTRLON, CENTRLAT <\/td> <\/tr>\n  <tr> <td> Composition variables <\/td> <td> composition <\/td> <td> BULL_SMALL, BULL_LARGE, LONE_COW, COW_1C, COW_2C, LONE_CALF, UNKNOWN_AG <\/td> <\/tr>\n   <\/tbody> <\/table>",
     "survey_factors_ui": {
       "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"survey_factors-label\" for=\"survey_factors\">Convert integer to categorical<\/label>\n  <div>\n    <select id=\"survey_factors\" multiple=\"multiple\"><option value=\"TKStrat_01\">TKStrat_01<\/option><\/select>\n    <script type=\"application/json\" data-for=\"survey_factors\">{\"plugins\":[\"selectize-plugin-a11y\"]}<\/script>\n  <\/div>\n<\/div>",
       "deps": [
@@ -770,8 +1166,10 @@
     "survey_preview": {
       "x": {
         "filter": "none",
+        "vertical": false,
         "container": "<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>SURVEY_NAM<\/th>\n      <th>YT_REGION<\/th>\n      <th>SURVEY_YEA<\/th>\n      <th>SURVEY_ID<\/th>\n      <th>S_SET_ID<\/th>\n      <th>SU_ID<\/th>\n      <th>ID<\/th>\n      <th>SUS_<\/th>\n      <th>SUS_ID<\/th>\n      <th>IDLATDEG<\/th>\n      <th>IDLATMIN<\/th>\n      <th>IDLONDEG<\/th>\n      <th>IDLONMIN<\/th>\n      <th>CENTRLAT<\/th>\n      <th>CENTRLON<\/th>\n      <th>REGION<\/th>\n      <th>GMU<\/th>\n      <th>GMU2<\/th>\n      <th>USE_SCALE<\/th>\n      <th>SRC_SCALE<\/th>\n      <th>AREA_KM<\/th>\n      <th>Sampled<\/th>\n      <th>BULL_SMALL<\/th>\n      <th>BULL_LARGE<\/th>\n      <th>LONE_COW<\/th>\n      <th>COW_1C<\/th>\n      <th>COW_2C<\/th>\n      <th>LONE_CALF<\/th>\n      <th>UNKNOWN_AG<\/th>\n      <th>MOOSE_TOTA<\/th>\n      <th>TKStrat_01<\/th>\n      <th>ELC_Subalpine<\/th>\n      <th>Fire1982_2012<\/th>\n      <th>Fire8212_DEM815<\/th>\n      <th>NALC_Needle<\/th>\n      <th>NALC_Shrub<\/th>\n      <th>Subalp_Shrub_250buf<\/th>\n      <th>ELCSub_Fire8212DEM815<\/th>\n      <th>SubShrub250_Fire8212DEM815<\/th>\n      <th>srv<\/th>\n      <th>COW_TOTA<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
         "options": {
+          "scrollX": true,
           "columnDefs": [
             {
               "className": "dt-right",
@@ -842,10 +1240,23 @@
       ],
       "deps": [
         {
-          "name": "dt-core",
-          "version": "1.10.20",
+          "name": "jquery",
+          "version": "3.6.0",
           "src": {
-            "href": "dt-core-1.10.20"
+            "href": "jquery-3.6.0"
+          },
+          "meta": null,
+          "script": "jquery-3.6.0.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "dt-core",
+          "version": "1.11.3",
+          "src": {
+            "href": "dt-core-1.11.3"
           },
           "meta": null,
           "script": "js/jquery.dataTables.min.js",
@@ -859,27 +1270,14 @@
           "all_files": false
         },
         {
-          "name": "jquery",
-          "version": "3.5.1",
-          "src": {
-            "href": "jquery-3.5.1"
-          },
-          "meta": null,
-          "script": "jquery.min.js",
-          "stylesheet": null,
-          "head": null,
-          "attachment": null,
-          "all_files": true
-        },
-        {
           "name": "crosstalk",
-          "version": "1.1.1",
+          "version": "1.2.0",
           "src": {
-            "href": "crosstalk-1.1.1"
+            "href": "crosstalk-1.2.0"
           },
           "meta": null,
           "script": "js/crosstalk.min.js",
-          "stylesheet": "css/crosstalk.css",
+          "stylesheet": "css/crosstalk.min.css",
           "head": null,
           "attachment": null,
           "all_files": true

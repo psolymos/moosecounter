@@ -209,6 +209,12 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
     Total_2C = tmp)
 
   b <- 1
+
+  # Progress bars setup
+  if(requireNamespace("shiny") && shiny::isRunning()) {
+    pbapply::pboptions(type = "shiny",
+                       title = "Calculating prediction intervals")
+  }
   pb <- pbapply::startpb(0, B)
   on.exit(pbapply::closepb(pb))
 

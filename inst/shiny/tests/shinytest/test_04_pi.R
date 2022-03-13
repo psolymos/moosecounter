@@ -13,27 +13,28 @@ app$uploadFile(survey_file = "../../../extdata/MayoMMU_QuerriedData.csv")
 
 # Models ------------------------------------------------------------------
 app$setInputs(sidebarItemExpanded = "Total")
-app$setInputs(menu = "addmodel")
-app$setInputs(model_var_count = "NALC_Needle")
-app$setInputs(model_add = "click")
+app$setInputs(menu = "total_models")
+app$setInputs(total_model_dist = "P")
+app$setInputs(total_model_var_count = "NALC_Needle")
+app$setInputs(total_model_add = "click")
 
 # Prediction Intervals ----------------------------------------------------
-app$setInputs(menu = "pi")
+app$setInputs(menu = "total_pi")
 
 # Test prediction intervals with A/B
-app$setInputs(pred_models = c("A", "B"))
-app$setInputs(pred_calc = "click")
+app$setInputs(total_pi_models = c("A", "B"))
+app$setInputs(total_pi_calc = "click")
 app$snapshot()
 
 # Test with non-averaged
-app$setInputs(pred_average = "FALSE")
-app$setInputs(pred_calc = "click")
+app$setInputs(total_pi_average = "FALSE")
+app$setInputs(total_pi_calc = "click")
 app$snapshot()
 
 # Test figures
-app$setInputs(pi_panel = "Moose Predictions")
+app$setInputs(total_pi_panel = "Moose Predictions")
 app$snapshot()
-app$setInputs(pred_cell = 600)
+app$setInputs(total_pi_cell = 600)
 app$snapshot()
-app$setInputs(pi_panel = "Bootstrap Results")
+app$setInputs(total_pi_panel = "Bootstrap Results")
 app$snapshot()
