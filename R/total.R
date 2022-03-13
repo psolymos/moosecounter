@@ -1,14 +1,16 @@
-#' Switch Response
+#' Total Moose Workflow
 #'
-#' Switch between total Moose vs. cows only.
+#' `switch_response` switches between total Moose vs. cows only.
 #' This sets the column name for totel Moose estimation.
 #'
-#' @param type type of the response, can be `"total"` or `"cows"`
+#' @param type The type of the response, can be `"total"` or `"cows"` for `switch_response`.
 #'
 #' @examples
 #'
 #' switch_response("cows")
 #'
+#' @keywords models regression
+#' @rdname total
 #' @export
 switch_response <- function(type="total") {
     type <- match.arg(type, c("total", "cows"))
@@ -28,10 +30,13 @@ switch_response <- function(type="total") {
 
 #' Update Moose Data
 #'
-#' @param x data frame
-#' @param srv logical vector, rows of `x` that are surveyed, falls back to global options when `NULL`
-#' @param ss logical vector to subset `x`, default is to take no subset
+#' `mc_update_total` Updates/prepares the Moose data set for downstream analyses (i.e. calculates some derived variables, sets a surveyed/unsurveyed indicator, and optinally takes a subset).
 #'
+#' @param x A data frame with Moose data, or a data frame from `mc_update_total()`.
+#' @param srv Logical vector, rows of `x` that are surveyed, falls back to global options when `NULL`.
+#' @param ss Logical vector to subset `x`, default is to take no subset.
+#'
+#' @rdname total
 #' @export
 # used to be saveMooseData
 mc_update_total <- function(x, srv=NULL, ss=NULL) {
@@ -49,6 +54,8 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 
 #' Fit Model to Total Abundance
 #'
+#' `mc_fit_total` fit total Moose abundance models.
+#'
 #' @param x data frame (use `mc_update_total()` on `x` prior)
 #' @param vars column names of `x` to be used as predictors for the count model
 #' @param zi_vars optional, column names of `x` to be used as predictors for the zero model
@@ -56,6 +63,7 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 #' @param weighted logical, to use weighting to moderate influential observations
 #' @param ... other args passed to `zeroinfl2()`
 #'
+#' @rdname total
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
     dist="ZINB", weighted=FALSE, ...) {
@@ -106,10 +114,13 @@ get_coefs <- function(ML) {
 
 #' Total Abundance Models
 #'
+#' `mc_models_total` prints out estimates from the models.
+#'
 #' @param ml named list of models
 #' @param x data frame
 #' @param coefs logical, return coefficient table too
 #'
+#' @rdname total
 #' @export
 # was updateModelTab
 mc_models_total <- function(ml, x, coefs=TRUE) {
@@ -174,6 +185,7 @@ pred_density_moose <- function(fit, x){
 #' @param do_boot logical, to do bootstrap
 #' @param do_avg logical, to do model averaging
 #'
+#' @rdname total
 #' @export
 # was: MooseSim.PI
 # x: MooseData
@@ -387,6 +399,7 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
 #' @param PI PI object returned by `mc_predict_total()`
 #' @param ss subset indicator
 #'
+#' @rdname total
 #' @export
 # was: subsetPiData
 mc_get_pred <- function(PI, ss=NULL) {
@@ -418,6 +431,7 @@ mc_get_pred <- function(PI, ss=NULL) {
 #'
 #' @param PI PI object returned by `mc_predict_total()`
 #'
+#' @rdname total
 #' @export
 pred_density_moose_PI <- function(PI){
     out <- round(PI$total, 2)
@@ -437,6 +451,7 @@ pred_density_moose_PI <- function(PI){
 #' @param ml named list of models
 #' @param x data frame
 #'
+#' @rdname total
 #' @export
 # was: plotResiduals
 mc_plot_residuals <- function(model_id, ml, x) {
@@ -489,6 +504,7 @@ mc_plot_residuals <- function(model_id, ml, x) {
 #'
 #' @param PI PI object returned by `mc_predict_total()`
 #'
+#' @rdname total
 #' @export
 mc_plot_predpi <- function(PI) {
 
@@ -581,6 +597,7 @@ mc_plot_predpi <- function(PI) {
 #' @param plot logical, to plot or just give summary
 #' @param breaks breaks arg passed to `graphics::hist()`
 #'
+#' @rdname total
 #' @export
 mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
     if (is.null(id)) {

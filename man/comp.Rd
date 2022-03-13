@@ -7,7 +7,7 @@
 \alias{mc_predict_comp}
 \alias{subset_CPI_data}
 \alias{pred_density_moose_CPI}
-\title{Check Composition Data}
+\title{Moose Composition Workflow}
 \usage{
 mc_check_comp(x)
 
@@ -58,3 +58,5 @@ Extract useful summaries from a mlist of composition models.
 
 Calculate prediction intervals based on composition model.
 }
+\keyword{models}
+\keyword{regression}

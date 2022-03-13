@@ -1,9 +1,10 @@
-#' Check Composition Data
+#' Moose Composition Workflow
 #'
 #' Check the composition data frame to make sure composition columns add up and give total Moose as a result.
 #'
 #' @param x Moose data object
 #'
+#' @keywords models regression
 #' @rdname comp
 #' @export
 ## used to be called checkCompData
