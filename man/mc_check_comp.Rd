@@ -10,5 +10,5 @@ mc_check_comp(x)
 \item{x}{Moose data object}
 }
 \description{
-Check Composition Data
+Check the composition data frame to make sure composition columns add up and give total Moose as a result.
 }

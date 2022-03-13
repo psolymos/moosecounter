@@ -14,5 +14,5 @@ mc_plot_univariate(i, x, dist = "ZINB")
 \item{dist}{count distribution (P, NB, ZIP, or ZINB)}
 }
 \description{
-Univariate Exploration
+Univariate exploration for the total Moose models.
 }

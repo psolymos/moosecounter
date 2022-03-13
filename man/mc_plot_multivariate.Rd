@@ -11,8 +11,9 @@ mc_plot_multivariate(vars, x, alpha = NULL)
 
 \item{x}{data frame with Moose data}
 
-\item{alpha}{alpha level defining mincriterion = 1 - alpha}
+\item{alpha}{alpha level defining mincriterion = 1 - alpha for `partykit::ctree()`}
 }
 \description{
-Multivariate Exploration
+Multivariate exploration based on regression trees
+(recursive partitioning  in a conditional inference framework).
 }

@@ -12,5 +12,5 @@ mc_fit_comp(x, vars = NULL)
 \item{vars}{column names of `x` to be used as predictors for the composition model}
 }
 \description{
-Fit Composition Model for Total Moose
+Multinomial model to capture how predictors affect compsotional data.
 }

@@ -39,5 +39,5 @@ zeroinfl2(
 \item{...}{control arguments}
 }
 \description{
-Count Models
+This is customized version of the `pscl::zeroinfl()` function, but this also fits the non-ZI counterparts in a way that simplifies downstream analyses (i.e. PI calculations). Intended for internal use.
 }

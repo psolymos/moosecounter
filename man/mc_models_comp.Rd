@@ -10,5 +10,5 @@ mc_models_comp(model_list_comp)
 \item{model_list_comp}{composition model list}
 }
 \description{
-Composition Model Table
+Extract useful summaries from a mlist of composition models.
 }

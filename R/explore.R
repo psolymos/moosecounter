@@ -1,5 +1,7 @@
 #' Univariate Exploration
 #'
+#' Univariate exploration for the total Moose models.
+#'
 #' @param i column name from `x` to be used as a predictor
 #' @param x data frame with Moose data
 #' @param dist count distribution (P, NB, ZIP, or ZINB)
@@ -82,9 +84,12 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
 
 #' Multivariate Exploration
 #'
+#' Multivariate exploration based on regression trees
+#' (recursive partitioning  in a conditional inference framework).
+#'
 #' @param vars column names from `x` to be used as a predictor
 #' @param x data frame with Moose data
-#' @param alpha alpha level defining mincriterion = 1 - alpha
+#' @param alpha alpha level defining mincriterion = 1 - alpha for `partykit::ctree()`
 #'
 #' @export
 mc_plot_multivariate <- function(vars, x, alpha=NULL) {

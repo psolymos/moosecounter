@@ -14,5 +14,5 @@ wzi(object, pass_data = FALSE, ...)
 \item{...}{other params}
 }
 \description{
-Weighted Refitting of Models
+The process finds weights that are related to leverage (how much each observation contributes to the model likelihood). This is a way to account for influential observations.
 }

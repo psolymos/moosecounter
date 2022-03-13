@@ -19,7 +19,7 @@
 #' * `xy`: Long/Lat
 #' * `composition`: Composition variables
 #'
-#' @param ... options to set (see `zzz.R`)
+#' @param ... options to set (see Details)
 #'
 #' @examples
 #' ## original values

@@ -1,5 +1,7 @@
 #' Weighted Refitting of Models
 #'
+#' The process finds weights that are related to leverage (how much each observation contributes to the model likelihood). This is a way to account for influential observations.
+#'
 #' @param object a model as returned by `zeroinfl2()`
 #' @param pass_data logical, to pass the data or not
 #' @param ... other params
@@ -41,6 +43,8 @@ wzi <- function(object, pass_data=FALSE, ...) {
 }
 
 #' Count Models
+#'
+#' This is customized version of the `pscl::zeroinfl()` function, but this also fits the non-ZI counterparts in a way that simplifies downstream analyses (i.e. PI calculations). Intended for internal use.
 #'
 #' @param formula model formula as in `pscl::zeroinfl()`
 #' @param data Moose data set

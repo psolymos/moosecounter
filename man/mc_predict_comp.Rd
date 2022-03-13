@@ -27,5 +27,5 @@ mc_predict_comp(
 \item{do_avg}{logical, to do model averaging}
 }
 \description{
-Composition Prediction Intervals
+Calculate prediction intervals based on composition model.
 }

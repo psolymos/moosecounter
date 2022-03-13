@@ -7,7 +7,7 @@
 mc_options(...)
 }
 \arguments{
-\item{...}{options to set (see `zzz.R`)}
+\item{...}{options to set (see Details)}
 }
 \description{
 A function to get and set the package related options.

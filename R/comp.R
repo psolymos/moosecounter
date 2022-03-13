@@ -1,5 +1,7 @@
 #' Check Composition Data
 #'
+#' Check the composition data frame to make sure composition columns add up and give total Moose as a result.
+#'
 #' @param x Moose data object
 #'
 #' @export
@@ -25,6 +27,8 @@ mc_check_comp <- function(x) {
 
 
 #' Fit Composition Model for Total Moose
+#'
+#' Multinomial model to capture how predictors affect compsotional data.
 #'
 #' @param x data frame
 #' @param vars column names of `x` to be used as predictors for the composition model
@@ -98,6 +102,8 @@ mc_fit_comp_formula <- function(formula, x) {
 
 #' Composition Model Table
 #'
+#' Extract useful summaries from a mlist of composition models.
+#'
 #' @param model_list_comp composition model list
 #'
 #' @export
@@ -113,6 +119,8 @@ mc_models_comp <- function(model_list_comp) {
 
 
 #' Composition Prediction Intervals
+#'
+#' Calculate prediction intervals based on composition model.
 #'
 #' @param total_model_id model ID or model IDs for total moose model (can be multiple model IDs from `names(model_list_total)`)
 #' @param comp_model_id model ID or model IDs for composition model (single model ID from `names(model_list_comp)`)
