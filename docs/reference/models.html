@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Set Moose Options — mc_options • moosecounter</title>
+<title>Internal Functions: Models — models • moosecounter</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Set Moose Options — mc_options" />
-<meta property="og:description" content="A function to get and set the package related options." />
+<meta property="og:title" content="Internal Functions: Models — models" />
+<meta property="og:description" content="These functions power the total Moose estimation and prediction." />
 
 
 
@@ -116,60 +116,107 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Set Moose Options</h1>
+    <h1>Internal Functions: Models</h1>
     
-    <div class="hidden name"><code>mc_options.Rd</code></div>
+    <div class="hidden name"><code>models.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>A function to get and set the package related options.</p>
+    <p>These functions power the total Moose estimation and prediction.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mc_options</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>wzi</span><span class='op'>(</span><span class='va'>object</span>, pass_data <span class='op'>=</span> <span class='cn'>FALSE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>zeroinfl2</span><span class='op'>(</span>
+  <span class='va'>formula</span>,
+  <span class='va'>data</span>,
+  <span class='va'>subset</span>,
+  <span class='va'>na.action</span>,
+  <span class='va'>weights</span>,
+  <span class='va'>offset</span>,
+  dist <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ZIP"</span>, <span class='st'>"ZINB"</span>, <span class='st'>"P"</span>, <span class='st'>"NB"</span><span class='op'>)</span>,
+  link <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"logit"</span>, <span class='st'>"probit"</span>, <span class='st'>"cloglog"</span><span class='op'>)</span>,
+  control <span class='op'>=</span> <span class='cn'>NULL</span>,
+  model <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  y <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  x <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  solveH <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
+
+<span class='co'># S3 method for non_zeroinfl</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for summary.non_zeroinfl</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>x</span>, digits <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fu'><a href='https://rdrr.io/r/base/options.html'>getOption</a></span><span class='op'>(</span><span class='st'>"digits"</span><span class='op'>)</span> <span class='op'>-</span> <span class='fl'>3</span><span class='op'>)</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for zeroinfl</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/nobs.html'>nobs</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>object</th>
+      <td><p>A model as returned by `zeroinfl2()`.</p></td>
+    </tr>
+    <tr>
+      <th>pass_data</th>
+      <td><p>Logical, to pass the data or not.</p></td>
+    </tr>
+    <tr>
       <th>...</th>
-      <td><p>options to set (see Details)</p></td>
+      <td><p>Other parameters passes to underlying functions.</p></td>
+    </tr>
+    <tr>
+      <th>formula</th>
+      <td><p>Model formula as in `pscl::zeroinfl()`.</p></td>
+    </tr>
+    <tr>
+      <th>data</th>
+      <td><p>Moose data frame.</p></td>
+    </tr>
+    <tr>
+      <th>subset, na.action, weights, offset, model, y</th>
+      <td><p>Arguments as
+in `pscl::zeroinfl()`.</p></td>
+    </tr>
+    <tr>
+      <th>dist</th>
+      <td><p>Count distribution, one of `"ZIP"`, `"ZINB"`, `"P"`, `"NB"`.</p></td>
+    </tr>
+    <tr>
+      <th>link</th>
+      <td><p>Link function for the zero model.</p></td>
+    </tr>
+    <tr>
+      <th>control</th>
+      <td><p>See `pscl::zeroinfl.control()`.</p></td>
+    </tr>
+    <tr>
+      <th>x</th>
+      <td><p>Arguments for `pscl::zeroinfl()` or a
+model as returned by `zeroinfl2()` for the methods.</p></td>
+    </tr>
+    <tr>
+      <th>solveH</th>
+      <td><p>Logical, to use robust matrix inversion to get VCV.</p></td>
+    </tr>
+    <tr>
+      <th>digits</th>
+      <td><p>Digits for print method.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>* `method`: Optimization algorithm
-* `response`: Response variable
-* `MAXCELL`: Max total abundance in cells
-* `MINCELL`: Min abundance for composition in cells
-* `B`: Number of bootstrap runs
-* `alpha`: Type I error rate for PI
-* `wscale`: Weight
-* `sightability`: Sightability
-* `seed`: Random seed
-* `Ntot`: set to `MOOSE_TOTA` (internally changing to `"COW_TOTA"` when modeling cows)
-* `srv_name`: Filtering variable
-* `srv_value`: Filtering value
-* `area_srv`: Comun indicating survey areas
-* `Area`: Area
-* `xy`: Long/Lat
-* `composition`: Composition variables</p>
+    <p>`zeroinfl2` is a customized version of the `pscl::zeroinfl()` function,
+but this also fits the non-ZI counterparts in a way that simplifies
+downstream analyses (i.e. PI calculations). Intended for internal use.</p>
+<p>`wzi` applies a leave-one-out approach to temper influential observations.
+The process finds weights that are related to leverage
+(how much each observation contributes to the model likelihood).</p>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'>## original values</span>
-<span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>mc_options</span><span class='op'>(</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>o</span><span class='op'>)</span>
-<span class='va'>o</span><span class='op'>$</span><span class='va'>B</span>
-
-<span class='co'>## set B to new value</span>
-<span class='fu'>mc_options</span><span class='op'>(</span>B <span class='op'>=</span> <span class='fl'>20</span><span class='op'>)</span>
-<span class='fu'>mc_options</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='va'>B</span>
-
-<span class='co'>## restore orgiginal values</span>
-<span class='fu'>mc_options</span><span class='op'>(</span><span class='va'>o</span><span class='op'>)</span>
-<span class='fu'>mc_options</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='va'>B</span>
-
-</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot the total PI distribution for a cell — mc_plot_pidistrcell • moosecounter</title>
+<title>Total Estimate with Gassaway Formula — gassaway • moosecounter</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,11 @@
 
 
 
-<meta property="og:title" content="Plot the total PI distribution for a cell — mc_plot_pidistrcell" />
-<meta property="og:description" content="Plot the total PI distribution for a cell" />
+<meta property="og:title" content="Total Estimate with Gassaway Formula — gassaway" />
+<meta property="og:description" content="We do the stratification BEFORE the surveys are done using the
+fixed wing aircraft. Every cell is stratified as LOW or HIGH.
+Then some of the LOW and some of HIGH are surveyed to find how
+many moose are there." />
 
 
 
@@ -82,7 +85,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">moosecounter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4-0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6-0</span>
       </span>
     </div>
 
@@ -116,39 +119,53 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot the total PI distribution for a cell</h1>
+    <h1>Total Estimate with Gassaway Formula</h1>
     
-    <div class="hidden name"><code>mc_plot_pidistrcell.Rd</code></div>
+    <div class="hidden name"><code>gassaway.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Plot the total PI distribution for a cell</p>
+    <p>We do the stratification BEFORE the surveys are done using the
+fixed wing aircraft. Every cell is stratified as LOW or HIGH.
+Then some of the LOW and some of HIGH are surveyed to find how
+many moose are there.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mc_plot_pidistrcell</span><span class='op'>(</span><span class='va'>PI</span>, id <span class='op'>=</span> <span class='fl'>1</span>, plot <span class='op'>=</span> <span class='cn'>TRUE</span>, breaks <span class='op'>=</span> <span class='st'>"Sturges"</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>mc_gassaway</span><span class='op'>(</span><span class='va'>y1</span>, <span class='va'>y2</span>, <span class='va'>N1</span>, <span class='va'>N2</span><span class='op'>)</span>
+
+<span class='co'># S3 method for mc_gassaway</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>PI</th>
-      <td><p>PI object returned by `mc_predict_total()`</p></td>
+      <th>y1, y2</th>
+      <td><p>surveyed cell-level population counts in the 2 strata</p></td>
     </tr>
     <tr>
-      <th>id</th>
-      <td><p>cell ID</p></td>
+      <th>N1, N2</th>
+      <td><p>total number of cells that were stratified</p></td>
     </tr>
     <tr>
-      <th>plot</th>
-      <td><p>logical, to plot or just give summary</p></td>
+      <th>x</th>
+      <td><p>object to print</p></td>
     </tr>
     <tr>
-      <th>breaks</th>
-      <td><p>breaks arg passed to `graphics::hist()`</p></td>
+      <th>...</th>
+      <td><p>arguments passed to the print method</p></td>
     </tr>
     </table>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><span class='va'>y1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='fl'>20</span>, <span class='fl'>50</span><span class='op'>)</span>
+<span class='va'>y2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='fl'>30</span>, <span class='fl'>5</span><span class='op'>)</span>
+<span class='va'>N1</span> <span class='op'>&lt;-</span> <span class='fl'>40</span>
+<span class='va'>N2</span> <span class='op'>&lt;-</span> <span class='fl'>50</span>
+<span class='fu'>mc_gassaway</span><span class='op'>(</span><span class='va'>y1</span>, <span class='va'>y2</span>, <span class='va'>N1</span>, <span class='va'>N2</span><span class='op'>)</span>
+
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

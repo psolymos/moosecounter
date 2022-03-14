@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Set Moose Options — mc_options • moosecounter</title>
+<title>Internal Functions: Helpers — internal • moosecounter</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="Set Moose Options — mc_options" />
-<meta property="og:description" content="A function to get and set the package related options." />
+<meta property="og:title" content="Internal Functions: Helpers — internal" />
+<meta property="og:description" content="Exported functions intended to be used internally.
+`%&amp;gt;%`: imported function,
+see magrittr::%&amp;gt;% for details." />
 
 
 
@@ -116,58 +118,88 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Set Moose Options</h1>
+    <h1>Internal Functions: Helpers</h1>
     
-    <div class="hidden name"><code>mc_options.Rd</code></div>
+    <div class="hidden name"><code>internal.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>A function to get and set the package related options.</p>
+    <p>Exported functions intended to be used internally.</p>
+<p>`%&gt;%`: imported function,
+see <code>magrittr::%&gt;%</code> for details.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mc_options</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>rZINB</span><span class='op'>(</span><span class='va'>N</span>, <span class='va'>mu.nb</span>, <span class='va'>theta.nb</span>, <span class='va'>phi.zi</span><span class='op'>)</span>
+
+<span class='fu'>solvenear</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+
+<span class='fu'>find_mode</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+
+<span class='va'>lhs</span> <span class='op'>%&gt;%</span> <span class='va'>rhs</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>...</th>
-      <td><p>options to set (see Details)</p></td>
+      <th>N</th>
+      <td><p>The number of random numbers to produce.</p></td>
+    </tr>
+    <tr>
+      <th>mu.nb</th>
+      <td><p>The mean of the NB distribution.</p></td>
+    </tr>
+    <tr>
+      <th>theta.nb</th>
+      <td><p>The dispersion parameter of the NB distribution,
+a single non-negative numeric value or `NULL` (this refers to
+no overdispersion, thus a Poisson or ZIP distribution).</p></td>
+    </tr>
+    <tr>
+      <th>phi.zi</th>
+      <td><p>The probability of the non-zero valies in the ZI part.</p></td>
+    </tr>
+    <tr>
+      <th>x</th>
+      <td><p>A symmetric square matrix for `solvenear`,
+a numeric vector for `find_mode`.</p></td>
+    </tr>
+    <tr>
+      <th>lhs</th>
+      <td><p>A value or the magrittr placeholder.</p></td>
+    </tr>
+    <tr>
+      <th>rhs</th>
+      <td><p>A function call using the magrittr semantics.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>The result of calling `rhs(lhs)`.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>* `method`: Optimization algorithm
-* `response`: Response variable
-* `MAXCELL`: Max total abundance in cells
-* `MINCELL`: Min abundance for composition in cells
-* `B`: Number of bootstrap runs
-* `alpha`: Type I error rate for PI
-* `wscale`: Weight
-* `sightability`: Sightability
-* `seed`: Random seed
-* `Ntot`: set to `MOOSE_TOTA` (internally changing to `"COW_TOTA"` when modeling cows)
-* `srv_name`: Filtering variable
-* `srv_value`: Filtering value
-* `area_srv`: Comun indicating survey areas
-* `Area`: Area
-* `xy`: Long/Lat
-* `composition`: Composition variables</p>
+    <p>`ZINB` makes zero inflated negative binomial random numbers.</p>
+<p>`solvenear` inverts near-PD matrices.
+It function makes sure that near-positive definite matrices
+are positive definite. Positive definiteness is needed
+for matrix inversion, which in turn is used to find
+the Hessian matrix and standard errors for model coefficients
+from numerical optimization.</p>
+<p>The `find_mode` function finds the mode of a distribution using
+one-dimensional kernel density estimation.
+The density based estimate is rounded, because
+the function is used in the context of count data models
+and predictions.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'>## original values</span>
-<span class='va'>o</span> <span class='op'>&lt;-</span> <span class='fu'>mc_options</span><span class='op'>(</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>o</span><span class='op'>)</span>
-<span class='va'>o</span><span class='op'>$</span><span class='va'>B</span>
+    <pre class="examples"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>rZINB</span><span class='op'>(</span><span class='fl'>100</span>, <span class='fl'>3</span>, <span class='fl'>2</span>, <span class='fl'>0.5</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>rZINB</span><span class='op'>(</span><span class='fl'>100</span>, <span class='fl'>3</span>, <span class='cn'>NULL</span>, <span class='fl'>0.5</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='co'>## set B to new value</span>
-<span class='fu'>mc_options</span><span class='op'>(</span>B <span class='op'>=</span> <span class='fl'>20</span><span class='op'>)</span>
-<span class='fu'>mc_options</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='va'>B</span>
-
-<span class='co'>## restore orgiginal values</span>
-<span class='fu'>mc_options</span><span class='op'>(</span><span class='va'>o</span><span class='op'>)</span>
-<span class='fu'>mc_options</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='va'>B</span>
+<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>1</span>, <span class='fl'>3</span>, <span class='fl'>4</span>, <span class='fl'>3</span>, <span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>6</span>, <span class='fl'>10</span><span class='op'>)</span>
+<span class='fu'>find_mode</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/density.html'>density</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/rug.html'>rug</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v <span class='op'>=</span> <span class='fu'>find_mode</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>, lty<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span>
 
 </pre>
   </div>

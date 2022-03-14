@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Run Shiny App — run_app • moosecounter</title>
+<title>Exploration — explore • moosecounter</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Run Shiny App — run_app" />
-<meta property="og:description" content="Run the Shiny app to estimate total Moose and composition." />
+<meta property="og:title" content="Exploration — explore" />
+<meta property="og:description" content="Functions to explore relationships between total Moose or composition
+as respone vs. environmental predictor variables." />
 
 
 
@@ -116,23 +117,77 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Run Shiny App</h1>
+    <h1>Exploration</h1>
     
-    <div class="hidden name"><code>run_app.Rd</code></div>
+    <div class="hidden name"><code>explore.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Run the Shiny app to estimate total Moose and composition.</p>
+    <p>Functions to explore relationships between total Moose or composition
+as respone vs. environmental predictor variables.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>run_app</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>mc_plot_univariate</span><span class='op'>(</span><span class='va'>i</span>, <span class='va'>x</span>, dist <span class='op'>=</span> <span class='st'>"ZINB"</span><span class='op'>)</span>
 
+<span class='fu'>mc_plot_multivariate</span><span class='op'>(</span><span class='va'>vars</span>, <span class='va'>x</span>, alpha <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
+<span class='fu'>mc_plot_comp</span><span class='op'>(</span><span class='va'>i</span>, <span class='va'>x</span><span class='op'>)</span></pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>i</th>
+      <td><p>Column name from `x` to be used as a predictor.</p></td>
+    </tr>
+    <tr>
+      <th>x</th>
+      <td><p>Data frame with Moose data.</p></td>
+    </tr>
+    <tr>
+      <th>dist</th>
+      <td><p>Count distribution (`P`, `NB`, `ZIP`, or `ZINB`).</p></td>
+    </tr>
+    <tr>
+      <th>vars</th>
+      <td><p>A vector of column names from `x` to be used as a predictor.</p></td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td><p>Alpha level defining `mincriterion = 1 - alpha` for `partykit::ctree()`.</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>`mc_plot_univariate` implements visual univariate
+(sigle predictor) exploration for the total Moose count models.</p>
+<p>`mc_plot_multivariate` implements visual multivariate
+(multiple predictors) exploration based on regression trees
+(recursive partitioning  in a conditional inference framework)
+for total Moose counts.</p>
+<p>`mc_plot_comp` implements visual univariate (sigle predictor) exploration
+for the multinomial composition models.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='kw'>if</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/interactive.html'>interactive</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
-  <span class='fu'>run_app</span><span class='op'>(</span><span class='op'>)</span>
-<span class='op'>}</span>
+    <pre class="examples"><span class='co'>## Prepare Moose data from Mayo</span>
+<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span><span class='op'>(</span>
+    <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata/MayoMMU_QuerriedData.csv"</span>,
+        package<span class='op'>=</span><span class='st'>"moosecounter"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='total.html'>switch_response</a></span><span class='op'>(</span><span class='st'>"total"</span><span class='op'>)</span>
+<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='total.html'>mc_update_total</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+
+<span class='co'>## Univariate exploration for total Moose</span>
+<span class='fu'>mc_plot_univariate</span><span class='op'>(</span><span class='st'>"Subalp_Shrub_250buf"</span>, <span class='va'>x</span>, <span class='st'>"ZINB"</span><span class='op'>)</span>
+
+<span class='co'>## Multivariate exploration for total Moose</span>
+<span class='va'>vars</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ELC_Subalpine"</span>, <span class='st'>"Fire1982_2012"</span>, <span class='st'>"Fire8212_DEM815"</span>,
+    <span class='st'>"NALC_Needle"</span>, <span class='st'>"NALC_Shrub"</span>, <span class='st'>"Subalp_Shrub_250buf"</span>,
+    <span class='st'>"ELCSub_Fire8212DEM815"</span>, <span class='st'>"SubShrub250_Fire8212DEM815"</span><span class='op'>)</span>
+<span class='fu'>mc_plot_multivariate</span><span class='op'>(</span><span class='va'>vars</span>, <span class='va'>x</span><span class='op'>)</span>
+
+<span class='co'>## Univariate exploration for composition</span>
+<span class='fu'>mc_plot_comp</span><span class='op'>(</span><span class='st'>"Fire8212_DEM815"</span>, <span class='va'>x</span><span class='op'>)</span>
 
 </pre>
   </div>
