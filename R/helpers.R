@@ -1,19 +1,48 @@
 #' Internal Functions: Helpers
 #'
+#' Exported functions intended to be used internally.
+#'
 #' `ZINB` makes zero inflated negative binomial random numbers.
 #'
-#' @param N the number of random numbers to produce
-#' @param mu.nb the mean of the NB distribution
-#' @param theta.nb the dispersion parameter of the NB distribution, a single non-negative numeric value or `NULL` (this refers to no overdispersion, thus a Poisson or ZIP distribution)
-#' @param phi.zi the probability of the non-zero valies in the ZI part
-#' @return A numeric vector of length `N` with random numbers
+#' `solvenear` inverts near-PD matrices.
+#' It function makes sure that near-positive definite matrices
+#' are positive definite. Positive definiteness is needed
+#' for matrix inversion, which in turn is used to find
+#' the Hessian matrix and standard errors for model coefficients
+#' from numerical optimization.
+#'
+#' The `find_mode` function finds the mode of a distribution using
+#' one-dimensional kernel density estimation.
+#' The density based estimate is rounded, because
+#' the function is used in the context of count data models
+#' and predictions.
+#'
+#' @param N The number of random numbers to produce.
+#' @param mu.nb The mean of the NB distribution.
+#' @param theta.nb The dispersion parameter of the NB distribution,
+#'   a single non-negative numeric value or `NULL` (this refers to
+#'   no overdispersion, thus a Poisson or ZIP distribution).
+#' @param phi.zi The probability of the non-zero valies in the ZI part.
+#' @param x A symmetric square matrix for `solvenear`,
+#'   a numeric vector for `find_mode`.
+#'
 #' @examples
 #' table(rZINB(100, 3, 2, 0.5))
 #' table(rZINB(100, 3, NULL, 0.5))
-#' @rdname internal
+#'
+#' x <- c(1, 2, 1, 3, 4, 3, 2, 3, 5, 6, 10)
+#' find_mode(x)
+#' plot(density(x))
+#' rug(x)
+#' abline(v = find_mode(x), lty=2)
+#'
 #' @keywords internal
+#' @name internal
+NULL
+
 # note: phi.zi is prob of 1 (not 0 as in zeroinfl)
 # theta.nb=NULL gives poisson
+#' @rdname internal
 #' @export
 rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
     if (length(phi.zi) < N)
@@ -28,20 +57,7 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
     Y
 }
 
-#' Robust Matrix Inversion
-#'
-#' `solvenear` inverts near-PD matrices.
-#' It function makes sure that near-positive definite matrices
-#' are positive definite. Positive definiteness is needed
-#' for matrix inversion, which in turn is used to find
-#' the Hessian matrix and standard errors for model coefficients
-#' from numerical optimization.
-#'
-#' @param x a symmetric square matrix for `solvenear`,
-#'   a numeric vector for `find_mode`
-#'
 #' @rdname internal
-#' @keywords internal
 #' @export
 solvenear <- function (x) {
     if (is.null(x))
@@ -52,23 +68,7 @@ solvenear <- function (x) {
     xinv
 }
 
-#' Find Mode
-#'
-#' The `find_mode` function finds the mode of a distribution using
-#' one-dimensional kernel density estimation.
-#' The density based estimate is rounded, because
-#' the function is used in the context of count data models
-#' and predictions.
-#'
-#' @examples
-#' x <- c(1, 2, 1, 3, 4, 3, 2, 3, 5, 6, 10)
-#' find_mode(x)
-#' plot(density(x))
-#' rug(x)
-#' abline(v = find_mode(x), lty=2)
-#'
 #' @rdname internal
-#' @keywords internal
 #' @export
 ## need to use density to get the mode because values tend to
 ## be spread out
