@@ -2,14 +2,81 @@
 #'
 #' `switch_response` switches between total Moose vs. cows only.
 #' This sets the column name for totel Moose estimation.
+#' `mc_update_total` Updates/prepares the Moose data set for downstream analyses (i.e. calculates some derived variables, sets a surveyed/unsurveyed indicator, and optinally takes a subset).
+#' `mc_fit_total` fit total Moose abundance models.
+#' `mc_models_total` prints out estimates from the models.
 #'
-#' @param type The type of the response, can be `"total"` or `"cows"` for `switch_response`.
+#' @param x A data frame with Moose data,
+#'   or a data frame from `mc_update_total()`.
+#' @param ml Named list of models.
+#' @param coefs logical, return coefficient table too
+#' @param vars column names of `x` to be used as predictors for
+#'   the count model.
+#' @param zi_vars optional, column names of `x` to be used as
+#'   predictors for the zero model.
+#' @param dist Coundt distribution (`P`, `NB`, `ZIP`, `ZINB`).
+#' @param weighted Logical, to use weighting to moderate
+#'   influential observations.
+#' @param ... Other arguments passed to `zeroinfl2()`.
+#' @param type The type of the response, can be `"total"` or
+#'   `"cows"` for `switch_response`.
+#' @param srv Logical vector, rows of `x` that are surveyed,
+#'   falls back to global options when `NULL`.
+#' @param ss Logical vector to subset `x`, default is to take no subset.
+#' @param model_id model ID or model IDs (can be multiple from `names(ml)`).
+#' @param do_boot Logical, to do bootstrap or not.
+#' @param do_avg Logical, to do model averaging or not.
+#' @param PI PI object returned by `mc_predict_total()`
+#' @param id Cell ID.
+#' @param plot Logical, to plot or just give summary.
+#' @param breaks Breaks argument passed to `graphics::hist()`.
 #'
 #' @examples
 #'
-#' switch_response("cows")
+#' mc_options(B=10)
+#'
+#' x <- read.csv(
+#'     system.file("extdata/MayoMMU_QuerriedData.csv",
+#'         package="moosecounter"))
+#'
+#' #switch_response("cows") # for cows only
+#' switch_response("total")
+#'
+#' x <- mc_update_total(x)
+#'
+#' mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
+#'
+#' vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
+#'     "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
+#'     "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
+#'
+#' mc_plot_multivariate(vars, x)
+#'
+#' ML <- list()
+#' ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+#' ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
+#' ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
+#' ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+#'
+#' mc_models_total(ML, x)
+#' mc_plot_residuals("Model 3", ML, x)
+#'
+#' PI <- mc_predict_total(
+#'     model_id=c("Model 1", "Model 3"),
+#'     ml=ML,
+#'     x=x,
+#'     do_boot=TRUE, do_avg=TRUE)
+#'
+#' mc_get_pred(PI)
+#' pred_density_moose_PI(PI)
+#' mc_plot_predpi(PI)
+#' mc_plot_pidistr(PI)
+#' mc_plot_pidistr(PI, id=2)
 #'
 #' @keywords models regression
+#' @name total
+NULL
+
 #' @rdname total
 #' @export
 switch_response <- function(type="total") {
@@ -28,14 +95,6 @@ switch_response <- function(type="total") {
     mc_options(opts)
 }
 
-#' Update Moose Data
-#'
-#' `mc_update_total` Updates/prepares the Moose data set for downstream analyses (i.e. calculates some derived variables, sets a surveyed/unsurveyed indicator, and optinally takes a subset).
-#'
-#' @param x A data frame with Moose data, or a data frame from `mc_update_total()`.
-#' @param srv Logical vector, rows of `x` that are surveyed, falls back to global options when `NULL`.
-#' @param ss Logical vector to subset `x`, default is to take no subset.
-#'
 #' @rdname total
 #' @export
 # used to be saveMooseData
@@ -52,17 +111,6 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
   x
 }
 
-#' Fit Model to Total Abundance
-#'
-#' `mc_fit_total` fit total Moose abundance models.
-#'
-#' @param x data frame (use `mc_update_total()` on `x` prior)
-#' @param vars column names of `x` to be used as predictors for the count model
-#' @param zi_vars optional, column names of `x` to be used as predictors for the zero model
-#' @param dist distribution (P, NB, ZIP, ZINB)
-#' @param weighted logical, to use weighting to moderate influential observations
-#' @param ... other args passed to `zeroinfl2()`
-#'
 #' @rdname total
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
@@ -112,14 +160,6 @@ get_coefs <- function(ML) {
     M
 }
 
-#' Total Abundance Models
-#'
-#' `mc_models_total` prints out estimates from the models.
-#'
-#' @param ml named list of models
-#' @param x data frame
-#' @param coefs logical, return coefficient table too
-#'
 #' @rdname total
 #' @export
 # was updateModelTab
@@ -177,14 +217,6 @@ pred_density_moose <- function(fit, x){
 }
 
 
-#' Total Abundance Prediction Intervals
-#'
-#' @param model_id model ID or model IDs (can be multiple from `names(ml)`)
-#' @param ml named list of models
-#' @param x data frame
-#' @param do_boot logical, to do bootstrap
-#' @param do_avg logical, to do model averaging
-#'
 #' @rdname total
 #' @export
 # was: MooseSim.PI
@@ -393,12 +425,6 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
 #  invisible(NULL)
 #}
 
-
-#' Get PI Info
-#'
-#' @param PI PI object returned by `mc_predict_total()`
-#' @param ss subset indicator
-#'
 #' @rdname total
 #' @export
 # was: subsetPiData
@@ -427,10 +453,6 @@ mc_get_pred <- function(PI, ss=NULL) {
     PIout
 }
 
-#' Get PI Density
-#'
-#' @param PI PI object returned by `mc_predict_total()`
-#'
 #' @rdname total
 #' @export
 pred_density_moose_PI <- function(PI){
@@ -444,13 +466,6 @@ pred_density_moose_PI <- function(PI){
     invisible(out)
 }
 
-
-#' Plot Model Residuals
-#'
-#' @param model_id model ID (one from `names(ml)`)
-#' @param ml named list of models
-#' @param x data frame
-#'
 #' @rdname total
 #' @export
 # was: plotResiduals
@@ -500,10 +515,6 @@ mc_plot_residuals <- function(model_id, ml, x) {
     invisible(z)
 }
 
-#' Plot PI
-#'
-#' @param PI PI object returned by `mc_predict_total()`
-#'
 #' @rdname total
 #' @export
 mc_plot_predpi <- function(PI) {
@@ -590,13 +601,6 @@ mc_plot_predpi <- function(PI) {
     invisible(PI)
 }
 
-#' Plot the total PI distribution
-#'
-#' @param PI PI object returned by `mc_predict_total()`
-#' @param id cell ID
-#' @param plot logical, to plot or just give summary
-#' @param breaks breaks arg passed to `graphics::hist()`
-#'
 #' @rdname total
 #' @export
 mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
