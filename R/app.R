@@ -7,6 +7,7 @@
 #'   run_app()
 #' }
 #'
+#' @keywords misc dynamic
 #' @export
 run_app <- function() {
     shiny::runApp(
