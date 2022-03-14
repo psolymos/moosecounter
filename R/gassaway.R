@@ -1,15 +1,3 @@
-# Gassaway formula
-#
-# We do the stratification BEFORE the surveys are done using the fixed wing aircraft. Every cell is stratified as LOW or HIGH. And, then some of the LOW and some of HIGH are surveyed to find how many moose are there. The average of the moose number in the LOW stratum cells that were surveyed is mu_1 and average of the HIGH is mu_2.
-#
-# This is the notation:
-#    L = 2 (two strata; Low and High).
-#    mu_i is the mean of the i-th stratum (mean number of Moose in Low and mean number of moose in High).
-#    s2_i = variance of the ith stratum (variance of the number of Moose in the Low stratum and variance of the number of Moose in the High stratum samples. This should use the denominator (n-1), not n.)
-#    N_1 and N_2 are the total number of cells that were stratified as LOW and HIGH after the strat flight.
-#    n_1 and n_2 are the number of cells that were sampled in LOW and HIGH strata.
-
-
 #' Total Estimate with Gassaway Formula
 #'
 #' We do the stratification BEFORE the surveys are done using the
@@ -29,7 +17,20 @@
 #' N2 <- 50
 #' mc_gassaway(y1, y2, N1, N2)
 #'
-#' @rdname mc_gassaway
+#' @name gassaway
+NULL
+
+# Gassaway formula
+#
+# We do the stratification BEFORE the surveys are done using the fixed wing aircraft. Every cell is stratified as LOW or HIGH. And, then some of the LOW and some of HIGH are surveyed to find how many moose are there. The average of the moose number in the LOW stratum cells that were surveyed is mu_1 and average of the HIGH is mu_2.
+#
+# This is the notation:
+#    L = 2 (two strata; Low and High).
+#    mu_i is the mean of the i-th stratum (mean number of Moose in Low and mean number of moose in High).
+#    s2_i = variance of the ith stratum (variance of the number of Moose in the Low stratum and variance of the number of Moose in the High stratum samples. This should use the denominator (n-1), not n.)
+#    N_1 and N_2 are the total number of cells that were stratified as LOW and HIGH after the strat flight.
+#    n_1 and n_2 are the number of cells that were sampled in LOW and HIGH strata.
+#' @rdname gassaway
 #' @export
 mc_gassaway <- function(y1, y2, N1, N2) {
 
@@ -61,7 +62,7 @@ mc_gassaway <- function(y1, y2, N1, N2) {
   out
 }
 
-#' @rdname mc_gassaway
+#' @rdname gassaway
 #' @export
 print.mc_gassaway <- function(x, ...) {
   cat("Total Moose population estimate - Gassaway formula\n\n",

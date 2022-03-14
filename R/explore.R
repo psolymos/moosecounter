@@ -1,14 +1,50 @@
 #' Exploration
 #'
+#' Functions to explore relationships between total Moose or composition
+#' as respone vs. environmental predictor variables.
+#'
 #' `mc_plot_univariate` implements visual univariate
 #' (sigle predictor) exploration for the total Moose count models.
 #'
-#' @param i column name from `x` to be used as a predictor
-#' @param x data frame with Moose data
-#' @param dist count distribution (P, NB, ZIP, or ZINB)
+#' `mc_plot_multivariate` implements visual multivariate
+#' (multiple predictors) exploration based on regression trees
+#' (recursive partitioning  in a conditional inference framework)
+#' for total Moose counts.
 #'
-#' @rdname explore
+#' `mc_plot_comp` implements visual univariate (sigle predictor) exploration
+#' for the multinomial composition models.
+#'
+#' @param x Data frame with Moose data.
+#' @param i Column name from `x` to be used as a predictor.
+#' @param vars A vector of column names from `x` to be used as a predictor.
+#' @param dist Count distribution (`P`, `NB`, `ZIP`, or `ZINB`).
+#' @param alpha Alpha level defining `mincriterion = 1 - alpha` for `partykit::ctree()`.
+#'
+#' @examples
+#' ## Prepare Moose data from Mayo
+#' x <- read.csv(
+#'     system.file("extdata/MayoMMU_QuerriedData.csv",
+#'         package="moosecounter"))
+#' switch_response("total")
+#' x <- mc_update_total(x)
+#'
+#' ## Univariate exploration for total Moose
+#' mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
+#'
+#' ## Multivariate exploration for total Moose
+#' vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
+#'     "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
+#'     "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
+#' mc_plot_multivariate(vars, x)
+#'
+#' ## Univariate exploration for composition
+#' mc_plot_comp("Fire8212_DEM815", x)
+#'
+#' @name explore
 #' @keywords tree models regression
+NULL
+
+#' @rdname explore
 #' @export
 ## density plots
 # used to be plotUnivariateExpl
@@ -85,19 +121,7 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
     invisible(NULL)
 }
 
-#' Multivariate Exploration
-#'
-#' `mc_plot_multivariate` implements visual multivariate
-#' (multiple predictors) exploration based on regression trees
-#' (recursive partitioning  in a conditional inference framework)
-#' for total Moose counts.
-#'
-#' @param vars column names from `x` to be used as a predictor
-#' @param x data frame with Moose data
-#' @param alpha alpha level defining mincriterion = 1 - alpha for `partykit::ctree()`
-#'
 #' @rdname explore
-#' @keywords tree models regression
 #' @export
 mc_plot_multivariate <- function(vars, x, alpha=NULL) {
     opts <- getOption("moose_options")
@@ -110,16 +134,7 @@ mc_plot_multivariate <- function(vars, x, alpha=NULL) {
     plot(tr)
 }
 
-#' Plot Univariate Composition Model
-#'
-#' `mc_plot_comp` implements visual univariate (sigle predictor) exploration
-#' for the multinomial composition models.
-#'
-#' @param i predictor variable name in `x`
-#' @param x moose data frame
-#'
 #' @rdname explore
-#' @keywords tree models regression
 #' @export
 mc_plot_comp <- function(i, x) {
     NAME <- i
