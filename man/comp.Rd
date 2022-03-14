@@ -64,8 +64,20 @@ mc_options(B=10)
 x <- read.csv(
     system.file("extdata/MayoMMU_QuerriedData.csv",
         package="moosecounter"))
+## Prepare Moose data frame object
+x <- mc_update_total(x)
 
-## Model list
+## Total moose model list
+vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
+    "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
+    "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
+ML <- list()
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+
+## Composition odel list
 CML <- list()
 CML[['FireDEMSub']] <- mc_fit_comp(x, "Fire8212_DEM815")
 
