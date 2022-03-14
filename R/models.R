@@ -1,15 +1,35 @@
 #' Internal Functions: Models
 #'
+#' These functions power the total Moose estimation and prediction.
+#'
+#' `zeroinfl2` is a customized version of the `pscl::zeroinfl()` function,
+#' but this also fits the non-ZI counterparts in a way that simplifies
+#' downstream analyses (i.e. PI calculations). Intended for internal use.
+#'
 #' `wzi` applies a leave-one-out approach to temper influential observations.
 #' The process finds weights that are related to leverage
 #' (how much each observation contributes to the model likelihood).
 #'
-#' @param object a model as returned by `zeroinfl2()`
-#' @param pass_data logical, to pass the data or not
-#' @param ... other params
+#' @param formula Model formula as in `pscl::zeroinfl()`.
+#' @param data Moose data frame.
+#' @param subset,na.action,weights,offset,model,y Arguments as
+#'   in `pscl::zeroinfl()`.
+#' @param control See `pscl::zeroinfl.control()`.
+#' @param solveH Logical, to use robust matrix inversion to get VCV.
+#' @param dist Count distribution, one of `"ZIP"`, `"ZINB"`, `"P"`, `"NB"`.
+#' @param link Link function for the zero model.
+#' @param object A model as returned by `zeroinfl2()`.
+#' @param pass_data Logical, to pass the data or not.
+#' @param x  Arguments for `pscl::zeroinfl()` or a
+#'   model as returned by `zeroinfl2()` for the methods.
+#' @param digits Digits for print method.
+#' @param ... Other parameters passes to underlying functions.
 #'
-#' @rdname models
+#' @name models
 #' @keywords internal models regression
+NULL
+
+#' @rdname models
 #' @export
 ## weighted ZI model to tame influential observations
 wzi <- function(object, pass_data=FALSE, ...) {
@@ -46,21 +66,7 @@ wzi <- function(object, pass_data=FALSE, ...) {
     out
 }
 
-#' Count Models
-#'
-#' `zeroinfl2` is a customized version of the `pscl::zeroinfl()` function, but this also fits the non-ZI counterparts in a way that simplifies downstream analyses (i.e. PI calculations). Intended for internal use.
-#'
-#' @param formula model formula as in `pscl::zeroinfl()`
-#' @param data Moose data set
-#' @param subset,na.action,weights,offset,model,y,x arguments as in `pscl::zeroinfl()`
-#' @param control see `pscl::zeroinfl.control()`
-#' @param solveH logical, to use robust matrix inversion to get VCV
-#' @param dist count distribution, one of `"ZIP"`, `"ZINB"`, `"P"`, `"NB"`
-#' @param link link function for the zero model
-#' @param ... control arguments
-#'
 #' @rdname models
-#' @keywords internal
 #' @export
 # poisson=ZIP, negbin=ZINB, P=poisson (non-ZI), NB=negbin (non-ZI)
 zeroinfl2 <- function (formula, data,
@@ -436,7 +442,6 @@ zeroinfl2 <- function (formula, data,
 }
 
 #' @rdname models
-#' @keywords internal
 #' @export
 summary.non_zeroinfl <-
 function (object, ...)
@@ -468,9 +473,6 @@ function (object, ...)
 }
 
 #' @rdname models
-#' @keywords internal
-#' @param x A model as returned by `zeroinfl2()`.
-#' @param digits Digits for print method.
 #' @export
 print.summary.non_zeroinfl <-
 function (x, digits = max(3, getOption("digits") - 3), ...)
@@ -505,7 +507,6 @@ function (x, digits = max(3, getOption("digits") - 3), ...)
 }
 
 #' @rdname models
-#' @keywords internal
 #' @importFrom stats nobs
 #' @export
 nobs.zeroinfl <- function(object, ...) object$n
