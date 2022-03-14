@@ -1,10 +1,53 @@
 #' Moose Composition Workflow
 #'
-#' Check the composition data frame to make sure composition columns add up and give total Moose as a result.
+#' Fit composition model for Moose using a multinomial model
+#' to capture how predictors affect compsotional data;
+#' alculate prediction intervals based on composition model;
+#' and xtract useful summaries.
 #'
-#' @param x Moose data object
+#' @param total_model_id Model ID or model IDs for total moose
+#'   model (can be multiple model IDs from `names(model_list_total)`).
+#' @param comp_model_id Model ID or model IDs for composition model
+#'   (single model ID from `names(model_list_comp)`).
+#' @param model_list_total Named list of total moose models.
+#' @param model_list_comp Named list of total composition models.
+#' @param x A Moose data frame object.
+#' @param do_avg Logical, to do model averaging or not.
+#' @param vars Column names of `x` to be used as predictors
+#'   for the composition model.
+#' @param ss A subset of rows (logical or numeric vector).
+#' @param CPI Composition PI object.
+#' @param ... Other arts passed to underlying functions.
+#'
+#' @examples
+#' mc_options(B=10)
+#' x <- read.csv(
+#'     system.file("extdata/MayoMMU_QuerriedData.csv",
+#'         package="moosecounter"))
+#'
+#' ## Model list
+#' CML <- list()
+#' CML[['FireDEMSub']] <- mc_fit_comp(x, "Fire8212_DEM815")
+#'
+#' ## Stats from the models
+#' mc_models_comp(CML)
+#'
+#' ## Calculate PI
+#' CPI <- mc_predict_comp(
+#'     total_model_id="Model 3",
+#'     comp_model_id='FireDEMSub',
+#'     model_list_total=ML,
+#'     model_list_comp=CML,
+#'     x=x,
+#'     do_avg=FALSE)
+#'
+#' ## Predict density
+#' pred_density_moose_CPI(CPI)
 #'
 #' @keywords models regression
+#' @name comp
+NULL
+
 #' @rdname comp
 #' @export
 ## used to be called checkCompData
@@ -28,13 +71,6 @@ mc_check_comp <- function(x) {
 }
 
 
-#' Fit Composition Model for Total Moose
-#'
-#' Multinomial model to capture how predictors affect compsotional data.
-#'
-#' @param x data frame
-#' @param vars column names of `x` to be used as predictors for the composition model
-#'
 #' @rdname comp
 #' @export
 ## fit comp model for total
@@ -103,12 +139,6 @@ mc_fit_comp_formula <- function(formula, x) {
 #    invisible(NULL)
 #}
 
-#' Composition Model Table
-#'
-#' Extract useful summaries from a mlist of composition models.
-#'
-#' @param model_list_comp composition model list
-#'
 #' @rdname comp
 #' @export
 ## used to be updateCompModelTab
@@ -122,17 +152,6 @@ mc_models_comp <- function(model_list_comp) {
 }
 
 
-#' Composition Prediction Intervals
-#'
-#' Calculate prediction intervals based on composition model.
-#'
-#' @param total_model_id model ID or model IDs for total moose model (can be multiple model IDs from `names(model_list_total)`)
-#' @param comp_model_id model ID or model IDs for composition model (single model ID from `names(model_list_comp)`)
-#' @param model_list_total named list of total moose models
-#' @param model_list_comp named list of total composition models
-#' @param x data frame
-#' @param do_avg logical, to do model averaging
-#'
 #' @rdname comp
 #' @export
 #function(Survey.data, Unsurvey.data, B,
@@ -412,11 +431,6 @@ mc_summarize_composition <- function(all_ratios_list) {
 }
 
 
-#' Subset composition PI data object
-#'
-#' @param CPI Composition PI output
-#' @param ss a subset of rows (logical or numeric vector)
-#'
 #' @rdname comp
 #' @export
 subset_CPI_data <- function(CPI, ss) {
@@ -436,11 +450,6 @@ subset_CPI_data <- function(CPI, ss) {
     CPIout
 }
 
-#' Print Composition PI Results
-#'
-#' @param CPI Composition PI output
-#' @param ... other arts passed to print
-#'
 #' @rdname comp
 #' @export
 pred_density_moose_CPI <- function(CPI, ...){
