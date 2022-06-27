@@ -47,6 +47,9 @@ PI <- mc_predict_total(
 
 mc_get_pred(PI)
 pred_density_moose_PI(PI)
+## results for a subset of rows
+pred_density_moose_PI(mc_get_pred(PI, 1:100))
+
 mc_plot_predpi(PI)
 mc_plot_pidistr(PI)
 mc_plot_pidistr(PI, id=1)
@@ -72,7 +75,7 @@ mc_models_comp(CML)
 
 CPI <- mc_predict_comp(
     total_model_id="Model 3",
-    comp_model_id='FireDEMSub',
+    comp_model_id="A",
     model_list_total=ML,
     model_list_comp=CML,
     x=x,
