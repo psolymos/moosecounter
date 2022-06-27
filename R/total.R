@@ -176,8 +176,11 @@ mc_models_total <- function(ml, x, coefs=TRUE) {
     colnames(ic)[colnames(ic) == "ic"] <- "AIC"
 
     D <- t(sapply(ml, pred_density_moose, x=x))
-    cf <- if (coefs) get_coefs(ml) else NULL
-    out <- data.frame(ic, D, cf)
+    out <- data.frame(ic, D)
+    if (coefs) {
+      cf <- get_coefs(ml)
+      out <- data.frame(out, cf)
+    }
     out[order(out$delta),]
 }
 
