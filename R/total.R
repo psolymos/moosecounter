@@ -9,7 +9,7 @@
 #' @param x A data frame with Moose data,
 #'   or a data frame from `mc_update_total()`.
 #' @param ml Named list of models.
-#' @param coefs logical, return coefficient table too
+#' @param coefs logical, return coefficient table too.
 #' @param vars column names of `x` to be used as predictors for
 #'   the count model.
 #' @param zi_vars optional, column names of `x` to be used as

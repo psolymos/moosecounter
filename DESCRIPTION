@@ -33,6 +33,6 @@ Suggests:
     systemfonts (>= 0.3.0),
     testthat (>= 3.0.0)
 License: GPL-2
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8
 Config/testthat/edition: 3

@@ -17,6 +17,7 @@
 #'   for the composition model.
 #' @param ss A subset of rows (logical or numeric vector).
 #' @param CPI Composition PI object.
+#' @param coefs logical, return coefficient table too.
 #' @param ... Other arts passed to underlying functions.
 #'
 #' @examples
@@ -167,15 +168,15 @@ get_coefs2 <- function(CML) {
 #' @rdname comp
 #' @export
 ## used to be updateCompModelTab
-mc_models_comp <- function(cml, coefs=TRUE) {
+mc_models_comp <- function(model_list_comp, coefs=TRUE) {
   ic <- data.frame(
-    AIC=sapply(cml, VGAM::AIC),
-    BIC=sapply(cml, VGAM::BIC))
+    AIC=sapply(model_list_comp, VGAM::AIC),
+    BIC=sapply(model_list_comp, VGAM::BIC))
   ic$delta <- ic$AIC - min(ic$AIC)
   rel <- exp(-0.5*ic$delta)
   ic$weight <- rel / sum(rel)
   if (coefs) {
-    cf <- get_coefs2(cml)
+    cf <- get_coefs2(model_list_comp)
     ic <- data.frame(ic, cf)
   }
   ic[order(ic$delta),]

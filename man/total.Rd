@@ -68,7 +68,7 @@ influential observations.}
 
 \item{ml}{Named list of models.}
 
-\item{coefs}{logical, return coefficient table too}
+\item{coefs}{logical, return coefficient table too.}
 
 \item{model_id}{model ID or model IDs (can be multiple from `names(ml)`).}
 

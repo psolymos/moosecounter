@@ -14,7 +14,7 @@ mc_check_comp(x)
 
 mc_fit_comp(x, vars = NULL)
 
-mc_models_comp(model_list_comp)
+mc_models_comp(model_list_comp, coefs = TRUE)
 
 mc_predict_comp(
   total_model_id,
@@ -36,6 +36,8 @@ pred_density_moose_CPI(CPI, ...)
 for the composition model.}
 
 \item{model_list_comp}{Named list of total composition models.}
+
+\item{coefs}{logical, return coefficient table too.}
 
 \item{total_model_id}{Model ID or model IDs for total moose
 model (can be multiple model IDs from `names(model_list_total)`).}
