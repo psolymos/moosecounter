@@ -65,7 +65,8 @@ mc_check_comp(x)
 mc_plot_comp("Fire8212_DEM815", x)
 
 CML <- list()
-CML[['FireDEMSub']] <- mc_fit_comp(x, "Fire8212_DEM815")
+CML[['A']] <- mc_fit_comp(x, "Fire8212_DEM815")
+CML[['B']] <- mc_fit_comp(x, c("Fire8212_DEM815", "Subalp_Shrub_250buf"))
 
 mc_models_comp(CML)
 
