@@ -151,18 +151,35 @@ mc_fit_comp_formula <- function(formula, x) {
 #    invisible(NULL)
 #}
 
+# Organize comp coefs
+get_coefs2 <- function(CML) {
+    l <- lapply(CML, stats::coef)
+    cfn <- unique(unname(unlist(lapply(l, names))))
+    M <- matrix(NA_real_, length(CML), length(cfn))
+    dimnames(M) <- list(names(CML), cfn)
+    for (i in seq_len(length(CML))) {
+        M[i,] <- l[[i]][match(cfn, names(l[[i]]))]
+    }
+    colnames(M) <- gsub("(", "", gsub(")", "", colnames(M), fixed=TRUE), fixed=TRUE)
+    M
+}
+
 #' @rdname comp
 #' @export
 ## used to be updateCompModelTab
-mc_models_comp <- function(model_list_comp) {
-  CompModelTab <- data.frame(
-    AIC=sapply(model_list_comp, VGAM::AIC))
-  CompModelTab$delta <- CompModelTab$AIC - min(CompModelTab$AIC)
-  rel <- exp(-0.5*CompModelTab$delta)
-  CompModelTab$weight <- rel / sum(rel)
-  CompModelTab[order(CompModelTab$delta),]
+mc_models_comp <- function(cml, coefs=TRUE) {
+  ic <- data.frame(
+    AIC=sapply(cml, VGAM::AIC),
+    BIC=sapply(cml, VGAM::BIC))
+  ic$delta <- ic$AIC - min(ic$AIC)
+  rel <- exp(-0.5*ic$delta)
+  ic$weight <- rel / sum(rel)
+  if (coefs) {
+    cf <- get_coefs2(cml)
+    ic <- data.frame(ic, cf)
+  }
+  ic[order(ic$delta),]
 }
-
 
 #' @rdname comp
 #' @export
