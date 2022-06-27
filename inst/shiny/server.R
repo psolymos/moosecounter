@@ -475,16 +475,33 @@ server <- function(input, output, session) {
 
 
   ## Explore PI ----------------------------------------------------
+  output$total_pi_subset_col <- renderUI({
+    req(survey_sub())
+    selectizeInput("total_pi_subset_col",
+                   label = "Column to subset by",
+                   choices = var_subset[var_subset %in% names(survey_sub())])
+  })
+
+  output$total_pi_subset_group <- renderUI({
+    req(input$total_pi_subset_col)
+    selectizeInput("total_pi_subset_group",
+                   label = "Groups to include",
+                   choices = unique(survey_sub()[[input$total_pi_subset_col]]),
+                   selected = unique(survey_sub()[[input$total_pi_subset_col]]),
+                   multiple = TRUE)
+  })
+
+  total_pi_subset <- reactive({
+    req(input$total_pi_subset_col)
+    ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
+    ss <- ss %in% input$total_pi_subset_group
+
+    mc_get_pred(total_pi()$pi, ss = ss)$data
+  })
+
 
   output$total_pi_data <- renderDT({
-    validate(
-      need(input$survey_file,
-           "First select a data set in the \"Data\" tab") %then%
-        need(length(total_models_list$m) > 0,
-             "First create models in the \"Models\" tab") %then%
-        need(!is.null(input$total_pi_models),
-             "First create the predictions in the \"Prediction Intervals\" tab"))
-    d <- mc_get_pred(total_pi()$pi)$data
+    d <- total_pi_subset()
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy")] <- NA
     v <- c("SU_ID", "observed_values", "fitted_values",
@@ -501,9 +518,17 @@ server <- function(input, output, session) {
 
   # Render map
   output$total_pi_map <- renderGirafe({
-    req(total_pi())
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(total_models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(!is.null(input$total_pi_models),
+             "First create the predictions in the \"Prediction Intervals\" tab") %then%
+        need(nrow(total_pi_subset()) > 0,
+             "No predictions. Make sure at least one group subset is selected"))
 
-    d <- mc_get_pred(total_pi()$pi)$data
+    d <- total_pi_subset()
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
                "Cell.PIL", "Cell.PIU", "Cell.accuracy")] <- NA
     d <- d %>%
@@ -526,7 +551,8 @@ server <- function(input, output, session) {
       scale_fill_binned(type = "viridis", n.breaks = input$total_pi_bins)
 
     girafe(ggobj = g,
-           options = list(opts_selection(type = "multiple")))
+           options = list(opts_selection(type = "multiple")),
+           width_svg = 8, height_svg = 7)
   })
 
 
@@ -828,6 +854,38 @@ server <- function(input, output, session) {
 
 
   ## Summary --------------------------------------------------
+  output$comp_pi_subset_col <- renderUI({
+    req(survey_sub())
+    selectizeInput("comp_pi_subset_col",
+                   label = "Column to subset by",
+                   choices = var_subset[var_subset %in% names(survey_sub())])
+  })
+
+  output$comp_pi_subset_group <- renderUI({
+    req(input$comp_pi_subset_col)
+    selectizeInput("comp_pi_subset_group",
+                   label = "Groups to include",
+                   choices = unique(survey_sub()[[input$comp_pi_subset_col]]),
+                   selected = unique(survey_sub()[[input$comp_pi_subset_col]]),
+                   multiple = TRUE)
+  })
+
+  comp_pi_subset <- reactive({
+    req(input$comp_pi_subset_col)
+    ss <- comp_pi()$pi$data[[input$comp_pi_subset_col]]
+    ss <- ss %in% input$comp_pi_subset_group
+
+    # Catch no valid subsets
+    if(any(ss)) {
+      cpi <- subset_CPI_data(comp_pi()$pi, ss = ss)
+      cpi <- data.frame(SU_ID = cpi$data$SU_ID,
+                        cpi$cells)
+    } else {
+      cpi <- data.frame()
+    }
+    cpi
+  })
+
   output$comp_pi_summary <- renderDT({
     validate(
       need(input$survey_file,
@@ -835,11 +893,11 @@ server <- function(input, output, session) {
         need(length(comp_models_list$m) > 0,
              "First create models in the \"Models\" tab") %then%
         need(input$comp_pi_calc > 0,
-             "First create the predictions in the \"Prediction Intervals\" tab"))
+             "First create the predictions in the \"Prediction Intervals\" tab") %then%
+        need(nrow(comp_pi_subset()) > 0,
+             "No predictions. Make sure at least one group subset is selected"))
 
-    data.frame(SU_ID = comp_pi()$pi$data$SU_ID,
-               comp_pi()$pi$cells) %>%
-      datatable()
+    datatable(comp_pi_subset())
   })
 
   # Download summary

@@ -185,8 +185,13 @@ bootstrap results per `SU_ID`.
 
 ### Explore Predictions
 
-In this window, you can pick different calculated values to display on
-the map. You can adjust the number of colour bins to ensure the best
+In this window, you can subset the data you want to explore by specifying the 
+column defining the group and then the groups you want to keep. By default all
+data is displayed (**this only applies to the display, the download contains all
+data**). 
+
+For the map, you can pick different calculated values to display. 
+You can also adjust the number of colour bins to ensure the best
 differentiation.
 
 For example, the starting value shows you “observed values” which are
@@ -195,7 +200,7 @@ counts based on your models, which may help identify un-surveyed
 locations with potential high numbers of moose.
 
 You can download the run info, settings, data, and bootstrap runs as an
-Excel file by clicking “Download results as Excel file”.
+Excel file by clicking “Download full results as Excel file”.
 
 ------------------------------------------------------------------------
 
@@ -251,5 +256,10 @@ The Bootstrap Results show an interactive table of bootstrap results per
 Finally we have the Composition Summary window. Here you can see the
 prediction intervals for total moose counts and composition by `SU_ID`.
 
+You can subset the data you want to explore by specifying the 
+column defining the group and then the groups you want to keep. By default all
+data is displayed (**this only applies to the display, the download contains all
+data**). 
+
 You can download the run info, settings, data, and bootstrap runs as an
-Excel file by clicking “Download results as Excel file”.
+Excel file by clicking “Download full results as Excel file

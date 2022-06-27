@@ -210,26 +210,31 @@ ui_total_pi <- fluidRow(
 
 ## Explore PI -----------------------------------------------------------------
 ui_total_pi_map <- fluidRow(
-  column(width=12,
+  column(width = 12,
          h2("Exploring Predictions"),
          p(downloadButton(
-             "total_boot_download", "Download results as Excel file")),
-         box(width = 12,
+             "total_boot_download", "Download full results as Excel file")),
+         box(width = 3,
+             h4("Subsets"),
+             uiOutput("total_pi_subset_col"),
+             uiOutput("total_pi_subset_group"),
+
+             hr(),
+             h4("Map options"),
+             selectInput("total_pi_col", label = "Variable to map",
+                         choices = c("observed_values", "fitted_values",
+                                     "Cell.mean", "Cell.mode", "Cell.pred",
+                                     "Cell.PIL", "Cell.PIU",
+                                     "Cell.accuracy", "Residuals")),
+             sliderInput("total_pi_bins",
+                         label = "Number of colour-bins", value = 5,
+                         min = 2, max = 10),
+             bsButton("total_pi_reset", "Reset selection", style = "primary")),
+         box(width = 9,
              h4("Map"),
-             div(style = "display:inline-block; vertical-align:top; width: 50%; max-width:200px",
-                 selectInput("total_pi_col", label = "Variable to map",
-                             choices = c("observed_values", "fitted_values",
-                                         "Cell.mean", "Cell.mode", "Cell.pred",
-                                         "Cell.PIL", "Cell.PIU",
-                                         "Cell.accuracy", "Residuals"))),
-             div(style = "display:inline-block; vertical-align:top; width: 50%; max-width:200px",
-                 sliderInput("total_pi_bins",
-                             label = "Number of colour-bins", value = 5,
-                             min = 2, max = 10)),
              girafeOutput("total_pi_map")),
          box(width = 12,
              h4("Data"),
-             bsButton("total_pi_reset", "Reset selection", style = "primary"),
              div(style = "overflow-x: scroll;margin-top:15px",
                  DTOutput("total_pi_data")))
   )
@@ -301,8 +306,13 @@ ui_comp_sum <- fluidRow(
   column(width = 12,
          h2("Composition Summary"),
          p(downloadButton(
-           "comp_boot_download", "Download results as Excel file")),
-         box(width = 12,
+           "comp_boot_download", "Download full results as Excel file")),
+         box(width = 3,
+             h4("Subsets"),
+             uiOutput("comp_pi_subset_col"),
+             uiOutput("comp_pi_subset_group")),
+         box(width = 9,
+             h4("Predictions"),
              div(DTOutput("comp_pi_summary"), style = "min-height:100px")
          )
   )
