@@ -1,4 +1,9 @@
-# Version 0.6-0 -- Marcg 14, 2022
+# Version 0.6-1 -- June 26, 2022
+
+* Composition table contains BIC and coefficients.
+* Composition checks fixed: don't include unknown ages.
+
+# Version 0.6-0 -- March 14, 2022
 
 * Composition analysis added to R package and Shiny app.
 
