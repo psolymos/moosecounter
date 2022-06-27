@@ -422,13 +422,13 @@ server <- function(input, output, session) {
   # Tables
   output$total_pi_density <- function() {
     req(total_pi())
-    pred_density_moose_PI(total_pi()$pi) %>%
+    total_pi()$pi$total %>%
       as.data.frame() %>%
       mutate(" " = c("Total Moose",
                      "Total Area (km<sup>2</sup>)",
                      "Density (Moose/km<sup>2</sup>)")) %>%
       select(` `, everything()) %>%
-      kable(escape = FALSE, row.names = FALSE, align = "lrrrrr") %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrrrr", digits = 3) %>%
       kable_styling(bootstrap_options = "condensed")
   }
 
