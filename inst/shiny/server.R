@@ -531,13 +531,28 @@ server <- function(input, output, session) {
     d <- total_pi_subset()
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
                "Cell.PIL", "Cell.PIU", "Cell.accuracy")] <- NA
+
+    input_col <- input$total_pi_col
+    set <- c("observed_values", "fitted_values", "Residuals")
+
     d <- d %>%
-      mutate(cell = 1:n(),
-             tooltip = paste0(
-               "Cell = ", cell,
-               if_else(is.na(observed_values),
-                       paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
-                       paste0("<br>Observed = ", observed_values))))
+      mutate(
+        Residuals = round(Residuals, 3),
+        cell = 1:n(),
+        data_cell = !is.na(observed_values),
+        acc = paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
+        obs = paste0("<br>Observed = ", observed_values),
+        col = paste0("<br>", input_col, " = ", .data[[input_col]]),
+        id = paste0("SU_ID = ", cell),
+        tooltip =
+          case_when(
+            input_col == "observed_values" & data_cell ~ paste0(id, obs),
+            input_col %in% set & data_cell ~ paste0(id, obs, col),
+            input_col %in% set & !data_cell ~ paste0(id, acc),
+            input_col == "Cell.accuracy" & !data_cell ~ paste0(id, acc),
+            !data_cell ~ paste0(id, acc, col),
+            data_cell ~ paste0(id, obs)
+          ))
 
     validate(need(
       length(unique(na.omit(d[, input$total_pi_col]))) > 1,
