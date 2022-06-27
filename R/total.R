@@ -638,7 +638,8 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
         graphics::abline(v=PI$total["Total_Moose", "Mode"], col=4)
         graphics::abline(v=PI$total["Total_Moose", 4:5], col="darkgrey", lty=2)
         TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
-            round(PI$total["Total_Moose", c("Mean", "Median", "Mode")]))
+            format(PI$total["Total_Moose", c("Mean", "Median", "Mode")],
+                   nsmall = 3))
         graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
             legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
     }
@@ -675,11 +676,11 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
             graphics::abline(v=PI$data[id, "Cell.mode"], col=4)
             graphics::abline(v=PI$data[id, c("Cell.PIL", "Cell.PIU")], col="darkgrey", lty=2)
             TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
-                round(PI$data[id, c("Cell.mean", "Cell.pred", "Cell.mode")]))
+                format(PI$data[id, c("Cell.mean", "Cell.pred", "Cell.mode")],
+                       nsmall = 3))
             graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
                 legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
         }
     }
     invisible(csfull)
 }
-
