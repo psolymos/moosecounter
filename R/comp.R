@@ -70,8 +70,8 @@ mc_check_comp <- function(x) {
   if (opts$response == "total") {
       x_srv$TOT_CALVES <- x_srv$COW_1C + 2*x_srv$COW_2C + x_srv$LONE_CALF
       x_srv$ADULT_COW <- x_srv$COW_1C + x_srv$COW_2C + x_srv$LONE_COW
-      check <- x_srv$MOOSE_TOTA - (x_srv$BULL_LARGE + x_srv$BULL_SMALL +
-        x_srv$ADULT_COW + x_srv$TOT_CALVES)
+      check <- (x_srv$MOOSE_TOTA - x_srv$UNKNOWN_AG) - (x_srv$BULL_LARGE +
+        x_srv$BULL_SMALL + x_srv$ADULT_COW + x_srv$TOT_CALVES)
       problem <- sum(abs(check) > 0.001)
       if (problem > 0)
         stop(paste("Composition data do not equal", opts$Ntot, "for", problem, "cases"))
