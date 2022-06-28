@@ -111,7 +111,11 @@ ui_total_univar <- fluidRow(
              radioButtons("uni_dist", "Distribution", inline = TRUE,
                           choices = c("P", "NB", "ZIP", "ZINB"),
                           selected = "NB")),
-         plotOutput("uni_graph", width = "100%")
+         box(width = 12,
+             column(width = 4, girafeOutput("uni_graph1", height = "100%")),
+             column(width = 4, girafeOutput("uni_graph2", height = "100%")),
+             column(width = 4, girafeOutput("uni_graph3", height = "100%"))
+         )
   )
 )
 

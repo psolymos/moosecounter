@@ -17,12 +17,13 @@ Imports:
     shiny (>= 1.6.0),
     magrittr,
     VGAM (>= 1.1.5),
-    Matrix (>= 1.3.4)
+    Matrix (>= 1.3.4),
+    ggplot2 (>= 3.3.5),
+    rlang (>= 1.0.2)
 Suggests: 
     dplyr (>= 1.0.7),
     DT (>= 0.18),
     ggiraph (>= 0.7.10),
-    ggplot2 (>= 3.3.5),
     kableExtra (>= 1.3.4),
     mapproj (>= 1.2.7),
     openxlsx,

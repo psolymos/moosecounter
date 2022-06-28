@@ -2,6 +2,44 @@
 #devtools::check()
 #devtools::install()
 
+x <- read.csv("inst/extdata/MayoMMU_QuerriedData.csv")
+switch_response("total")
+x <- mc_update_total(x)
+
+## continuous
+i <- "SubShrub250_Fire8212DEM815"
+mc_plot_univariate(i, x, "ZINB")
+.plot_univariate(i, x, dist="ZINB", type = "density")
+.plot_univariate(i, x, dist="ZINB", type = "density", interactive = TRUE)
+
+.plot_univariate(i, x, dist="ZINB", type = "map")
+.plot_univariate(i, x, dist="ZINB", type = "map", interactive = TRUE)
+
+.plot_univariate(i, x, dist="ZINB", type = "fit")
+.plot_univariate(i, x, dist="ZINB", type = "fit", interactive = TRUE)
+
+#
+i <- "TKStrat_01"
+mc_plot_univariate(i, x, "ZINB")
+.plot_univariate(i, x, dist="ZINB", type = "density")
+
+
+## discrete
+i <- "ZZZ"
+x$ZZZ <- cut(x$SubShrub250_Fire8212DEM815, 3)
+mc_plot_univariate(i, x, "ZINB")
+
+.plot_univariate(i, x, dist="ZINB", type = "density")
+.plot_univariate(i, x, dist="ZINB", type = "density", interactive = TRUE)
+
+.plot_univariate(i, x, dist="ZINB", type = "map")
+.plot_univariate(i, x, dist="ZINB", type = "map", interactive = TRUE)
+
+.plot_univariate(i, x, dist="ZINB", type = "fit")
+.plot_univariate(i, x, dist="ZINB", type = "fit", interactive = TRUE)
+
+
+
 library(moosecounter)
 
 ## modify options as needed

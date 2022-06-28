@@ -159,13 +159,26 @@ server <- function(input, output, session) {
                        survey_sub())
   })
 
-  output$uni_graph <- renderPlot({
-    req(input$uni_var, input$uni_dist)
-    req(input$uni_var != "none")
-    req(opts())
+  output$uni_graph1 <- renderGirafe({
+    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
 
-    mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist)
-  }, res = 125)
+    .plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                     type = "density", interactive = TRUE)
+  })
+
+  output$uni_graph2 <- renderGirafe({
+    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
+
+    .plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                     type = "map", interactive = TRUE)
+  })
+
+  output$uni_graph3 <- renderGirafe({
+    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
+
+    .plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                     type = "fit", interactive = TRUE)
+  })
 
 
   ## Multivariate Exploration ---------------------
