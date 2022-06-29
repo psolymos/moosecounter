@@ -461,6 +461,7 @@ server <- function(input, output, session) {
       kable_styling(bootstrap_options = "condensed")
   }
 
+  # Note showing what models presented
   output$total_pi_selected <- renderText({
     m <- total_pi()$pi$model_id
     paste0(
@@ -921,6 +922,23 @@ server <- function(input, output, session) {
     data.frame(SU_ID = comp_pi()$pi$data$SU_ID,
                comp_pi()$pi$boot_full) %>%
       datatable()
+  })
+
+  # Note showing what models presented
+  output$comp_pi_selected <- renderText({
+
+    m_t <- comp_pi()$pi$total_model_id
+    m_c <- comp_pi()$pi$comp_model_id
+
+    paste0(
+      "<strong>Showing results of</strong><br><strong>Total model(s):</strong> ",
+      paste0(m_t, collapse = ", "),
+      if_else(length(m_t) > 1,
+              paste0(" (", dplyr::if_else(comp_pi()$pi$do_avg,
+                                          "Averaged", "Best model"),
+                     ")"),
+              ""),
+      "<br><strong>Composition model:</strong> ", m_c)
   })
 
 
