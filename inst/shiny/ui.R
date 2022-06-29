@@ -325,7 +325,9 @@ ui_comp_sum <- fluidRow(
              uiOutput("comp_pi_subset_group")),
          box(width = 9,
              h4("Predictions"),
-             div(DTOutput("comp_pi_summary"), style = "min-height:100px")
+             div(DTOutput("comp_pi_summary"), style = "min-height:100px"),
+             h4("Summary - Subset"),
+             tableOutput("comp_pi_density_subset")
          )
   )
 )

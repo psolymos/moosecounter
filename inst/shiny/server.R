@@ -968,10 +968,8 @@ server <- function(input, output, session) {
     # Catch no valid subsets
     if(any(ss)) {
       cpi <- subset_CPI_data(comp_pi()$pi, ss = ss)
-      cpi <- data.frame(SU_ID = cpi$data$SU_ID,
-                        cpi$cells)
     } else {
-      cpi <- data.frame()
+      cpi <- list()
     }
     cpi
   })
@@ -984,11 +982,24 @@ server <- function(input, output, session) {
              "First create models in the \"Models\" tab") %then%
         need(input$comp_pi_calc > 0,
              "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(nrow(comp_pi_subset()) > 0,
+        need(length(comp_pi_subset()) > 0,
              "No predictions. Make sure at least one group subset is selected"))
 
-    datatable(comp_pi_subset())
+    cpi <- data.frame(SU_ID = comp_pi_subset()$data$SU_ID,
+                      comp_pi_subset()$cells)
+    datatable(cpi)
   })
+
+  # Tables
+  output$comp_pi_density_subset <- function() {
+    req(length(comp_pi_subset()) > 0)
+    pred_density_moose_CPI(comp_pi_subset()) %>%
+      as.data.frame() %>%
+      mutate(type = rownames(.)) %>%
+      select(type, everything()) %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
+      kable_styling(bootstrap_options = "condensed")
+  }
 
   # Download summary
   # PI/bootstrap download
