@@ -190,7 +190,9 @@ ui_total_pi <- fluidRow(
                        choices = c("Use best model" = FALSE,
                                    "Average over models" = TRUE),
                        selected = TRUE)),
-          uiOutput("total_pi_cell_ui"))),
+          uiOutput("total_pi_cell_ui")),
+        hr(),
+        uiOutput("total_pi_selected", style = "margin-top:50px")),
 
     box(width = 5, height = "225px",
         title = "Summary",

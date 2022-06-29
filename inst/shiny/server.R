@@ -434,7 +434,6 @@ server <- function(input, output, session) {
 
   # Tables
   output$total_pi_density <- function() {
-    req(total_pi())
     total_pi()$pi$total %>%
       as.data.frame() %>%
       mutate(" " = c("Total Moose",
@@ -461,6 +460,18 @@ server <- function(input, output, session) {
       kable() %>%
       kable_styling(bootstrap_options = "condensed")
   }
+
+  output$total_pi_selected <- renderText({
+    m <- total_pi()$pi$model_id
+    paste0(
+      "<strong>Showing results of model(s):</strong> ", paste0(m, collapse = ", "),
+      if_else(length(m) > 1,
+              paste0(" (", dplyr::if_else(total_pi()$pi$do_avg,
+                                          "Averaged", "Best model"),
+                     ")"),
+              ""))
+  })
+
 
   # Plots
   output$total_pi_predpi <- renderPlot(mc_plot_predpi(total_pi()$pi), res = 125)
