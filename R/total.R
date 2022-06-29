@@ -684,3 +684,39 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
     }
     invisible(csfull)
 }
+
+
+mc_plot_predfit <- function(i, PI, interactive = FALSE) {
+
+  dat <- PI$data[,c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU")]
+  dat$Surveyed <- PI$data$srv
+  dat$z <- PI$data[[i]]
+
+  p <- ggplot2::ggplot(dat, ggplot2::aes(x = .data$z, y = .data$Cell.mean,
+                                         colour = .data$Surveyed)) +
+    ggplot2::geom_ribbon(data = dplyr::filter(dat, !.data$Surveyed),
+                         mapping = ggplot2::aes(ymin = .data$Cell.PIL, ymax = .data$Cell.PIU,
+                                                fill = "Prediction Interval"),
+                         alpha = 0.15, colour = NA) +
+    ggplot2::scale_fill_manual(name = NULL, values = "black") +
+    ggplot2::scale_colour_viridis_d(end = 0.7) +
+    ggplot2::theme_minimal() +
+    ggplot2::xlab(i) +
+    ggplot2::ylab("Total Moose")
+
+  if(interactive) {
+    dat <- dplyr::mutate(dat,
+                         tt = paste0("SU_ID: ", .data$SU_ID,
+                                     "<br>", .env$i, ": ", round(.data$z, 2),
+                                     "<br>Total Moose: ", .data$Cell.mean,
+                                     "<br>Surveyed: ", .data$Surveyed))
+    p <- p + ggiraph::geom_point_interactive(data = dat, size = 3, alpha = 0.5,
+                                             ggplot2::aes(tooltip = .data$tt,
+                                                          data_id = .data$tt))
+    p <- ggiraph::girafe(ggobj = p, width_svg = 8, height_svg = 4)
+  } else {
+    p <- p + ggplot2::geom_point()
+  }
+  p
+}
+

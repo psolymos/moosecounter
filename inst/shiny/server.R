@@ -629,6 +629,39 @@ server <- function(input, output, session) {
   )
 
 
+  output$total_pi_plot_col <- renderUI({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(total_models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(!is.null(input$total_pi_models),
+             "First create the predictions in the \"Prediction Intervals\" tab") %then%
+        need(nrow(total_pi_subset()) > 0,
+             "No predictions. Make sure at least one group subset is selected"))
+
+    m <- unique(total_pi()$pi$model_select_id)
+
+    vars <- map(total_models_list$m[m],
+                ~c(.[["var_count"]], .[["var_zero"]])) %>%
+      unlist() %>%
+      unique()
+
+    if(is.null(vars)) vars <- "No variables"
+
+    selectInput("total_pi_plot_col", label = "Explanatory Variable",
+                choices = vars)
+  })
+
+  output$total_pi_plot <- renderGirafe({
+    req(input$total_pi_plot_col,
+        input$total_pi_plot_col != "No variables")
+
+    mc_plot_predfit(input$total_pi_plot_col, total_pi()$pi, interactive = TRUE)
+  })
+
+
+
 
   # Composition of Moose ----------------------------------------------------
 
