@@ -476,17 +476,17 @@ server <- function(input, output, session) {
 
   # Plots
   output$total_pi_predpi <- renderPlot(mc_plot_predpi(total_pi()$pi), res = 125)
-  output$total_pi_pidistr <- renderPlot({
+  output$total_pi_pidistr_all <- renderPlot({
+    mc_plot_pidistr(total_pi()$pi)
+  }, res = 100)
+  output$total_pi_pidistr_cell <- renderPlot({
     req(input$total_pi_cell)
     validate(need(input$total_pi_cell <= nrow(total_pi()$pi$data) &
                     input$total_pi_cell > 0,
                   paste0("Out of cell range: There are only ",
                          nrow(total_pi()$pi$data),
                          " cells in the data")))
-    op <- par(mfrow = c(1, 2))
-    mc_plot_pidistr(total_pi()$pi)
     mc_plot_pidistr(total_pi()$pi, id = input$total_pi_cell)
-    par(op)
   }, res = 100)
 
   # Bootstraps table
