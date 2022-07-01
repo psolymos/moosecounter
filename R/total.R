@@ -393,6 +393,8 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     o <- order(x_full$sort_id)
     out <- list(model_id=model_id0,
         do_avg=do_avg,
+        do_boot=do_boot,
+        model_list=ms,
         model_select_id=mid,
         alpha=alpha,
         boot_full=boot.full[o,,drop=FALSE],
