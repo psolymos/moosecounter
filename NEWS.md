@@ -2,6 +2,9 @@
 
 * Composition table contains BIC and coefficients.
 * Composition checks fixed: don't include unknown ages.
+* `mc_plot_univariate` has the ability to return ggplot2 objects and their interactive versions.
+* New function: `mc_plot_predfit` to check model fit.
+* Shiny app: predictions can no be subsetted independent of the training data.
 
 # Version 0.6-0 -- March 14, 2022
 
