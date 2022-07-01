@@ -1,8 +1,8 @@
 #' Total Moose Workflow
 #'
 #' `switch_response` switches between total Moose vs. cows only.
-#' This sets the column name for totel Moose estimation.
-#' `mc_update_total` Updates/prepares the Moose data set for downstream analyses (i.e. calculates some derived variables, sets a surveyed/unsurveyed indicator, and optinally takes a subset).
+#' This sets the column name for total Moose estimation.
+#' `mc_update_total` Updates/prepares the Moose data set for downstream analyses (i.e. calculates some derived variables, sets a surveyed/unsurveyed indicator, and optionally takes a subset).
 #' `mc_fit_total` fit total Moose abundance models.
 #' `mc_models_total` prints out estimates from the models.
 #'
@@ -14,7 +14,7 @@
 #'   the count model.
 #' @param zi_vars optional, column names of `x` to be used as
 #'   predictors for the zero model.
-#' @param dist Coundt distribution (`P`, `NB`, `ZIP`, `ZINB`).
+#' @param dist Count distribution (`P`, `NB`, `ZIP`, `ZINB`).
 #' @param weighted Logical, to use weighting to moderate
 #'   influential observations.
 #' @param ... Other arguments passed to `zeroinfl2()`.
@@ -394,7 +394,7 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     out <- list(model_id=model_id0,
         do_avg=do_avg,
         do_boot=do_boot,
-        model_list=ms,
+        model_list=ml,
         model_select_id=mid,
         alpha=alpha,
         boot_full=boot.full[o,,drop=FALSE],
