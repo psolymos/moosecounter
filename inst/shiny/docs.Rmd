@@ -181,16 +181,25 @@ results per `SU_ID`.
 
 ### Explore Predictions
 
-In this window, you can pick different calculated values to display on the map. 
-You can adjust the number of colour bins to ensure the best differentiation. 
+In this window, you can subset the data you want to explore by specifying the 
+column defining the group and then the groups you want to keep. By default all
+data is displayed (**this only applies to the display, the download contains all
+data**). 
+
+For the map, you can pick different calculated values to display. 
+You can also adjust the number of colour bins to ensure the best differentiation.
 
 For example, the starting value shows you "observed values" which are the actual
 values surveyed. "Cell.pred" shows you the predicted moose counts based on your 
 models, which may help identify un-surveyed locations with potential high 
 numbers of moose.
 
+Click on the "Plot" tab to explore the predictions results as a function of 
+different explanatory variables, separated by surveyed and non-surveyed results.
+The grey ribbon represents the prediction intervals.
+
 You can download the run info, settings, data, and bootstrap runs as an Excel 
-file by clicking "Download results as Excel file". 
+file by clicking "Download full results as Excel file". 
 
 
 ---
@@ -244,7 +253,11 @@ The Bootstrap Results show an interactive table of bootstrap results per `SU_ID`
 Finally we have the Composition Summary window. Here you can see the prediction
 intervals for total moose counts and composition by `SU_ID`. 
 
-You can download the run info, settings, data, and bootstrap runs as an Excel 
-file by clicking "Download results as Excel file". 
 
+You can subset the data you want to explore by specifying the 
+column defining the group and then the groups you want to keep. By default all
+data is displayed (**this only applies to the display, the download contains all
+data**). 
 
+You can download the run info, settings, data, and bootstrap runs as an
+Excel file by clicking “Download full results as Excel file".

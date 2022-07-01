@@ -159,13 +159,26 @@ server <- function(input, output, session) {
                        survey_sub())
   })
 
-  output$uni_graph <- renderPlot({
-    req(input$uni_var, input$uni_dist)
-    req(input$uni_var != "none")
-    req(opts())
+  output$uni_graph1 <- renderGirafe({
+    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
 
-    mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist)
-  }, res = 125)
+    .plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                     type = "density", interactive = TRUE)
+  })
+
+  output$uni_graph2 <- renderGirafe({
+    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
+
+    .plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                     type = "map", interactive = TRUE)
+  })
+
+  output$uni_graph3 <- renderGirafe({
+    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
+
+    .plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                     type = "fit", interactive = TRUE)
+  })
 
 
   ## Multivariate Exploration ---------------------
@@ -421,14 +434,13 @@ server <- function(input, output, session) {
 
   # Tables
   output$total_pi_density <- function() {
-    req(total_pi())
-    pred_density_moose_PI(total_pi()$pi) %>%
+    total_pi()$pi$total %>%
       as.data.frame() %>%
       mutate(" " = c("Total Moose",
                      "Total Area (km<sup>2</sup>)",
                      "Density (Moose/km<sup>2</sup>)")) %>%
       select(` `, everything()) %>%
-      kable(escape = FALSE, row.names = FALSE, align = "lrrrrr") %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrrrr", digits = 3) %>%
       kable_styling(bootstrap_options = "condensed")
   }
 
@@ -448,6 +460,19 @@ server <- function(input, output, session) {
       kable() %>%
       kable_styling(bootstrap_options = "condensed")
   }
+
+  # Note showing what models presented
+  output$total_pi_selected <- renderText({
+    m <- total_pi()$pi$model_id
+    paste0(
+      "<strong>Showing results of model(s):</strong> ", paste0(m, collapse = ", "),
+      if_else(length(m) > 1,
+              paste0(" (", dplyr::if_else(total_pi()$pi$do_avg,
+                                          "Averaged", "Best model"),
+                     ")"),
+              ""))
+  })
+
 
   # Plots
   output$total_pi_predpi <- renderPlot(mc_plot_predpi(total_pi()$pi), res = 125)
@@ -475,16 +500,33 @@ server <- function(input, output, session) {
 
 
   ## Explore PI ----------------------------------------------------
+  output$total_pi_subset_col <- renderUI({
+    req(survey_sub())
+    selectizeInput("total_pi_subset_col",
+                   label = "Column to subset by",
+                   choices = var_subset[var_subset %in% names(survey_sub())])
+  })
+
+  output$total_pi_subset_group <- renderUI({
+    req(input$total_pi_subset_col)
+    selectizeInput("total_pi_subset_group",
+                   label = "Groups to include",
+                   choices = unique(survey_sub()[[input$total_pi_subset_col]]),
+                   selected = unique(survey_sub()[[input$total_pi_subset_col]]),
+                   multiple = TRUE)
+  })
+
+  total_pi_subset <- reactive({
+    req(input$total_pi_subset_col)
+    ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
+    ss <- ss %in% input$total_pi_subset_group
+
+    mc_get_pred(total_pi()$pi, ss = ss)$data
+  })
+
 
   output$total_pi_data <- renderDT({
-    validate(
-      need(input$survey_file,
-           "First select a data set in the \"Data\" tab") %then%
-        need(length(total_models_list$m) > 0,
-             "First create models in the \"Models\" tab") %then%
-        need(!is.null(input$total_pi_models),
-             "First create the predictions in the \"Prediction Intervals\" tab"))
-    d <- mc_get_pred(total_pi()$pi)$data
+    d <- total_pi_subset()
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy")] <- NA
     v <- c("SU_ID", "observed_values", "fitted_values",
@@ -501,18 +543,41 @@ server <- function(input, output, session) {
 
   # Render map
   output$total_pi_map <- renderGirafe({
-    req(total_pi())
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(total_models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(!is.null(input$total_pi_models),
+             "First create the predictions in the \"Prediction Intervals\" tab") %then%
+        need(nrow(total_pi_subset()) > 0,
+             "No predictions. Make sure at least one group subset is selected"))
 
-    d <- mc_get_pred(total_pi()$pi)$data
+    d <- total_pi_subset()
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
                "Cell.PIL", "Cell.PIU", "Cell.accuracy")] <- NA
+
+    input_col <- input$total_pi_col
+    set <- c("observed_values", "fitted_values", "Residuals")
+
     d <- d %>%
-      mutate(cell = 1:n(),
-             tooltip = paste0(
-               "Cell = ", cell,
-               if_else(is.na(observed_values),
-                       paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
-                       paste0("<br>Observed = ", observed_values))))
+      mutate(
+        Residuals = round(Residuals, 3),
+        cell = 1:n(),
+        data_cell = !is.na(observed_values),
+        acc = paste0("<br>Cell Accuracy = ", round(Cell.accuracy, 3)),
+        obs = paste0("<br>Observed = ", observed_values),
+        col = paste0("<br>", input_col, " = ", .data[[input_col]]),
+        id = paste0("SU_ID = ", cell),
+        tooltip =
+          case_when(
+            input_col == "observed_values" & data_cell ~ paste0(id, obs),
+            input_col %in% set & data_cell ~ paste0(id, obs, col),
+            input_col %in% set & !data_cell ~ paste0(id, acc),
+            input_col == "Cell.accuracy" & !data_cell ~ paste0(id, acc),
+            !data_cell ~ paste0(id, acc, col),
+            data_cell ~ paste0(id, obs)
+          ))
 
     validate(need(
       length(unique(na.omit(d[, input$total_pi_col]))) > 1,
@@ -526,7 +591,8 @@ server <- function(input, output, session) {
       scale_fill_binned(type = "viridis", n.breaks = input$total_pi_bins)
 
     girafe(ggobj = g,
-           options = list(opts_selection(type = "multiple")))
+           options = list(opts_selection(type = "multiple")),
+           width_svg = 8, height_svg = 7)
   })
 
 
@@ -573,6 +639,39 @@ server <- function(input, output, session) {
         },
         contentType="application/octet-stream"
   )
+
+
+  output$total_pi_plot_col <- renderUI({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(total_models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(!is.null(input$total_pi_models),
+             "First create the predictions in the \"Prediction Intervals\" tab") %then%
+        need(nrow(total_pi_subset()) > 0,
+             "No predictions. Make sure at least one group subset is selected"))
+
+    m <- unique(total_pi()$pi$model_select_id)
+
+    vars <- map(total_models_list$m[m],
+                ~c(.[["var_count"]], .[["var_zero"]])) %>%
+      unlist() %>%
+      unique()
+
+    if(is.null(vars)) vars <- "No variables"
+
+    selectInput("total_pi_plot_col", label = "Explanatory Variable",
+                choices = vars)
+  })
+
+  output$total_pi_plot <- renderGirafe({
+    req(input$total_pi_plot_col,
+        input$total_pi_plot_col != "No variables")
+
+    mc_plot_predfit(input$total_pi_plot_col, total_pi()$pi, interactive = TRUE)
+  })
+
 
 
 
@@ -825,9 +924,56 @@ server <- function(input, output, session) {
       datatable()
   })
 
+  # Note showing what models presented
+  output$comp_pi_selected <- renderText({
+
+    m_t <- comp_pi()$pi$total_model_id
+    m_c <- comp_pi()$pi$comp_model_id
+
+    paste0(
+      "<strong>Showing results of</strong><br><strong>Total model(s):</strong> ",
+      paste0(m_t, collapse = ", "),
+      if_else(length(m_t) > 1,
+              paste0(" (", dplyr::if_else(comp_pi()$pi$do_avg,
+                                          "Averaged", "Best model"),
+                     ")"),
+              ""),
+      "<br><strong>Composition model:</strong> ", m_c)
+  })
+
 
 
   ## Summary --------------------------------------------------
+  output$comp_pi_subset_col <- renderUI({
+    req(survey_sub())
+    selectizeInput("comp_pi_subset_col",
+                   label = "Column to subset by",
+                   choices = var_subset[var_subset %in% names(survey_sub())])
+  })
+
+  output$comp_pi_subset_group <- renderUI({
+    req(input$comp_pi_subset_col)
+    selectizeInput("comp_pi_subset_group",
+                   label = "Groups to include",
+                   choices = unique(survey_sub()[[input$comp_pi_subset_col]]),
+                   selected = unique(survey_sub()[[input$comp_pi_subset_col]]),
+                   multiple = TRUE)
+  })
+
+  comp_pi_subset <- reactive({
+    req(input$comp_pi_subset_col)
+    ss <- comp_pi()$pi$data[[input$comp_pi_subset_col]]
+    ss <- ss %in% input$comp_pi_subset_group
+
+    # Catch no valid subsets
+    if(any(ss)) {
+      cpi <- subset_CPI_data(comp_pi()$pi, ss = ss)
+    } else {
+      cpi <- list()
+    }
+    cpi
+  })
+
   output$comp_pi_summary <- renderDT({
     validate(
       need(input$survey_file,
@@ -835,12 +981,25 @@ server <- function(input, output, session) {
         need(length(comp_models_list$m) > 0,
              "First create models in the \"Models\" tab") %then%
         need(input$comp_pi_calc > 0,
-             "First create the predictions in the \"Prediction Intervals\" tab"))
+             "First create the predictions in the \"Prediction Intervals\" tab") %then%
+        need(length(comp_pi_subset()) > 0,
+             "No predictions. Make sure at least one group subset is selected"))
 
-    data.frame(SU_ID = comp_pi()$pi$data$SU_ID,
-               comp_pi()$pi$cells) %>%
-      datatable()
+    cpi <- data.frame(SU_ID = comp_pi_subset()$data$SU_ID,
+                      comp_pi_subset()$cells)
+    datatable(cpi)
   })
+
+  # Tables
+  output$comp_pi_density_subset <- function() {
+    req(length(comp_pi_subset()) > 0)
+    pred_density_moose_CPI(comp_pi_subset()) %>%
+      as.data.frame() %>%
+      mutate(type = rownames(.)) %>%
+      select(type, everything()) %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
+      kable_styling(bootstrap_options = "condensed")
+  }
 
   # Download summary
   # PI/bootstrap download

@@ -111,7 +111,11 @@ ui_total_univar <- fluidRow(
              radioButtons("uni_dist", "Distribution", inline = TRUE,
                           choices = c("P", "NB", "ZIP", "ZINB"),
                           selected = "NB")),
-         plotOutput("uni_graph", width = "100%")
+         box(width = 12,
+             column(width = 4, girafeOutput("uni_graph1", height = "100%")),
+             column(width = 4, girafeOutput("uni_graph2", height = "100%")),
+             column(width = 4, girafeOutput("uni_graph3", height = "100%"))
+         )
   )
 )
 
@@ -186,7 +190,9 @@ ui_total_pi <- fluidRow(
                        choices = c("Use best model" = FALSE,
                                    "Average over models" = TRUE),
                        selected = TRUE)),
-          uiOutput("total_pi_cell_ui"))),
+          uiOutput("total_pi_cell_ui")),
+        hr(),
+        uiOutput("total_pi_selected", style = "margin-top:50px")),
 
     box(width = 5, height = "225px",
         title = "Summary",
@@ -210,26 +216,35 @@ ui_total_pi <- fluidRow(
 
 ## Explore PI -----------------------------------------------------------------
 ui_total_pi_map <- fluidRow(
-  column(width=12,
+  column(width = 12,
          h2("Exploring Predictions"),
          p(downloadButton(
-             "total_boot_download", "Download results as Excel file")),
-         box(width = 12,
-             h4("Map"),
-             div(style = "display:inline-block; vertical-align:top; width: 50%; max-width:200px",
-                 selectInput("total_pi_col", label = "Variable to map",
-                             choices = c("observed_values", "fitted_values",
-                                         "Cell.mean", "Cell.mode", "Cell.pred",
-                                         "Cell.PIL", "Cell.PIU",
-                                         "Cell.accuracy", "Residuals"))),
-             div(style = "display:inline-block; vertical-align:top; width: 50%; max-width:200px",
-                 sliderInput("total_pi_bins",
-                             label = "Number of colour-bins", value = 5,
-                             min = 2, max = 10)),
-             girafeOutput("total_pi_map")),
+             "total_boot_download", "Download full results as Excel file")),
+         box(width = 3,
+             h4("Subsets"),
+             uiOutput("total_pi_subset_col"),
+             uiOutput("total_pi_subset_group"),
+
+             hr(),
+             h4("Map options"),
+             selectInput("total_pi_col", label = "Variable to map",
+                         choices = c("observed_values", "fitted_values",
+                                     "Cell.mean", "Cell.mode", "Cell.pred",
+                                     "Cell.PIL", "Cell.PIU",
+                                     "Cell.accuracy", "Residuals")),
+             sliderInput("total_pi_bins",
+                         label = "Number of colour-bins", value = 5,
+                         min = 2, max = 10),
+             bsButton("total_pi_reset", "Reset selection", style = "primary")),
+         tabBox(width = 9,
+                tabPanel(title = "Map",
+                         girafeOutput("total_pi_map")),
+                tabPanel(title = "Plot",
+                         uiOutput("total_pi_plot_col"),
+                         girafeOutput("total_pi_plot"))
+         ),
          box(width = 12,
              h4("Data"),
-             bsButton("total_pi_reset", "Reset selection", style = "primary"),
              div(style = "overflow-x: scroll;margin-top:15px",
                  DTOutput("total_pi_data")))
   )
@@ -281,7 +296,9 @@ ui_comp_pi <- fluidRow(
                     uiOutput("comp_pi_models_ui"),
                     uiOutput("comp_pi_average_ui"),
                     bsButton("comp_pi_calc", "Calculate PI",
-                             style = "primary")),
+                             style = "primary"),
+                    hr(),
+                    uiOutput("comp_pi_selected", style = "margin-top:5px")),
                 box(width = 12,
                     title = "Issues and Options",
                     tableOutput("comp_pi_options"))),
@@ -301,9 +318,16 @@ ui_comp_sum <- fluidRow(
   column(width = 12,
          h2("Composition Summary"),
          p(downloadButton(
-           "comp_boot_download", "Download results as Excel file")),
-         box(width = 12,
-             div(DTOutput("comp_pi_summary"), style = "min-height:100px")
+           "comp_boot_download", "Download full results as Excel file")),
+         box(width = 3,
+             h4("Subsets"),
+             uiOutput("comp_pi_subset_col"),
+             uiOutput("comp_pi_subset_group")),
+         box(width = 9,
+             h4("Predictions"),
+             div(DTOutput("comp_pi_summary"), style = "min-height:100px"),
+             h4("Summary - Subset"),
+             tableOutput("comp_pi_density_subset")
          )
   )
 )

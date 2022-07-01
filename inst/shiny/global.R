@@ -30,7 +30,7 @@ var_meta <- c("SURVEY_NAM", "YT_REGION", "SURVEY_YEA", "SURVEY_ID",
               "PROJECT_ID", "CENSUS_ID",
               "In1Out0", "SU_STRATUM", "ALL_STRATA",
               "IDLATDEG", "IDLATMIN", "IDLONDEG", "IDLONMIN", "CENTRLAT", "CENTRLON",
-              "REGION", "GMU", "GMU2", "USE_SCALE", "SRC_SCALE", "SRC_NOTES",
+              "REGION", "MMU_ID", "GMU", "GMU2", "USE_SCALE", "SRC_SCALE", "SRC_NOTES",
               "AREA_KM", "PERIM_KM", "AREA_MI", "PERIM_MI", "FEATURE_ID",
               "SUBSET_NAM", "SUBSET_ID",
               "Sampled", "srv", "Kluane_ID")
@@ -44,6 +44,13 @@ var_filter <- c("Survey Name" = "SURVEY_NAM",
                 "Yukon Territory Region" = "YT_REGION",
                 "Survey Year" = "SURVEY_YEA",
                 "Survey ID" = "SURVEY_ID")
+
+# Columns which can be subsetted (during PI exploration/summaries)
+var_subset <- c("MMU_ID", "SURVEY_NAM", "YT_REGION", "SURVEY_YEA", "SURVEY_ID",
+                "PROJECT_ID", "CENSUS_ID",
+                "REGION", "GMU", "GMU2",
+                "SUBSET_NAM", "SUBSET_ID")
+
 
 opts_tooltip <- list(
   "method" = "Defines the optimization algorithm used by <code>optim</code> for <emph>Prediction Intervals</emph>",

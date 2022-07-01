@@ -16,7 +16,7 @@ Next, we will go over these steps in detail.
 
 You can adjust the settings for the analyses by modifying options:
 
--   response (total vs. cows),
+-   response (total vs. cows),
 -   model optimization methods (Nelder-Mead, etc.)
 -   bootstrap iterations
 -   alpha level
@@ -60,9 +60,9 @@ ensure the data you’ve loaded looks as it should.
 > `SUS_ID`, `S_YEAR_ID`, `S_TYPE`, `S_SEASON`, `PROJECT_ID`,
 > `CENSUS_ID`, `In1Out0`, `SU_STRATUM`, `ALL_STRATA`, `IDLATDEG`,
 > `IDLATMIN`, `IDLONDEG`, `IDLONMIN`, `CENTRLAT`, `CENTRLON`, `REGION`,
-> `GMU`, `GMU2`, `USE_SCALE`, `SRC_SCALE`, `SRC_NOTES`, `AREA_KM`,
-> `PERIM_KM`, `AREA_MI`, `PERIM_MI`, `FEATURE_ID`, `SUBSET_NAM`,
-> `SUBSET_ID`, `Sampled`, `srv`, `Kluane_ID`
+> `MMU_ID`, `GMU`, `GMU2`, `USE_SCALE`, `SRC_SCALE`, `SRC_NOTES`,
+> `AREA_KM`, `PERIM_KM`, `AREA_MI`, `PERIM_MI`, `FEATURE_ID`,
+> `SUBSET_NAM`, `SUBSET_ID`, `Sampled`, `srv`, `Kluane_ID`
 
 **Omit variables with too few surveyed levels.**
 
@@ -185,8 +185,13 @@ bootstrap results per `SU_ID`.
 
 ### Explore Predictions
 
-In this window, you can pick different calculated values to display on
-the map. You can adjust the number of colour bins to ensure the best
+In this window, you can subset the data you want to explore by
+specifying the column defining the group and then the groups you want to
+keep. By default all data is displayed (**this only applies to the
+display, the download contains all data**).
+
+For the map, you can pick different calculated values to display. You
+can also adjust the number of colour bins to ensure the best
 differentiation.
 
 For example, the starting value shows you “observed values” which are
@@ -194,8 +199,13 @@ the actual values surveyed. “Cell.pred” shows you the predicted moose
 counts based on your models, which may help identify un-surveyed
 locations with potential high numbers of moose.
 
+Click on the “Plot” tab to explore the predictions results as a function
+of different explanatory variables, separated by surveyed and
+non-surveyed results. The grey ribbon represents the prediction
+intervals.
+
 You can download the run info, settings, data, and bootstrap runs as an
-Excel file by clicking “Download results as Excel file”.
+Excel file by clicking “Download full results as Excel file”.
 
 ------------------------------------------------------------------------
 
@@ -251,5 +261,10 @@ The Bootstrap Results show an interactive table of bootstrap results per
 Finally we have the Composition Summary window. Here you can see the
 prediction intervals for total moose counts and composition by `SU_ID`.
 
+You can subset the data you want to explore by specifying the column
+defining the group and then the groups you want to keep. By default all
+data is displayed (**this only applies to the display, the download
+contains all data**).
+
 You can download the run info, settings, data, and bootstrap runs as an
-Excel file by clicking “Download results as Excel file”.
+Excel file by clicking “Download full results as Excel file”.
