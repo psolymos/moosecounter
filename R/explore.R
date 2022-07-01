@@ -19,6 +19,9 @@
 #' @param vars A vector of column names from `x` to be used as a predictor.
 #' @param dist Count distribution (`P`, `NB`, `ZIP`, or `ZINB`).
 #' @param alpha Alpha level defining `mincriterion = 1 - alpha` for `partykit::ctree()`.
+#' @param type Character, type of plot to be drawn (`"density"`, `"map"`, `"fit"`). Base plot can draw all 3, ggplot2 can only draw one at a time.
+#' @param base Logical, draw base graphics or ggplot2.
+#' @param interactive Logical, draw interactive plot (not available for base plots).
 #'
 #' @examples
 #' ## Prepare Moose data from Mayo
@@ -46,11 +49,23 @@ NULL
 
 #' @rdname explore
 #' @export
+mc_plot_univariate <- function(i, x, dist = "ZINB",
+                             base = TRUE,
+                             type = c("density", "map", "fit"),
+                             interactive = FALSE) {
+  if (base) {
+    .plot_univariate_base(i = i, x = x, dist = dist)
+  } else {
+    .plot_univariate(i = i, x = x, dist = dist,
+      type = type, interactive = interactive)
+  }
+}
+
 ## density plots
 # used to be plotUnivariateExpl
 # x: MooseData
 # i: colid
-mc_plot_univariate <- function(i, x, dist="ZINB") {
+.plot_univariate_base <- function(i, x, dist="ZINB") {
 
     opts <- getOption("moose_options")
     srv <- x$srv

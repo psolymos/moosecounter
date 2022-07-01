@@ -12,6 +12,7 @@
 \alias{mc_plot_residuals}
 \alias{mc_plot_predpi}
 \alias{mc_plot_pidistr}
+\alias{mc_plot_predfit}
 \title{Total Moose Workflow}
 \usage{
 switch_response(type = "total")
@@ -40,6 +41,8 @@ mc_plot_residuals(model_id, ml, x)
 mc_plot_predpi(PI)
 
 mc_plot_pidistr(PI, id = NULL, plot = TRUE, breaks = "Sturges")
+
+mc_plot_predfit(i, PI, interactive = FALSE)
 }
 \arguments{
 \item{type}{The type of the response, can be `"total"` or
@@ -83,6 +86,10 @@ influential observations.}
 \item{plot}{Logical, to plot or just give summary.}
 
 \item{breaks}{Breaks argument passed to `graphics::hist()`.}
+
+\item{i}{Column (variable) name or index.}
+
+\item{interactive}{Logical, draw interactive plot.}
 }
 \description{
 `switch_response` switches between total Moose vs. cows only.

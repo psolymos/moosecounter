@@ -7,7 +7,14 @@
 \alias{mc_plot_comp}
 \title{Exploration}
 \usage{
-mc_plot_univariate(i, x, dist = "ZINB")
+mc_plot_univariate(
+  i,
+  x,
+  dist = "ZINB",
+  base = TRUE,
+  type = c("density", "map", "fit"),
+  interactive = FALSE
+)
 
 mc_plot_multivariate(vars, x, alpha = NULL)
 
@@ -19,6 +26,12 @@ mc_plot_comp(i, x)
 \item{x}{Data frame with Moose data.}
 
 \item{dist}{Count distribution (`P`, `NB`, `ZIP`, or `ZINB`).}
+
+\item{base}{Logical, draw base graphics or ggplot2.}
+
+\item{type}{Character, type of plot to be drawn (`"density"`, `"map"`, `"fit"`). Base plot can draw all 3, ggplot2 can only draw one at a time.}
+
+\item{interactive}{Logical, draw interactive plot (not available for base plots).}
 
 \item{vars}{A vector of column names from `x` to be used as a predictor.}
 

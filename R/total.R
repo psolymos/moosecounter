@@ -27,6 +27,8 @@
 #' @param do_boot Logical, to do bootstrap or not.
 #' @param do_avg Logical, to do model averaging or not.
 #' @param PI PI object returned by `mc_predict_total()`
+#' @param i Column (variable) name or index.
+#' @param interactive Logical, draw interactive plot.
 #' @param id Cell ID.
 #' @param plot Logical, to plot or just give summary.
 #' @param breaks Breaks argument passed to `graphics::hist()`.
@@ -686,6 +688,8 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
 }
 
 
+#' @rdname total
+#' @export
 mc_plot_predfit <- function(i, PI, interactive = FALSE) {
 
   dat <- PI$data[,c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU")]

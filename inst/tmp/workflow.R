@@ -1,6 +1,8 @@
 #remotes::install_github("psolymos/moosecounter")
+#devtools::document()
 #devtools::check()
 #devtools::install()
+moosecounter::run_app()
 
 x <- read.csv("inst/extdata/MayoMMU_QuerriedData.csv")
 switch_response("total")
