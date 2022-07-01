@@ -1,17 +1,17 @@
 #' Exploration
 #'
 #' Functions to explore relationships between total Moose or composition
-#' as respone vs. environmental predictor variables.
+#' as response vs. environmental predictor variables.
 #'
 #' `mc_plot_univariate` implements visual univariate
-#' (sigle predictor) exploration for the total Moose count models.
+#' (single predictor) exploration for the total Moose count models.
 #'
 #' `mc_plot_multivariate` implements visual multivariate
 #' (multiple predictors) exploration based on regression trees
 #' (recursive partitioning  in a conditional inference framework)
 #' for total Moose counts.
 #'
-#' `mc_plot_comp` implements visual univariate (sigle predictor) exploration
+#' `mc_plot_comp` implements visual univariate (single predictor) exploration
 #' for the multinomial composition models.
 #'
 #' @param x Data frame with Moose data.

@@ -57,9 +57,9 @@ model (can be multiple model IDs from `names(model_list_total)`).}
 }
 \description{
 Fit composition model for Moose using a multinomial model
-to capture how predictors affect compsotional data;
-alculate prediction intervals based on composition model;
-and xtract useful summaries.
+to capture how predictors affect composition data;
+calculate prediction intervals based on composition model;
+and extract useful summaries.
 }
 \examples{
 mc_options(B=10)

@@ -1,9 +1,9 @@
 #' Moose Composition Workflow
 #'
 #' Fit composition model for Moose using a multinomial model
-#' to capture how predictors affect compsotional data;
-#' alculate prediction intervals based on composition model;
-#' and xtract useful summaries.
+#' to capture how predictors affect composition data;
+#' calculate prediction intervals based on composition model;
+#' and extract useful summaries.
 #'
 #' @param total_model_id Model ID or model IDs for total moose
 #'   model (can be multiple model IDs from `names(model_list_total)`).

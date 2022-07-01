@@ -62,7 +62,7 @@ the count model.}
 \item{zi_vars}{optional, column names of `x` to be used as
 predictors for the zero model.}
 
-\item{dist}{Coundt distribution (`P`, `NB`, `ZIP`, `ZINB`).}
+\item{dist}{Count distribution (`P`, `NB`, `ZIP`, `ZINB`).}
 
 \item{weighted}{Logical, to use weighting to moderate
 influential observations.}
@@ -93,8 +93,8 @@ influential observations.}
 }
 \description{
 `switch_response` switches between total Moose vs. cows only.
-This sets the column name for totel Moose estimation.
-`mc_update_total` Updates/prepares the Moose data set for downstream analyses (i.e. calculates some derived variables, sets a surveyed/unsurveyed indicator, and optinally takes a subset).
+This sets the column name for total Moose estimation.
+`mc_update_total` Updates/prepares the Moose data set for downstream analyses (i.e. calculates some derived variables, sets a surveyed/unsurveyed indicator, and optionally takes a subset).
 `mc_fit_total` fit total Moose abundance models.
 `mc_models_total` prints out estimates from the models.
 }

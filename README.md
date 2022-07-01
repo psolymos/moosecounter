@@ -54,7 +54,7 @@ Switch between modeling total vs. cows only:
 switch_response("total")
 ```
 
-Ddefine surveyed units and take a subset as needed
+Define surveyed units and take a subset as needed
 (this also sets total cows value):
 
 ```R

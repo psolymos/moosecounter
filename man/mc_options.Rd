@@ -25,7 +25,7 @@ A function to get and set the package related options.
 * `Ntot`: set to `MOOSE_TOTA` (internally changing to `"COW_TOTA"` when modeling cows)
 * `srv_name`: Filtering variable
 * `srv_value`: Filtering value
-* `area_srv`: Comun indicating survey areas
+* `area_srv`: Column indicating survey areas
 * `Area`: Area
 * `xy`: Long/Lat
 * `composition`: Composition variables
