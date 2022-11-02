@@ -431,7 +431,7 @@ function(NAME) {
             ylab="Percent of Total", col=col, ylim=c(0,100*max(pr0)))
         axis(1, at=1:ncol(pr0), labels=colnames(pr0))
         axis(2)
-        box()
+        graphics::box()
 
         plot.new()
         legend("topleft", fill=rev(col), legend=rev(colnames(mf$ymat)))
