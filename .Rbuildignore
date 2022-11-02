@@ -5,3 +5,4 @@
 ^_pkgdown\.yml$
 ^RELEASE.R$
 ^inst/shiny/tests/*$
+^_tmp/*$
