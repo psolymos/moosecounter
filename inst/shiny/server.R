@@ -54,8 +54,8 @@ server <- function(input, output, session) {
     req(survey_data())
 
     vars <- survey_data() %>%
-      select(-any_of(c(var_meta, var_resp))) %>%
-      select(where(~is.integer(.) || is.character(.) || is.factor(.))) %>%
+      dplyr::select(-any_of(c(var_meta, var_resp))) %>%
+      dplyr::select(where(~is.integer(.) || is.character(.) || is.factor(.))) %>%
       names()
 
     # Check for missing levels in filtered data
@@ -70,8 +70,8 @@ server <- function(input, output, session) {
     req(survey_data())
 
     vars <- survey_data() %>%
-      select(-any_of(c(var_meta, var_resp))) %>%
-      select(where(is.integer)) %>%
+      dplyr::select(-any_of(c(var_meta, var_resp))) %>%
+      dplyr::select(where(is.integer)) %>%
       names()
 
     if(!is.null(input$survey_omit)) vars <- vars[!vars %in% input$survey_omit]
@@ -116,10 +116,10 @@ server <- function(input, output, session) {
 
     # Convert selected integers to factors
     if(!is.null(input$survey_factors)) {
-      s <- mutate(s, across(input$survey_factors, as.factor))
+      s <- dplyr::mutate(s, across(input$survey_factors, as.factor))
     }
 
-    if(!is.null(input$survey_omit)) s <- select(s, -any_of(input$survey_omit))
+    if(!is.null(input$survey_omit)) s <- dplyr::select(s, -any_of(input$survey_omit))
 
     # Apply filtering
     mc_update_total(s)
@@ -132,19 +132,19 @@ server <- function(input, output, session) {
 
   output$survey_response <- renderPrint({
     survey_sub() %>%
-      select(any_of(var_resp)) %>%
+      dplyr::select(any_of(var_resp)) %>%
       str()
   })
 
   output$survey_meta <- renderPrint({
     survey_sub() %>%
-      select(any_of(var_meta)) %>%
+      dplyr::select(any_of(var_meta)) %>%
       str()
   })
 
   output$survey_explanatory <- renderPrint({
     survey_sub() %>%
-      select(-any_of(c(var_resp, var_meta))) %>%
+      dplyr::select(-any_of(c(var_resp, var_meta))) %>%
       str()
   })
 
@@ -304,9 +304,9 @@ server <- function(input, output, session) {
                       Distribution = .x$dist,
                       Weighted = .x$weighted)
       if("try-error" %in% class(.x$model)) {
-        d <- mutate(d, method = "MODEL PROBLEM", response = "MODEL PROBLEM")
+        d <- dplyr::mutate(d, method = "MODEL PROBLEM", response = "MODEL PROBLEM")
       } else {
-        d <- mutate(d,
+        d <- dplyr::mutate(d,
                     method = .x$model$method,
                     response = names(.x$model$model)[1])
       }
@@ -353,7 +353,7 @@ server <- function(input, output, session) {
 
     map(total_models(), "model") %>%
       mc_models_total(survey_sub()) %>%
-      mutate(across(everything(), round, 2))
+      dplyr::mutate(across(everything(), round, 2))
   })
 
   output$total_model_aic1 <- renderTable({
@@ -436,10 +436,10 @@ server <- function(input, output, session) {
   output$total_pi_density <- function() {
     total_pi()$pi$total %>%
       as.data.frame() %>%
-      mutate(" " = c("Total Moose",
+      dplyr::mutate(" " = c("Total Moose",
                      "Total Area (km<sup>2</sup>)",
                      "Density (Moose/km<sup>2</sup>)")) %>%
-      select(` `, everything()) %>%
+      dplyr::select(` `, everything()) %>%
       kable(escape = FALSE, row.names = FALSE, align = "lrrrrr", digits = 3) %>%
       kable_styling(bootstrap_options = "condensed")
   }
@@ -561,7 +561,7 @@ server <- function(input, output, session) {
     set <- c("observed_values", "fitted_values", "Residuals")
 
     d <- d %>%
-      mutate(
+      dplyr::mutate(
         Residuals = round(Residuals, 3),
         cell = 1:n(),
         data_cell = !is.na(observed_values),
@@ -816,7 +816,7 @@ server <- function(input, output, session) {
     map(comp_models(), "model") %>%
       mc_models_comp() %>%
       as.data.frame() %>%
-      mutate(across(everything(), round, 2))
+      dplyr::mutate(across(everything(), round, 2))
   })
 
   output$comp_model_aic <- renderTable({
@@ -891,8 +891,8 @@ server <- function(input, output, session) {
     req(comp_pi())
     pred_density_moose_CPI(comp_pi()$pi) %>%
       as.data.frame() %>%
-      mutate(type = rownames(.)) %>%
-      select(type, everything()) %>%
+      dplyr::mutate(type = rownames(.)) %>%
+      dplyr::select(type, everything()) %>%
       kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
       kable_styling(bootstrap_options = "condensed")
   }
@@ -995,8 +995,8 @@ server <- function(input, output, session) {
     req(length(comp_pi_subset()) > 0)
     pred_density_moose_CPI(comp_pi_subset()) %>%
       as.data.frame() %>%
-      mutate(type = rownames(.)) %>%
-      select(type, everything()) %>%
+      dplyr::mutate(type = rownames(.)) %>%
+      dplyr::select(type, everything()) %>%
       kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
       kable_styling(bootstrap_options = "condensed")
   }
