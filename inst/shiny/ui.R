@@ -14,7 +14,7 @@ ui_settings <- fluidRow(
 
          h2("Settings"),
 
-         box(width = 12,
+         shinydashboard::box(width = 12,
              column(width = 6,
              radioButtons("opts_response", inline = TRUE,
                           label = "Response variable",
@@ -59,7 +59,7 @@ ui_settings <- fluidRow(
                           value = 4323, min = 1, max = 10000),
              bsTooltip("opts_seed", opts_tooltip$seed)
            )),
-         box(width = 12, title = "Current Settings",
+         shinydashboard::box(width = 12, title = "Current Settings",
              tableOutput("opts"))
 
          # Surveyed units?
@@ -73,7 +73,7 @@ ui_data <- fluidRow(
   column(width = 12,
     h2("Data"),
 
-    box(width = 4,
+    shinydashboard::box(width = 4,
         fileInput("survey_file", "Choose Survey CSV File",
                   multiple = FALSE,
                   accept = c("text/csv",
@@ -85,7 +85,7 @@ ui_data <- fluidRow(
         h3("Filter data"),
         uiOutput("filters_ui")),
 
-    box(width = 8,
+    shinydashboard::box(width = 8,
         tabBox(width = 12, id = "data_panel",
           tabPanel("Interactive table",
                    div(style = "overflow-x: scroll", DTOutput("survey_preview"))),
@@ -106,12 +106,12 @@ ui_data <- fluidRow(
 ui_total_univar <- fluidRow(
   column(width = 12,
          h2("Univariate Exploration"),
-         box(height = "100px", uiOutput("uni_var_ui")),
-         box(height = "100px",
+         shinydashboard::box(height = "100px", uiOutput("uni_var_ui")),
+         shinydashboard::box(height = "100px",
              radioButtons("uni_dist", "Distribution", inline = TRUE,
                           choices = c("P", "NB", "ZIP", "ZINB"),
                           selected = "NB")),
-         box(width = 12,
+         shinydashboard::box(width = 12,
              column(width = 4, girafeOutput("uni_graph1", height = "100%")),
              column(width = 4, girafeOutput("uni_graph2", height = "100%")),
              column(width = 4, girafeOutput("uni_graph3", height = "100%"))
@@ -123,11 +123,11 @@ ui_total_univar <- fluidRow(
 ui_total_multivar <- fluidRow(
   column(width = 12,
          h2("Multivariate Exploration"),
-         box(width = 6, uiOutput("multi_var_ui")),
-         box(width = 6, sliderInput("multi_alpha", label = "alpha level for split",
+         shinydashboard::box(width = 6, uiOutput("multi_var_ui")),
+         shinydashboard::box(width = 6, sliderInput("multi_alpha", label = "alpha level for split",
                                     value = 0.01,
                                     min = 0.001, max = 0.5, step = 0.01)),
-         box(width = 12, plotOutput("multi_graph"))
+         shinydashboard::box(width = 12, plotOutput("multi_graph"))
   )
 )
 
@@ -137,7 +137,7 @@ ui_total_models <- fluidRow(
   column(width = 12,
     h2("Add model"),
     column(width = 4,
-           box(width = 12,
+           shinydashboard::box(width = 12,
                uiOutput("total_model_id_ui"),
                uiOutput("total_model_var_count_ui"),
                uiOutput("total_model_var_zero_ui"),
@@ -149,10 +149,10 @@ ui_total_models <- fluidRow(
                             c("Non weighted" = FALSE, "Weighted" = TRUE),
                             inline = TRUE),
                bsButton("total_model_add", "Add", style = "primary")),
-           box(width = 12,
+           shinydashboard::box(width = 12,
                h4("Error messages"),
                uiOutput("total_model_msgs"))),
-    box(width = 8,
+    shinydashboard::box(width = 8,
         h4("Current models"),
         tableOutput("total_model_table"),
         uiOutput("total_model_delete_ui"),
@@ -166,7 +166,7 @@ ui_total_models <- fluidRow(
 ui_total_residuals <- fluidRow(
   column(width = 12,
     h2("Residuals"),
-    box(width = 12,
+    shinydashboard::box(width = 12,
         h4("AIC Model Comparison"),
         div(style = "overflow-x: scroll", tableOutput("total_model_aic2")),
         uiOutput("total_resid_models_ui"),
@@ -179,7 +179,7 @@ ui_total_residuals <- fluidRow(
 ui_total_pi <- fluidRow(
   column(width=12,
     h2("Calculating Prediction Intervals"),
-    box(width = 4, height = "225px",
+    shinydashboard::box(width = 4, height = "225px",
         column(width = 6,
                uiOutput("total_pi_models_ui"),
                bsButton("total_pi_calc", "Calculate PI",
@@ -194,11 +194,11 @@ ui_total_pi <- fluidRow(
         hr(),
         uiOutput("total_pi_selected", style = "margin-top:50px")),
 
-    box(width = 5, height = "225px",
+    shinydashboard::box(width = 5, height = "225px",
         title = "Summary",
         tableOutput("total_pi_density")),
 
-    box(width = 3, height = "225px",
+    shinydashboard::box(width = 3, height = "225px",
         title = "Issues and Options",
         tableOutput("total_pi_options")),
 
@@ -222,7 +222,7 @@ ui_total_pi_map <- fluidRow(
          h2("Exploring Predictions"),
          p(downloadButton(
              "total_boot_download", "Download full results as Excel file")),
-         box(width = 3,
+         shinydashboard::box(width = 3,
              h4("Subsets"),
              uiOutput("total_pi_subset_col"),
              uiOutput("total_pi_subset_group"),
@@ -245,7 +245,7 @@ ui_total_pi_map <- fluidRow(
                          uiOutput("total_pi_plot_col"),
                          girafeOutput("total_pi_plot"))
          ),
-         box(width = 12,
+         shinydashboard::box(width = 12,
              h4("Data"),
              div(style = "overflow-x: scroll;margin-top:15px",
                  DTOutput("total_pi_data")))
@@ -259,7 +259,7 @@ ui_total_pi_map <- fluidRow(
 ui_comp_explore <- fluidRow(
   column(width = 12,
          h2("Composition Exploration"),
-         box(height = "100px", uiOutput("comp_explore_ui")),
+         shinydashboard::box(height = "100px", uiOutput("comp_explore_ui")),
          plotOutput("comp_explore_graph", width = "100%")
   )
 )
@@ -270,14 +270,14 @@ ui_comp_models <- fluidRow(
   column(width = 12,
          h2("Composition Model Fit"),
          column(width = 4,
-                box(width = 12,
+                shinydashboard::box(width = 12,
                     uiOutput("comp_model_id_ui"),
                     uiOutput("comp_model_var_ui"),
                     bsButton("comp_model_add", "Add", style = "primary")),
-                box(width = 12,
+                shinydashboard::box(width = 12,
                     h4("Error messages"),
                     uiOutput("comp_model_msgs"))),
-         box(width = 8,
+         shinydashboard::box(width = 8,
              h4("Current models"),
              tableOutput("comp_model_table"),
              uiOutput("comp_model_delete_ui"),
@@ -294,14 +294,14 @@ ui_comp_pi <- fluidRow(
          h2("Composition Prediction Intervals"),
 
          column(width = 3,
-                box(width = 12,
+                shinydashboard::box(width = 12,
                     uiOutput("comp_pi_models_ui"),
                     uiOutput("comp_pi_average_ui"),
                     bsButton("comp_pi_calc", "Calculate PI",
                              style = "primary"),
                     hr(),
                     uiOutput("comp_pi_selected", style = "margin-top:5px")),
-                box(width = 12,
+                shinydashboard::box(width = 12,
                     title = "Issues and Options",
                     tableOutput("comp_pi_options"))),
 
@@ -321,11 +321,11 @@ ui_comp_sum <- fluidRow(
          h2("Composition Summary"),
          p(downloadButton(
            "comp_boot_download", "Download full results as Excel file")),
-         box(width = 3,
+         shinydashboard::box(width = 3,
              h4("Subsets"),
              uiOutput("comp_pi_subset_col"),
              uiOutput("comp_pi_subset_group")),
-         box(width = 9,
+         shinydashboard::box(width = 9,
              h4("Predictions"),
              div(DTOutput("comp_pi_summary"), style = "min-height:100px"),
              h4("Summary - Subset"),
@@ -339,7 +339,7 @@ ui_comp_sum <- fluidRow(
 ui_docs <- fluidRow(
   column(width=12,
          h2("Documentation"),
-         box(width = 12, class = "docs",
+         shinydashboard::box(width = 12, class = "docs",
              includeMarkdown("docs.md")
          )
   )
