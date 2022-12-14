@@ -825,6 +825,31 @@ server <- function(input, output, session) {
   }, rownames = TRUE)
 
 
+  ## Comp model residuals / diagnostics ------------------------------
+
+  output$comp_resid_models_ui <- renderUI({
+    validate(need(length(comp_models_list$m) > 0,
+                  "First create models in the \"Composition Model Fit\" tab"))
+    validate_models(comp_models())
+
+    radioButtons("comp_resid_model", label = "Composition Model", inline = TRUE,
+                 choices = sort(names(comp_models())))
+  })
+
+  output$comp_model_aic2 <- renderTable({
+    a <- comp_model_aic()
+    t(a[rev(seq_len(nrow(a))),])
+  }, rownames = TRUE)
+
+  output$comp_resid_summary <- renderPrint({
+    req(length(comp_models()) > 0, input$comp_resid_model)
+    validate_models(comp_models())
+
+    cat("Composition Model:", input$comp_resid_model, "\n")
+    VGAM::summaryvglm(comp_models()[[input$comp_resid_model]][["model"]])
+  })
+
+
   ## PI ----------------------------------------------------
 
   # UI elements

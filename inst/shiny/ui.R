@@ -287,6 +287,17 @@ ui_comp_models <- fluidRow(
   )
 )
 
+## Residuals for comp-----------------
+ui_comp_residuals <- fluidRow(
+  column(width = 12,
+    h2("Composition Residuals"),
+    shinydashboard::box(width = 12,
+        h4("AIC Model Comparison"),
+        div(style = "overflow-x: scroll", tableOutput("comp_model_aic2")),
+        uiOutput("comp_resid_models_ui"),
+        verbatimTextOutput("comp_resid_summary"))
+  )
+)
 
 ## Prediction Intervals -------------------------------------------------
 ui_comp_pi <- fluidRow(
@@ -369,6 +380,7 @@ dashboardPage(
       menuItem("Composition", tabName = "composition", icon = icon("chart-pie"),
                menuSubItem("Explore", tabName = "comp_explore"),
                menuSubItem("Models", tabName = "comp_models"),
+               menuSubItem("Residuals", tabName = "comp_residuals"),
                menuSubItem("Prediction Intervals", tabName = "comp_pi"),
                menuSubItem("Summary", tabName = "comp_sum")),
       menuItem("Documentation", tabName = "docs", icon=icon("book"))
@@ -390,6 +402,7 @@ dashboardPage(
       tabItem("total_pi_map", ui_total_pi_map),
       tabItem("comp_explore", ui_comp_explore),
       tabItem("comp_models", ui_comp_models),
+      tabItem("comp_residuals", ui_comp_residuals),
       tabItem("comp_pi", ui_comp_pi),
       tabItem("comp_sum", ui_comp_sum),
       tabItem("docs", ui_docs)
