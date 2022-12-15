@@ -9,7 +9,6 @@ server <- function(input, output, session) {
         input$opts_wscale,
         input$opts_sightability)
 
-
     switch_response(input$opts_response)
     mc_options(
       method = input$opts_method,
@@ -50,6 +49,18 @@ server <- function(input, output, session) {
     d
   })
 
+  # update subset variable list based on data
+  var_subset_all <- reactive({
+    req(survey_data())
+    ds <- survey_data() %>%
+      dplyr::select(-any_of(c(var_meta, var_resp)))
+    # subset variables tend to have only 2 unique values
+    uv <- sapply(ds, function(z) length(unique(z)))
+    uv[is.na(uv)] <- 0
+    print(uv)
+    sort(union(var_subset, colnames(ds)[uv == 2L]))
+  })
+
   output$survey_omit_ui <- renderUI({
     req(survey_data())
 
@@ -63,7 +74,7 @@ server <- function(input, output, session) {
 
     selectInput("survey_omit",
                 label = "Omit variables with too few surveyed levels",
-                selected = vars, choices = vars, multiple = TRUE)
+                selected = character(0), choices = vars, multiple = TRUE)
   })
 
   output$survey_factors_ui <- renderUI({
@@ -504,7 +515,7 @@ server <- function(input, output, session) {
     req(survey_sub())
     selectizeInput("total_pi_subset_col",
                    label = "Column to subset by",
-                   choices = var_subset[var_subset %in% names(survey_sub())])
+                   choices = var_subset_all()[var_subset_all() %in% names(survey_sub())])
   })
 
   output$total_pi_subset_group <- renderUI({
@@ -973,7 +984,7 @@ server <- function(input, output, session) {
     req(survey_sub())
     selectizeInput("comp_pi_subset_col",
                    label = "Column to subset by",
-                   choices = var_subset[var_subset %in% names(survey_sub())])
+                   choices = var_subset_all()[var_subset_all() %in% names(survey_sub())])
   })
 
   output$comp_pi_subset_group <- renderUI({
