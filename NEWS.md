@@ -1,4 +1,4 @@
-# Version 0.6-1 -- December 17, 2022
+# Version 0.6-2 -- December 17, 2022
 
 * Added Residual tab for composition analysis to show model summaries and AIC table.
 * More columns are allowed to be treated as filters/subsetters with 2 levels (usually 0/1).
