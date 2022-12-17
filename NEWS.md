@@ -3,6 +3,7 @@
 * Added Residual tab for composition analysis to show model summaries and AIC table.
 * More columns are allowed to be treated as filters/subsetters with 2 levels (usually 0/1).
 * Print abundance/density summaries for subsets under Summary tab.
+* Added `Total_Bulls` and `Bulls_per_Cow` to the composition summaries.
 
 # Version 0.6-1 -- December 14, 2022
 

@@ -71,6 +71,8 @@ mc_check_comp <- function(x) {
   if (opts$response == "total") {
       x_srv$TOT_CALVES <- x_srv$COW_1C + 2*x_srv$COW_2C + x_srv$LONE_CALF
       x_srv$ADULT_COW <- x_srv$COW_1C + x_srv$COW_2C + x_srv$LONE_COW
+      x_srv$BULL_TOTA <- x_srv$BULL_LARGE + x_srv$BULL_SMALL
+      x_srv$BULL_PER_COW <- x_srv$BULL_TOTA / x_srv$COW_TOTA
       check <- (x_srv$MOOSE_TOTA - x_srv$UNKNOWN_AG) - (x_srv$BULL_LARGE +
         x_srv$BULL_SMALL + x_srv$ADULT_COW + x_srv$TOT_CALVES)
       problem <- sum(abs(check) > 0.001)
@@ -268,7 +270,8 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
     Total_Yrlings = tmp,
     Total_Mature_Cows = tmp,
     Total_1C = tmp,
-    Total_2C = tmp)
+    Total_2C = tmp,
+    Total_Bulls = tmp)
 
   b <- 1
 
@@ -399,6 +402,8 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
                   pred.numbers$COW_1C)
               all_ratios_list$Total_2C[,b] <- c(Survey.data$COW_2C,
                   pred.numbers$COW_2C)
+              all_ratios_list$Total_Bulls[,b] <- c(Survey.data$BULL_LARGE + Survey.data$BULL_SMALL,
+                  pred.numbers$BULL_LARGE + pred.numbers$BULL_SMALL)
 
             pbapply::setpb(pb, b)
               b <- b + 1
@@ -458,6 +463,8 @@ mc_summarize_composition <- function(all_ratios_list) {
     d$PC_Calves <- d$Total_Calves/d$Total.pred
     d$Yrling_Recruitment <- d$Total_Yrlings/(d$Total.pred - d$Total_Calves)
     d$Twining_rate <- d$Total_2C/(d$Total_1C + d$Total_2C)
+    ## Number of all large bulls per 100 cows
+    d$Bulls_per_Cow <- (d$Total_Bulls/d$Total_Cows)*100
     dtot <- t(apply(d, 2, stats::quantile, c(alpha/2,0.5,(1-alpha/2))))
     list(total=dtot, cells=dcell, raw=d)
 }
