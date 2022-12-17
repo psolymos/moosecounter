@@ -1,10 +1,16 @@
-# Version 0.6-1 -- June 26, 2022
+# Version 0.6-1 -- December 17, 2022
+
+* Added Residual tab for composition analysis to show model summaries and AIC table.
+* More columns are allowed to be treated as filters/subsetters with 2 levels (usually 0/1).
+* Print abundance/density summaries for subsets under Summary tab.
+
+# Version 0.6-1 -- December 14, 2022
 
 * Composition table contains BIC and coefficients.
 * Composition checks fixed: don't include unknown ages.
 * `mc_plot_univariate` has the ability to return ggplot2 objects and their interactive versions.
 * New function: `mc_plot_predfit` to check model fit.
-* Shiny app: predictions can no be subsetted independent of the training data.
+* Shiny app: predictions can now be subsetted independent of the training data.
 
 # Version 0.6-0 -- March 14, 2022
 

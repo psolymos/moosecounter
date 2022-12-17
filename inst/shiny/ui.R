@@ -243,7 +243,9 @@ ui_total_pi_map <- fluidRow(
                          girafeOutput("total_pi_map")),
                 tabPanel(title = "Plot",
                          uiOutput("total_pi_plot_col"),
-                         girafeOutput("total_pi_plot"))
+                         girafeOutput("total_pi_plot")),
+                tabPanel(title = "Summary",
+                         tableOutput("total_pi_density_selected"))
          ),
          shinydashboard::box(width = 12,
              h4("Data"),

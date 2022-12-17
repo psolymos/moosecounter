@@ -57,7 +57,6 @@ server <- function(input, output, session) {
     # subset variables tend to have only 2 unique values
     uv <- sapply(ds, function(z) length(unique(z)))
     uv[is.na(uv)] <- 0
-    print(uv)
     sort(union(var_subset, colnames(ds)[uv == 2L]))
   })
 
@@ -508,8 +507,6 @@ server <- function(input, output, session) {
   })
 
 
-
-
   ## Explore PI ----------------------------------------------------
   output$total_pi_subset_col <- renderUI({
     req(survey_sub())
@@ -683,6 +680,32 @@ server <- function(input, output, session) {
     mc_plot_predfit(input$total_pi_plot_col, total_pi()$pi, interactive = TRUE)
   })
 
+  output$total_pi_density_selected <- reactive({
+    validate(
+      need(input$survey_file,
+           "First select a data set in the \"Data\" tab") %then%
+        need(length(total_models_list$m) > 0,
+             "First create models in the \"Models\" tab") %then%
+        need(!is.null(input$total_pi_models),
+             "First create the predictions in the \"Prediction Intervals\" tab") %then%
+        need(nrow(total_pi_subset()) > 0,
+             "No predictions. Make sure at least one group subset is selected"))
+
+    req(input$total_pi_subset_col)
+    ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
+    ss <- ss %in% input$total_pi_subset_group
+
+    d <- mc_get_pred(total_pi()$pi, ss = ss)$total
+
+    d %>%
+      as.data.frame() %>%
+      dplyr::mutate(" " = c("Total Moose",
+                     "Total Area (km<sup>2</sup>)",
+                     "Density (Moose/km<sup>2</sup>)")) %>%
+      dplyr::select(` `, everything()) %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrrrr", digits = 3) %>%
+      kable_styling(bootstrap_options = "condensed")
+  })
 
 
 
