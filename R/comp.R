@@ -268,6 +268,7 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
     Total_Cows = tmp,
     Total_SB = tmp,
     Total_Yrlings = tmp,
+    Total_Yrling_Cows = tmp,
     Total_Mature_Cows = tmp,
     Total_1C = tmp,
     Total_2C = tmp,
@@ -389,15 +390,18 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
               all_ratios_list$Total_Calves[,b] <- c(Survey.data$TOT_CALVES,
                   pred.numbers$TOT_CALVES)
               all_ratios_list$Total_Cows[,b] <- c(
-                  Survey.data$COW_1C +
-                  Survey.data$COW_2C +
-                  Survey.data$LONE_COW,
+                  Survey.data$COW_1C + Survey.data$COW_2C + Survey.data$LONE_COW,
                   pred.numbers$COW_1C + pred.numbers$COW_2C + pred.numbers$LONE_COW)
               all_ratios_list$Total_SB[,b] <- c(Survey.data$BULL_SMALL,
                   pred.numbers$BULL_SMALL)
-              all_ratios_list$Total_Yrlings[,b] <- 2 * all_ratios_list$Total_SB[,b]
+              # need this to avoid negative Total_Mature_Cows numbers
+              all_ratios_list$Total_Yrling_Cows[,b] <- pmin(all_ratios_list$Total_SB[,b], all_ratios_list$Total_Cows[,b])
+              # all_ratios_list$Total_Yrlings[,b] <- 2 * all_ratios_list$Total_SB[,b]
+              all_ratios_list$Total_Yrlings[,b] <- all_ratios_list$Total_Yrling_Cows[,b] + all_ratios_list$Total_SB[,b]
+              # all_ratios_list$Total_Mature_Cows[,b] <-
+              #     all_ratios_list$Total_Cows[,b] - all_ratios_list$Total_SB[,b]
               all_ratios_list$Total_Mature_Cows[,b] <-
-                  all_ratios_list$Total_Cows[,b] - all_ratios_list$Total_SB[,b]
+                  all_ratios_list$Total_Cows[,b] - all_ratios_list$Total_Yrling_Cows[,b]
               all_ratios_list$Total_1C[,b] <- c(Survey.data$COW_1C,
                   pred.numbers$COW_1C)
               all_ratios_list$Total_2C[,b] <- c(Survey.data$COW_2C,

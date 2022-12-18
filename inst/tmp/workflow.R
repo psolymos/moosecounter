@@ -129,6 +129,7 @@ pred_density_moose_CPI(CPI)
 pred_density_moose_CPI(subset_CPI_data(CPI, 1:100))
 
 head(CPI$cells) # this is what we need
+t(apply(CPI$cells, 2, range))
 
 ## Gassaway
 
