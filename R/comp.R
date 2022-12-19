@@ -469,6 +469,7 @@ mc_summarize_composition <- function(all_ratios_list) {
     d$Twining_rate <- d$Total_2C/(d$Total_1C + d$Total_2C)
     ## Number of all large bulls per 100 cows
     d$Bulls_per_Cow <- (d$Total_Bulls/d$Total_Cows)*100
+    d$Calves_per_Cows <- (d$Total_Calves / d$Total_Cows)*100
     dtot <- t(apply(d, 2, stats::quantile, c(alpha/2,0.5,(1-alpha/2))))
     list(total=dtot, cells=dcell, raw=d)
 }

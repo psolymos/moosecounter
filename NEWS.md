@@ -5,6 +5,7 @@
 * Print abundance/density summaries for subsets under Summary tab.
 * Added `Total_Bulls` and `Bulls_per_Cow` to the composition summaries.
 * Yearling cows now calculated as `min(adult_cows, yearling_bulls)` to avoid negative mature cows values.
+* Total Calves / Total Cows is now part of the `mc_summarize_composition` output.
 
 # Version 0.6-1 -- December 14, 2022
 
