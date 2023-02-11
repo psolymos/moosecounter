@@ -1,3 +1,7 @@
+# Version 0.6-3 -- February 11, 2023
+
+* Bootstrap setting is now a numeric input, not a slider, to allow high numbers.
+
 # Version 0.6-2 -- December 17, 2022
 
 * Added Residual tab for composition analysis to show model summaries and AIC table.
