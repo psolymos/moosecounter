@@ -27,9 +27,12 @@ ui_settings <- fluidRow(
                                       "SANN")),
              bsTooltip("opts_method", opts_tooltip$method),
 
-             sliderInput("opts_b",
+            #  sliderInput("opts_b",
+            #              label = "No. bootstrap interations",
+            #              value = 500, min = 100, max = 1000, step = 50),
+             numericInput("opts_b",
                          label = "No. bootstrap interations",
-                         value = 500, min = 100, max = 1000, step = 50),
+                         value = 1000, min = 100, max = NA, step = NA),
              bsTooltip("opts_b", opts_tooltip$b),
 
              radioButtons("opts_alpha", inline = TRUE,
