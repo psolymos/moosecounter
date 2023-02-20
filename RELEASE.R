@@ -50,6 +50,8 @@ urlchecker::url_check()
 devtools::build() %>%
   install.packages(repos = NULL, type = "source")
 
+devtools::document()
 devtools::check()
 
+devtools::install()
 
