@@ -22,7 +22,9 @@ mc_predict_comp(
   model_list_total,
   model_list_comp,
   x,
-  do_avg = FALSE
+  do_avg = FALSE,
+  fix_mean = FALSE,
+  PI = NULL
 )
 
 subset_CPI_data(CPI, ss)
@@ -49,11 +51,16 @@ model (can be multiple model IDs from `names(model_list_total)`).}
 
 \item{do_avg}{Logical, to do model averaging or not.}
 
+\item{fix_mean}{logical, use the fixed (rounded) mean as the Multinomial size
+instead of the bootstrap PI counts.}
+
+\item{PI}{Total Moose PI object.}
+
 \item{CPI}{Composition PI object.}
 
 \item{ss}{A subset of rows (logical or numeric vector).}
 
-\item{...}{Other arts passed to underlying functions.}
+\item{...}{Other arguments passed to underlying functions.}
 }
 \description{
 Fit composition model for Moose using a multinomial model
