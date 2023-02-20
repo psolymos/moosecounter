@@ -17,8 +17,11 @@
 #'   for the composition model.
 #' @param ss A subset of rows (logical or numeric vector).
 #' @param CPI Composition PI object.
+#' @param PI Total Moose PI object.
 #' @param coefs logical, return coefficient table too.
-#' @param ... Other arts passed to underlying functions.
+#' @param fix_mean logical, use the fixed (rounded) mean as the Multinomial size
+#'   instead of the bootstrap PI counts.
+#' @param ... Other arguments passed to underlying functions.
 #'
 #' @examples
 #' mc_options(B=10)
@@ -191,7 +194,21 @@ mc_models_comp <- function(model_list_comp, coefs=TRUE) {
 #Mult.model, alpha, TotalMMU.pred, MMU_ID)
 ## used to be MooseCompSimMMU.PI1
 mc_predict_comp <- function(total_model_id, comp_model_id,
-    model_list_total, model_list_comp, x, do_avg=FALSE) {
+    model_list_total, model_list_comp, x, do_avg=FALSE,
+    fix_mean = FALSE, PI=NULL) {
+
+  newPI <- is.null(PI)
+  if (!newPI) {
+    total_model_id <- PI$model_id
+    model_list_total <- PI$model_list
+    x <- PI$data
+    do_avg <- PI$do_avg
+    PImean <- round(rowMeans(PI$boot_full))
+    PIboot <- PI$boot_full
+  } else {
+    if (fix_mean)
+      stop("fix_mean implies a non NULL PI object is provided")
+  }
 
   opts <- getOption("moose_options")
   #x <- MooseData
@@ -204,11 +221,16 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
       x$area_srv <- TRUE
   }
 
-  keep <- x$UNKNOWN_AG == 0
-  if (any(x$UNKNOWN_AG > 0))
-      warning(sum(x$UNKNOWN_AG > 0),
-        " rows with unknown animals excluded")
-  x <- x[keep,,drop=FALSE]
+  # keep <- x$UNKNOWN_AG == 0
+  # if (any(x$UNKNOWN_AG > 0))
+  #     warning(sum(x$UNKNOWN_AG > 0),
+  #       " rows with unknown animals excluded")
+  # x <- x[keep,,drop=FALSE]
+
+  # if (!newPI) {
+  #   PImean <- PImean[keep]
+  #   PIboot <- PIboot[keep,,drop=FALSE]
+  # }
 
   x$sort_id <- 1:nrow(x)
   srv <- x$srv
@@ -292,60 +314,80 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
   BSurvey.data <- Survey.data[index,]
   if (max(BSurvey.data$MOOSE_TOTA) != 0) { # loop 1
 
-
     ## model selection
-    if (do_avg) {
-        total_model_id <- sample(rownames(wts), 1, prob=wts$weight)
+    if (newPI) {
+      if (do_avg) {
+          total_model_id <- sample(rownames(wts), 1, prob=wts$weight)
+      } else {
+          total_model_id <- rownames(wts)[which.max(wts$weight)]
+          if (length(total_model_id) > 1) # this should really never happen
+              total_model_id <- sample(total_model_id, 1)
+      }
+      mid[b] <- total_model_id
+      total_fit <- model_list_total[[total_model_id]]
+      parms.start <- list(
+          count = total_fit$coef$count,
+          zero = total_fit$coef$zero,
+          theta = total_fit$theta)
+      w <- rep(1, nrow(BSurvey.data))
+      model.Boot <- try(suppressWarnings(stats::update(total_fit,
+        #data = BSurvey.data,
+        x = BSurvey.data,
+        control = pscl::zeroinfl.control(
+          start = parms.start,
+          method = opts$method))), silent = TRUE)
     } else {
-        total_model_id <- rownames(wts)[which.max(wts$weight)]
-        if (length(total_model_id) > 1) # this should really never happen
-            total_model_id <- sample(total_model_id, 1)
+      total_fit <- model_list_total[[PI$model_select_id[b]]]
+      model.Boot <- total_fit
+      parms.start <- list(
+          count = total_fit$coef$count,
+          zero = total_fit$coef$zero,
+          theta = total_fit$theta)
     }
-    mid[b] <- total_model_id
-    total_fit <- model_list_total[[total_model_id]]
-    parms.start <- list(
-        count = total_fit$coef$count,
-        zero = total_fit$coef$zero,
-        theta = total_fit$theta)
-    w <- rep(1, nrow(BSurvey.data))
-    model.Boot <- try(suppressWarnings(stats::update(total_fit,
-      #data = BSurvey.data,
-      x = BSurvey.data,
-      control = pscl::zeroinfl.control(
-        start = parms.start,
-        method = opts$method))), silent = TRUE)
     if (!inherits(model.Boot, "try-error")) {
         attr(model.Boot, "parms.start") <- parms.start
-        if (inherits(total_fit, "wzi"))
+        if (inherits(total_fit, "wzi") && newPI)
           model.Boot <- wzi(model.Boot, pass_data=TRUE)
 
     #   model.Boot <- model.B(BSurvey.data)
-        predict.BNS <- stats::predict(model.Boot, newdata=Unsurvey.data, type="response")
-        predict.BNSout <- if (DUAL && inherits(total_fit, "wzi")) {
-            stats::predict(model.Boot$unweighted_model,
-                newdata=Unsurvey.data, type="response")
+        if (newPI) {
+          predict.BNS <- stats::predict(model.Boot, newdata=Unsurvey.data, type="response")
+          predict.BNSout <- if (DUAL && inherits(total_fit, "wzi")) {
+              stats::predict(model.Boot$unweighted_model,
+                  newdata=Unsurvey.data, type="response")
+          } else {
+              predict.BNS
+          }
         } else {
-            predict.BNS
+          predict.BNS <- predict.BNSout <- PI$boot_full[!srv,b]
         }
 
         if (max(predict.BNS, predict.BNSout) <= MAXCELL & model.Boot$optim$convergence == 0) { # loop 2
-          ## here 'count' refers to the abundance model (no ZI considered)
-          Bm.NS <- stats::predict(model.Boot, newdata=Unsurvey.data, type="count")
-          Btheta.nb <- model.Boot$theta
-          #Bphi.zi <- 1 - plogis(coef(model.Boot)[length(coef(model.Boot))])
-          Bphi.zi <- 1 - stats::predict(model.Boot, newdata=Unsurvey.data, type="zero")
-          PUnsurvey.data <- rZINB(NS, mu.nb=Bm.NS,
-            theta.nb=Btheta.nb, phi.zi=Bphi.zi)
-          if (DUAL && inherits(total_fit, "wzi")) {
-            Bm.NSout <- stats::predict(model.Boot$unweighted_model,
-                newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="count")
-            Btheta.nbout <- model.Boot$unweighted_model$theta
-            Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
-                newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="zero")
-            PUnsurvey.data[!Unsurvey.data$area_srv] <- rZINB(sum(!Unsurvey.data$area_srv),
-                mu.nb = Bm.NSout,
-                theta.nb=Btheta.nbout,
-                phi.zi=Bphi.ziout)
+          if (newPI) {
+            ## here 'count' refers to the abundance model (no ZI considered)
+            Bm.NS <- stats::predict(model.Boot, newdata=Unsurvey.data, type="count")
+            Btheta.nb <- model.Boot$theta
+            #Bphi.zi <- 1 - plogis(coef(model.Boot)[length(coef(model.Boot))])
+            Bphi.zi <- 1 - stats::predict(model.Boot, newdata=Unsurvey.data, type="zero")
+            PUnsurvey.data <- rZINB(NS, mu.nb=Bm.NS,
+              theta.nb=Btheta.nb, phi.zi=Bphi.zi)
+            if (DUAL && inherits(total_fit, "wzi")) {
+              Bm.NSout <- stats::predict(model.Boot$unweighted_model,
+                  newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="count")
+              Btheta.nbout <- model.Boot$unweighted_model$theta
+              Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
+                  newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="zero")
+              PUnsurvey.data[!Unsurvey.data$area_srv] <- rZINB(sum(!Unsurvey.data$area_srv),
+                  mu.nb = Bm.NSout,
+                  theta.nb=Btheta.nbout,
+                  phi.zi=Bphi.ziout)
+            }
+          } else {
+            if (fix_mean) {
+              PUnsurvey.data <- PImean[!srv]
+            } else {
+              PUnsurvey.data <- PIboot[!srv,b]
+            }
           }
 
           if (max(PUnsurvey.data) <= MAXCELL) { # loop 3
@@ -427,6 +469,7 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
     out <- list(total_model_id=total_model_id0,
         comp_model_id=comp_model_id,
         do_avg=do_avg,
+        fix_mean=fix_mean,
         model_list_total=model_list_total,
         model_list_comp=model_list_comp,
         total_model_select_id=mid,
