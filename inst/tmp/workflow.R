@@ -320,3 +320,81 @@ CPI <- mc_predict_comp(
   x=x,
   do_avg=TRUE)
 
+
+## new data testing: low abundance
+
+library(moosecounter)
+x <- read.csv("~/Dropbox/a8m/projects-2022/yt-000-moosecounter/Cassiar2020_QuerriedSUs_ForFinalAnalysis.csv")
+switch_response("total")
+# x$UNKNOWN_AG[] <- 0
+x <- mc_update_total(x)
+
+mc_options(B=1000)
+
+ML <- list()
+ML[["Model 1"]] <- mc_fit_total(x, "SUM_Final_RSPF", "SUM_Final_RSPF", dist="ZINB")
+
+PI <- mc_predict_total(
+    model_id="Model 1",
+    ml=ML,
+    x=x,
+    do_boot=TRUE, do_avg=TRUE)
+
+mc_check_comp(x)
+
+CML <- list()
+CML[['Comp 1']] <- mc_fit_comp(x)
+
+system.time(CPI1 <- mc_predict_comp(
+    total_model_id="Model 1",
+    comp_model_id="Comp 1",
+    model_list_total=ML,
+    model_list_comp=CML,
+    x=x,
+    do_avg=FALSE))
+system.time(CPI2 <- mc_predict_comp(
+    total_model_id="Model 1",
+    comp_model_id="Comp 1",
+    model_list_total=ML,
+    model_list_comp=CML,
+    x=x,
+    do_avg=FALSE,
+    PI=PI))
+system.time(CPI3 <- mc_predict_comp(
+    total_model_id="Model 1",
+    comp_model_id="Comp 1",
+    model_list_total=ML,
+    model_list_comp=CML,
+    x=x,
+    do_avg=FALSE,
+    PI=PI,
+    fix_mean=TRUE))
+
+
+
+summary(colSums(PI$boot_full))
+summary(sum(rowMeans(PI$boot_full)))
+pred_density_moose_PI(PI)
+CPI1$total[1,,drop=FALSE]
+CPI2$total[1,,drop=FALSE]
+CPI3$total[1,,drop=FALSE]
+summary(colSums(CPI1$boot_full$Total.pred))
+summary(sum(rowMeans(CPI1$boot_full$Total.pred)))
+summary(colSums(CPI2$boot_full$Total.pred))
+summary(sum(rowMeans(CPI2$boot_full$Total.pred)))
+summary(colSums(CPI3$boot_full$Total.pred))
+summary(sum(rowMeans(CPI3$boot_full$Total.pred)))
+
+
+keep <- x$UNKNOWN_AG == 0
+# keep <- 1:nrow(x)
+table(keep)
+
+pred_density_moose_PI(PI)
+
+summary(colSums(PI$boot_full[keep,]))
+summary(sum(rowMeans(PI$boot_full[keep,])))
+summary(colSums(CPI2$boot_full$Total.pred))
+summary(sum(rowMeans(CPI2$boot_full$Total.pred)))
+
+table(PI$boot_full[keep,1], CPI2$boot_full$Total.pred[,1])
