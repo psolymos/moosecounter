@@ -425,6 +425,7 @@ server <- function(input, output, session) {
                  value = 1, min = 1, max = nrow(total_pi()$pi$data), step = 1)
   })
 
+  total_pi_done <- reactiveVal(FALSE)
   total_pi <- reactive({
     req(length(total_models()) > 0, input$total_pi_average)
     validate(need(input$total_pi_models, "Please choose your model(s)"))
@@ -432,7 +433,7 @@ server <- function(input, output, session) {
 
     updateButton(session, "total_pi_calc", style = "primary",
                  label = "Calculate PI")
-
+    total_pi_done(TRUE)
     list(pi = mc_predict_total(model_id = input$total_pi_models,
                                ml = map(total_models(), "model"),
                                x = survey_sub(),
@@ -884,7 +885,7 @@ server <- function(input, output, session) {
   })
 
 
-  ## PI ----------------------------------------------------
+  ## Comp PI ----------------------------------------------------
 
   # UI elements
   output$comp_pi_models_ui <- renderUI({
@@ -940,7 +941,8 @@ server <- function(input, output, session) {
         model_list_total = map(total_models(), "model"),
         model_list_comp = map(comp_models(), "model"),
         x = survey_sub(),
-        do_avg = do_avg),
+        do_avg = do_avg,
+        PI = if (total_pi_done()) total_pi()$pi else NULL),
       opts = opts())
   }) %>%
     bindEvent(input$comp_pi_calc)
@@ -952,7 +954,7 @@ server <- function(input, output, session) {
       as.data.frame() %>%
       dplyr::mutate(type = rownames(.)) %>%
       dplyr::select(type, everything()) %>%
-      kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrrr") %>%
       kable_styling(bootstrap_options = "condensed")
   }
 
@@ -1056,7 +1058,7 @@ server <- function(input, output, session) {
       as.data.frame() %>%
       dplyr::mutate(type = rownames(.)) %>%
       dplyr::select(type, everything()) %>%
-      kable(escape = FALSE, row.names = FALSE, align = "lrrr") %>%
+      kable(escape = FALSE, row.names = FALSE, align = "lrrrr") %>%
       kable_styling(bootstrap_options = "condensed")
   }
 
