@@ -1,4 +1,4 @@
-# Version 0.6-3 -- February 11, 2023
+# Version 0.6-3 -- February 21, 2023
 
 * Bootstrap setting is now a numeric input, not a slider, to allow high numbers.
 * Composition analysis can be performed by using the cell level stats and by reusing an existing PI object.
