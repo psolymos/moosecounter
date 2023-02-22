@@ -3,6 +3,9 @@
 * Bootstrap setting is now a numeric input, not a slider, to allow high numbers.
 * Composition analysis can be performed by using the cell level stats and by reusing an existing PI object.
 * CPI calculations do not exclude rows with unknown ages.
+* CPI summaries return Mean and Median besides PI.
+* Unknown age classed individuals are distributed randomly according to comp model.
+* The Shiny app uses the PI object when available.
 
 # Version 0.6-2 -- December 17, 2022
 
