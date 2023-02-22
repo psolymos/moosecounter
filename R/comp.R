@@ -403,7 +403,7 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
 
               for (i in 1:NS1){
         	       pred.numbers1[i,] <- stats::rmultinom(1, newdata1$MOOSE_TOTA[i], pred.prob[i,])
-               }
+              }
 
               pred.numbers <- matrix(0,NS,K)
               pred.numbers[BUnsurvey.data$MOOSE_TOTA != 0,] <- pred.numbers1
@@ -423,6 +423,32 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
                     COW_2C = pred.numbers[,2],
                     LONE_COW = pred.numbers[,3],
                     TOT_CALVES = pred.numbers[,4])
+              }
+
+              ## handle UNKNOWN_AG for surveyed data
+              UNKwhere <- which(Survey.data$MOOSE_TOTA > 0 & Survey.data$UNKNOWN_AG > 0)
+              unk_df <- Survey.data[UNKwhere,,drop=FALSE]
+              UNK1 <- nrow(unk_df)
+              if (UNK1 > 0) {
+                pred.prob.unk <- VGAM::predict(Mult.model, newdata=unk_df, type="response")
+                K <- ncol(pred.prob.unk)
+                pred.unk1 <- matrix(-100,UNK1,K)
+                for (i in 1:UNK1){
+                  pred.unk1[i,] <- stats::rmultinom(1, unk_df$UNKNOWN_AG[i], pred.prob.unk[i,])
+                }
+                if (opts$response == "total") {
+                      Survey.data$BULL_LARGE[UNKwhere] <- Survey.data$BULL_LARGE[UNKwhere] + pred.unk1[,1]
+                      Survey.data$BULL_SMALL[UNKwhere] <- Survey.data$BULL_SMALL[UNKwhere] + pred.unk1[,2]
+                      Survey.data$COW_1C[UNKwhere] <- Survey.data$COW_1C[UNKwhere] + pred.unk1[,3]
+                      Survey.data$COW_2C[UNKwhere] <- Survey.data$COW_2C[UNKwhere] + pred.unk1[,4]
+                      Survey.data$LONE_COW[UNKwhere] <- Survey.data$LONE_COW[UNKwhere] + pred.unk1[,5]
+                      Survey.data$TOT_CALVES[UNKwhere] <- Survey.data$TOT_CALVES[UNKwhere] + pred.unk1[,6]
+                } else {
+                      Survey.data$COW_1C[UNKwhere] <- Survey.data$COW_1C[UNKwhere] + pred.unk1[,1]
+                      Survey.data$COW_2C[UNKwhere] <- Survey.data$COW_2C[UNKwhere] + pred.unk1[,2]
+                      Survey.data$LONE_COW[UNKwhere] <- Survey.data$LONE_COW[UNKwhere] + pred.unk1[,3]
+                      Survey.data$TOT_CALVES[UNKwhere] <- Survey.data$TOT_CALVES[UNKwhere] + pred.unk1[,4]
+                }
               }
 
               all_ratios_list$Total.pred[,b] <- c(Survey.data$MOOSE_TOTA,
@@ -492,9 +518,9 @@ mc_summarize_composition <- function(all_ratios_list) {
     opts <- getOption("moose_options")
     alpha <- opts$alpha
     dc <- lapply(all_ratios_list, function(z)
-        t(apply(z, 1, stats::quantile, c(alpha/2,0.5,(1-alpha/2)))))
+        t(apply(z, 1, function(zz) c(Mean=mean(zz), stats::quantile(zz, c(0.5, alpha/2,(1-alpha/2)))))))
     dcell <- do.call(cbind, dc)
-    colnames(dcell) <- paste(rep(names(dc), each=3), colnames(dc[[1]]), sep="_")
+    colnames(dcell) <- paste(rep(names(dc), each=ncol(dc[[1]])), colnames(dc[[1]]), sep="_")
     d <- sapply(all_ratios_list, colSums)
     d <- data.frame(d)
   ## Now we will compute the required ratios.
@@ -513,7 +539,7 @@ mc_summarize_composition <- function(all_ratios_list) {
     ## Number of all large bulls per 100 cows
     d$Bulls_per_Cow <- (d$Total_Bulls/d$Total_Cows)*100
     d$Calves_per_Cows <- (d$Total_Calves / d$Total_Cows)*100
-    dtot <- t(apply(d, 2, stats::quantile, c(alpha/2,0.5,(1-alpha/2))))
+    dtot <- t(apply(d, 2, function(z) c(Mean=mean(z), stats::quantile(z, c(0.5, alpha/2, (1-alpha/2))))))
     list(total=dtot, cells=dcell, raw=d)
 }
 
