@@ -398,3 +398,17 @@ summary(colSums(CPI2$boot_full$Total.pred))
 summary(sum(rowMeans(CPI2$boot_full$Total.pred)))
 
 table(PI$boot_full[keep,1], CPI2$boot_full$Total.pred[,1])
+
+z <- CPI2$boot_full
+round(CPI2$total,2)
+summary(colSums(z$Total.pred))
+summary(colSums(z$Total_Cows))
+summary(colSums(z$COW_1C + z$COW_2C + z$LONE_COW))
+
+dim(CPI2$results$surveyed)
+Survey.data <- CPI2$results$surveyed 
+pred.numbers <- CPI2$results$unsurveyed
+
+Total_Cows <- c(
+    Survey.data$COW_1C + Survey.data$COW_2C + Survey.data$LONE_COW,
+    pred.numbers$COW_1C + pred.numbers$COW_2C + pred.numbers$LONE_COW)
