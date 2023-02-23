@@ -308,10 +308,12 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
 
   ISSUES <- list()
 
+
   while (b <= B) {
 
   index <- sample(seq(1:nrow(Survey.data)), nrow(Survey.data), replace=TRUE)
   BSurvey.data <- Survey.data[index,]
+  Survey.data1 <- Survey.data
   if (max(BSurvey.data$MOOSE_TOTA) != 0) { # loop 1
 
     ## model selection
@@ -437,32 +439,35 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
                   pred.unk1[i,] <- stats::rmultinom(1, unk_df$UNKNOWN_AG[i], pred.prob.unk[i,])
                 }
                 if (opts$response == "total") {
-                      Survey.data$BULL_LARGE[UNKwhere] <- Survey.data$BULL_LARGE[UNKwhere] + pred.unk1[,1]
-                      Survey.data$BULL_SMALL[UNKwhere] <- Survey.data$BULL_SMALL[UNKwhere] + pred.unk1[,2]
-                      Survey.data$COW_1C[UNKwhere] <- Survey.data$COW_1C[UNKwhere] + pred.unk1[,3]
-                      Survey.data$COW_2C[UNKwhere] <- Survey.data$COW_2C[UNKwhere] + pred.unk1[,4]
-                      Survey.data$LONE_COW[UNKwhere] <- Survey.data$LONE_COW[UNKwhere] + pred.unk1[,5]
-                      Survey.data$TOT_CALVES[UNKwhere] <- Survey.data$TOT_CALVES[UNKwhere] + pred.unk1[,6]
+                      Survey.data1$BULL_LARGE[UNKwhere] <- Survey.data$BULL_LARGE[UNKwhere] + pred.unk1[,1]
+                      Survey.data1$BULL_SMALL[UNKwhere] <- Survey.data$BULL_SMALL[UNKwhere] + pred.unk1[,2]
+                      Survey.data1$COW_1C[UNKwhere] <- Survey.data$COW_1C[UNKwhere] + pred.unk1[,3]
+                      Survey.data1$COW_2C[UNKwhere] <- Survey.data$COW_2C[UNKwhere] + pred.unk1[,4]
+                      Survey.data1$LONE_COW[UNKwhere] <- Survey.data$LONE_COW[UNKwhere] + pred.unk1[,5]
+                      Survey.data1$TOT_CALVES[UNKwhere] <- Survey.data$TOT_CALVES[UNKwhere] + pred.unk1[,6]
                 } else {
-                      Survey.data$COW_1C[UNKwhere] <- Survey.data$COW_1C[UNKwhere] + pred.unk1[,1]
-                      Survey.data$COW_2C[UNKwhere] <- Survey.data$COW_2C[UNKwhere] + pred.unk1[,2]
-                      Survey.data$LONE_COW[UNKwhere] <- Survey.data$LONE_COW[UNKwhere] + pred.unk1[,3]
-                      Survey.data$TOT_CALVES[UNKwhere] <- Survey.data$TOT_CALVES[UNKwhere] + pred.unk1[,4]
+                      Survey.data1$COW_1C[UNKwhere] <- Survey.data$COW_1C[UNKwhere] + pred.unk1[,1]
+                      Survey.data1$COW_2C[UNKwhere] <- Survey.data$COW_2C[UNKwhere] + pred.unk1[,2]
+                      Survey.data1$LONE_COW[UNKwhere] <- Survey.data$LONE_COW[UNKwhere] + pred.unk1[,3]
+                      Survey.data1$TOT_CALVES[UNKwhere] <- Survey.data$TOT_CALVES[UNKwhere] + pred.unk1[,4]
                 }
               }
 
-              all_ratios_list$Total.pred[,b] <- c(Survey.data$MOOSE_TOTA,
+              all_ratios_list$Total.pred[,b] <- c(Survey.data1$MOOSE_TOTA,
                   rowSums(pred.numbers))
-              all_ratios_list$Total_LB[,b] <- c(Survey.data$BULL_LARGE,
+              all_ratios_list$Total_LB[,b] <- c(Survey.data1$BULL_LARGE,
                   pred.numbers$BULL_LARGE)
-              all_ratios_list$Total_Calves[,b] <- c(Survey.data$TOT_CALVES,
+              all_ratios_list$Total_Calves[,b] <- c(Survey.data1$TOT_CALVES,
                   pred.numbers$TOT_CALVES)
               all_ratios_list$Total_Cows[,b] <- c(
-                  Survey.data$COW_1C + Survey.data$COW_2C + Survey.data$LONE_COW,
+                  Survey.data1$COW_1C + Survey.data1$COW_2C + Survey.data1$LONE_COW,
                   pred.numbers$COW_1C + pred.numbers$COW_2C + pred.numbers$LONE_COW)
-              all_ratios_list$Total_SB[,b] <- c(Survey.data$BULL_SMALL,
+              all_ratios_list$Total_SB[,b] <- c(Survey.data1$BULL_SMALL,
                   pred.numbers$BULL_SMALL)
-              # need this to avoid negative Total_Mature_Cows numbers
+              # When we count cows in the field we can't differentiate between yearlings and adults. 
+              # But we CAN identify yearling bulls so what we do is assume that the sex ratio in the population at age 1 is 50/50. 
+              # So yearling cows = yearling bulls. Then Adult cows = Total cows - yearling cows (or yearling bulls).
+              # -- need this to avoid negative Total_Mature_Cows numbers
               all_ratios_list$Total_Yrling_Cows[,b] <- pmin(all_ratios_list$Total_SB[,b], all_ratios_list$Total_Cows[,b])
               # all_ratios_list$Total_Yrlings[,b] <- 2 * all_ratios_list$Total_SB[,b]
               all_ratios_list$Total_Yrlings[,b] <- all_ratios_list$Total_Yrling_Cows[,b] + all_ratios_list$Total_SB[,b]
@@ -470,11 +475,11 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
               #     all_ratios_list$Total_Cows[,b] - all_ratios_list$Total_SB[,b]
               all_ratios_list$Total_Mature_Cows[,b] <-
                   all_ratios_list$Total_Cows[,b] - all_ratios_list$Total_Yrling_Cows[,b]
-              all_ratios_list$Total_1C[,b] <- c(Survey.data$COW_1C,
+              all_ratios_list$Total_1C[,b] <- c(Survey.data1$COW_1C,
                   pred.numbers$COW_1C)
-              all_ratios_list$Total_2C[,b] <- c(Survey.data$COW_2C,
+              all_ratios_list$Total_2C[,b] <- c(Survey.data1$COW_2C,
                   pred.numbers$COW_2C)
-              all_ratios_list$Total_Bulls[,b] <- c(Survey.data$BULL_LARGE + Survey.data$BULL_SMALL,
+              all_ratios_list$Total_Bulls[,b] <- c(Survey.data1$BULL_LARGE + Survey.data1$BULL_SMALL,
                   pred.numbers$BULL_LARGE + pred.numbers$BULL_SMALL)
 
             pbapply::setpb(pb, b)
@@ -503,6 +508,7 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
         boot_full=all_ratios_list,
         issues=ISSUES,
         data=x,
+        results = list(surveyed=Survey.data, unsurveyed=pred.numbers),
         cells=sc$cells,
         total=sc$total)
     out
