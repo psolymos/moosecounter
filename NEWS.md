@@ -1,3 +1,7 @@
+# Version 0.7-0 -- March 24, 2023
+
+* Add robust regression option.
+
 # Version 0.6-3 -- February 21, 2023
 
 * Bootstrap setting is now a numeric input, not a slider, to allow high numbers.

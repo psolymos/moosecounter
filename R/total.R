@@ -17,6 +17,7 @@
 #' @param dist Count distribution (`P`, `NB`, `ZIP`, `ZINB`).
 #' @param weighted Logical, to use weighting to moderate
 #'   influential observations.
+#' @param robust Logical, use robust regression approach.
 #' @param ... Other arguments passed to `zeroinfl2()`.
 #' @param type The type of the response, can be `"total"` or
 #'   `"cows"` for `switch_response`.
@@ -116,7 +117,7 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 #' @rdname total
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
-    dist="ZINB", weighted=FALSE, ...) {
+    dist="ZINB", weighted=FALSE, robust=FALSE, ...) {
     opts <- getOption("moose_options")
     if (is.null(vars)) {
         CNT <- "1"
@@ -137,6 +138,7 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         dist=dist,
         link="logit",
         method=opts$method,
+        robust=robust,
         ...)
     if (weighted)
         out <- wzi(out) # wzi know about method

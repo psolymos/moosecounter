@@ -413,7 +413,6 @@ zeroinfl2 <- function (formula, data,
             if (dist %in% c("negbin", "NB")) log(start$theta) else NULL),
             method = method, hessian = hessian, control = control)
     }
-    str(fit)
 
     if (fit$convergence > 0)
         warning("optimization failed to converge")
@@ -572,7 +571,7 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
     ## linkinvx=exp
     nll_P_ML <- function(parms) {
         mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
-        loglik <- sum(weights * dpois(Y, mu, log = TRUE))
+        loglik <- sum(weights * stats::dpois(Y, mu, log = TRUE))
         if (!is.finite(loglik) || is.na(loglik))
             loglik <- -good.num.limit[2]
         loglik
@@ -581,7 +580,7 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
         mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
         phi <- as.vector(linkinvz(Z %*% parms[(kx + 1):(kx + kz)] + offsetz))
         loglik0 <- log(phi + exp(log(1 - phi) - mu))
-        loglik1 <- log(1 - phi) + dpois(Y, lambda = mu, log = TRUE)
+        loglik1 <- log(1 - phi) + stats::dpois(Y, lambda = mu, log = TRUE)
         loglik <- sum(weights[id0] * loglik0[id0]) + sum(weights[id1] *
             loglik1[id1])
         if (!is.finite(loglik) || is.na(loglik))
@@ -591,7 +590,7 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
     nll_ZIP_CL <- function(parms) {
         mu1 <- as.vector(linkinvx(X1 %*% parms[1:kx] + offsetx1))
         ## P(Y=y|Y>0)=f(y;theta)/(1-0)=f(y;theta)
-        num <- dpois(Y1, mu1, log = TRUE)
+        num <- stats::dpois(Y1, mu1, log = TRUE)
         den <- log(1 - exp(-mu1))
         loglik <- sum(weights1 * (num - den))
         if (!is.finite(loglik) || is.na(loglik))
@@ -620,7 +619,7 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
     nll_NB_ML <- function(parms) {
         mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
         theta <- exp(parms[kx + 1])
-        d <- suppressWarnings(dnbinom(Y,
+        d <- suppressWarnings(stats::dnbinom(Y,
             size = theta, mu = mu, log = TRUE))
         loglik <- sum(weights * d)
         if (!is.finite(loglik) || is.na(loglik))
@@ -631,9 +630,9 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
         mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
         theta <- exp(parms[kx + 1])
         phi <- as.vector(linkinvz(Z %*% parms[(kx+1+1):(kx+kz+1)] + offsetz))
-        loglik0 <- log(phi + exp(log(1 - phi) + suppressWarnings(dnbinom(0,
+        loglik0 <- log(phi + exp(log(1 - phi) + suppressWarnings(stats::dnbinom(0,
             size = theta, mu = mu, log = TRUE))))
-        loglik1 <- log(1 - phi) + suppressWarnings(dnbinom(Y,
+        loglik1 <- log(1 - phi) + suppressWarnings(stats::dnbinom(Y,
             size = theta, mu = mu, log = TRUE))
         loglik <- sum(weights[id0] * loglik0[id0]) + sum(weights[id1] *
             loglik1[id1])
@@ -645,9 +644,9 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
         mu1 <- as.vector(linkinvx(X1 %*% parms[1:kx] + offsetx1))
         theta <- exp(parms[kx + 1])
         ## P(Y=y|Y>0)=f(y;theta)/(1-0)=f(y;theta)
-        num <- suppressWarnings(dnbinom(Y1,
+        num <- suppressWarnings(stats::dnbinom(Y1,
             size = theta, mu = mu1, log = TRUE))
-        den <- log(1 - exp(suppressWarnings(dnbinom(0,
+        den <- log(1 - exp(suppressWarnings(stats::dnbinom(0,
             size = theta, mu = mu1, log = TRUE))))
         loglik <- sum(weights1 * (num - den))
         if (!is.finite(loglik) || is.na(loglik))
@@ -657,7 +656,7 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
     logd0_ZINB <- function(parms) {
         mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
         theta <- exp(parms[kx + 1])
-        suppressWarnings(dnbinom(0, size = theta, mu = mu, log = TRUE))
+        suppressWarnings(stats::dnbinom(0, size = theta, mu = mu, log = TRUE))
     }
     nll_ZINB_PL <- nll_ZIP_PL
 
@@ -675,8 +674,8 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
         offsetz <- rep(0, n)
     if (missing(weights))
         weights <- rep(1, n)
-    linkinvx <- poisson("log")$linkinv
-    linkinvz <- binomial(link)$linkinv
+    linkinvx <- stats::poisson("log")$linkinv
+    linkinvz <- stats::binomial(link)$linkinv
     id1 <- Y > 0
     id0 <- !id1
     W <- ifelse(id1, 1L, 0L)

@@ -25,6 +25,7 @@ zeroinfl2(
   y = TRUE,
   x = FALSE,
   solveH = TRUE,
+  robust = FALSE,
   ...
 )
 
@@ -59,6 +60,8 @@ model as returned by `zeroinfl2()` for the methods.}
 
 \item{solveH}{Logical, to use robust matrix inversion to get VCV.}
 
+\item{robust}{Logical, use CL/PL robust regression approach.}
+
 \item{digits}{Digits for print method.}
 }
 \description{
@@ -72,6 +75,10 @@ downstream analyses (i.e. PI calculations). Intended for internal use.
 `wzi` applies a leave-one-out approach to temper influential observations.
 The process finds weights that are related to leverage
 (how much each observation contributes to the model likelihood).
+
+The robust version (CL/PL = conditional likelihood / pseudo likelihood)
+applies the conditioning described in Solymos et al. (2021)
+<https://doi.org/10.1002/env.1149>.
 }
 \keyword{internal}
 \keyword{models}

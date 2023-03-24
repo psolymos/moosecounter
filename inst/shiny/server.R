@@ -270,7 +270,8 @@ server <- function(input, output, session) {
                                         vars = !!.$var_count,
                                         zi_vars = !!.$var_zero,
                                         dist = !!.$dist,
-                                        weighted = !!.$weighted))),
+                                        weighted = !!.$weighted,
+                                        robust = !!.$robust))),
           silent = TRUE)))))
   })
 
@@ -296,10 +297,11 @@ server <- function(input, output, session) {
 
 
   observe({
-    req(input$total_model_dist, input$total_model_id, input$total_model_weighted)
+    req(input$total_model_dist, input$total_model_id, input$total_model_weighted, input$total_model_robust)
 
     total_models_list$m[[input$total_model_id]] <- list(
       dist = input$total_model_dist,
+      robust = as.logical(input$total_model_robust),
       weighted = as.logical(input$total_model_weighted),
       var_count = input$total_model_var_count,
       var_zero = input$total_model_var_zero)
@@ -312,7 +314,8 @@ server <- function(input, output, session) {
                       `Count variables` = paste(.x$var_count, collapse = ", "),
                       `Zero variables` = paste(.x$var_zero, collapse = ", "),
                       Distribution = .x$dist,
-                      Weighted = .x$weighted)
+                      Weighted = .x$weighted,
+                      Robust = .x$robust)
       if("try-error" %in% class(.x$model)) {
         d <- dplyr::mutate(d, method = "MODEL PROBLEM", response = "MODEL PROBLEM")
       } else {

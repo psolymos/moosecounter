@@ -25,6 +25,7 @@ mc_fit_total(
   zi_vars = NULL,
   dist = "ZINB",
   weighted = FALSE,
+  robust = FALSE,
   ...
 )
 
@@ -66,6 +67,8 @@ predictors for the zero model.}
 
 \item{weighted}{Logical, to use weighting to moderate
 influential observations.}
+
+\item{robust}{Logical, use robust regression approach.}
 
 \item{...}{Other arguments passed to `zeroinfl2()`.}
 
