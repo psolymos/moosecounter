@@ -10,12 +10,17 @@
 #' The process finds weights that are related to leverage
 #' (how much each observation contributes to the model likelihood).
 #'
+#' The robust version (CL/PL = conditional likelihood / pseudo likelihood)
+#' applies the conditioning described in Solymos et al. (2021)
+#' <https://doi.org/10.1002/env.1149>.
+#'
 #' @param formula Model formula as in `pscl::zeroinfl()`.
 #' @param data Moose data frame.
 #' @param subset,na.action,weights,offset,model,y Arguments as
 #'   in `pscl::zeroinfl()`.
 #' @param control See `pscl::zeroinfl.control()`.
 #' @param solveH Logical, to use robust matrix inversion to get VCV.
+#' @param robust Logical, use CL/PL robust regression approach.
 #' @param dist Count distribution, one of `"ZIP"`, `"ZINB"`, `"P"`, `"NB"`.
 #' @param link Link function for the zero model.
 #' @param object A model as returned by `zeroinfl2()`.
@@ -75,10 +80,11 @@ zeroinfl2 <- function (formula, data,
     link = c("logit", "probit", "cloglog"),
     control = NULL,
     model = TRUE, y = TRUE, x = FALSE,
-    solveH=TRUE, ...) {
+    solveH=TRUE, robust=FALSE, ...) {
 
     if (is.null(control))
         control <- pscl::zeroinfl.control(...)
+    dist0 <- dist
     dist <- switch(dist,
         "P"="P",
         "NB"="NB",
@@ -373,17 +379,48 @@ zeroinfl2 <- function (formula, data,
         hessian <- FALSE
     ocontrol <- control
     control$method <- control$hessian <- control$EM <- control$start <- NULL
-    fit <- stats::optim(fn = loglikfun, gr = gradfun, par = c(start$count,
-        start$zero,
-        if (dist %in% c("negbin", "NB")) log(start$theta) else NULL),
-        method = method, hessian = hessian, control = control)
+
+    if (robust) {
+        fit <- .zeroinfl_clpl(Y=Y, X=X, Z=Z, 
+            offsetx=offsetx, offsetz=offsetz, weights=weights,
+            distr=dist0, link=linkstr,
+            method=method, 
+            inits=c(start$count,
+                if (dist %in% c("negbin", "NB")) log(start$theta) else NULL,
+                start$zero), 
+            control=control, hessian=hessian)
+        if (dist0 == "P") {
+            fit$par <- c(fit$par[1:kx], rep(-100,kz))
+            if (hessian) {
+                hess <- fit$hessian
+                fit$hessian <- matrix(NA, kx + kz, kx + kz)
+                fit$hessian[1:kx,1:kx] <- hess
+            }
+        }
+        if (dist0 == "NB") {
+            fit$par <- c(fit$par[1:kx], rep(-100,kz), fit$par[kx+1])
+            if (hessian) {
+                hess <- fit$hessian
+                fit$hessian <- matrix(NA, kx + kz + 1, kx + kz + 1)
+                iii <- c(1:kx, if (dist == "NB") kx+kz+1 else NULL)
+                fit$hessian[iii,iii] <- hess
+            }
+        }
+
+    } else {
+        fit <- stats::optim(fn = loglikfun, gr = gradfun, par = c(start$count,
+            start$zero,
+            if (dist %in% c("negbin", "NB")) log(start$theta) else NULL),
+            method = method, hessian = hessian, control = control)
+    }
+    str(fit)
+
     if (fit$convergence > 0)
         warning("optimization failed to converge")
     coefc <- fit$par[1:kx]
     names(coefc) <- names(start$count) <- colnames(X)
     coefz <- fit$par[(kx + 1):(kx + kz)]
     names(coefz) <- names(start$zero) <- colnames(Z)
-
     HM <- if (solveH)
         as.matrix(fit$hessian) else NULL
     if (NonZI) {
@@ -395,7 +432,6 @@ zeroinfl2 <- function (formula, data,
     } else {
         vc <- -solvenear(HM)
     }
-
     if (dist %in% c("negbin", "NB")) {
         np <- kx + kz + 1
         theta <- as.vector(exp(fit$par[np]))
@@ -405,6 +441,7 @@ zeroinfl2 <- function (formula, data,
         theta <- NULL
         SE.logtheta <- NULL
     }
+
     colnames(vc) <- rownames(vc) <- c(paste("count", colnames(X),
         sep = "_"), paste("zero", colnames(Z), sep = "_"))
     mu <- exp(X %*% coefc + offsetx)[, 1]
@@ -414,7 +451,9 @@ zeroinfl2 <- function (formula, data,
     res <- sqrt(weights) * (Y - Yhat)
     nobs <- sum(weights > 0)
     rval <- list(coefficients = list(count = coefc, zero = coefz),
-        residuals = res, fitted.values = Yhat, optim = fit, method = method,
+        residuals = res, fitted.values = Yhat, 
+        optim = fit, #robust = fit2,
+        method = method,
         control = ocontrol, start = start, weights = if (identical(as.vector(weights),
             rep.int(1L, n))) NULL else weights, offset = list(count = if (identical(offsetx,
             rep.int(0, n))) NULL else offsetx, zero = if (identical(offsetz,
@@ -510,3 +549,199 @@ function (x, digits = max(3, getOption("digits") - 3), ...)
 #' @importFrom stats nobs
 #' @export
 nobs.zeroinfl <- function(object, ...) object$n
+
+
+#' Internal function for CL/PL robust fitting
+#' 
+#' @param Y,X,Z Response vector and count, zero model matrices.
+#' @param offsetx,offsetz,weights Offsets and weights.
+#' @param distr,link Distribution and zero link function.
+#' @param method,inits,control,hessian,... Parameters passed to `optin()`.
+#' 
+#' @noRd
+.zeroinfl_clpl <- function(Y, X, Z, offsetx, offsetz, weights,
+distr=c("P", "NB", "ZIP", "ZINB"), link="logit",
+method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
+
+    distr <- match.arg(distr)
+    zi <- distr %in% c("ZIP", "ZINB")
+    distr <- if (distr %in% c("P", "ZIP"))
+        "poisson" else "negbin"
+
+    ## >>> ZI-POIS
+    ## linkinvx=exp
+    nll_P_ML <- function(parms) {
+        mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
+        loglik <- sum(weights * dpois(Y, mu, log = TRUE))
+        if (!is.finite(loglik) || is.na(loglik))
+            loglik <- -good.num.limit[2]
+        loglik
+    }
+    nll_ZIP_ML <- function(parms) {
+        mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
+        phi <- as.vector(linkinvz(Z %*% parms[(kx + 1):(kx + kz)] + offsetz))
+        loglik0 <- log(phi + exp(log(1 - phi) - mu))
+        loglik1 <- log(1 - phi) + dpois(Y, lambda = mu, log = TRUE)
+        loglik <- sum(weights[id0] * loglik0[id0]) + sum(weights[id1] *
+            loglik1[id1])
+        if (!is.finite(loglik) || is.na(loglik))
+            loglik <- -good.num.limit[2]
+        loglik
+    }
+    nll_ZIP_CL <- function(parms) {
+        mu1 <- as.vector(linkinvx(X1 %*% parms[1:kx] + offsetx1))
+        ## P(Y=y|Y>0)=f(y;theta)/(1-0)=f(y;theta)
+        num <- dpois(Y1, mu1, log = TRUE)
+        den <- log(1 - exp(-mu1))
+        loglik <- sum(weights1 * (num - den))
+        if (!is.finite(loglik) || is.na(loglik))
+            loglik <- -good.num.limit[2]
+        loglik
+    }
+    logd0_ZIP <- function(parms) {
+        -as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
+    }
+    ## this function applies to all distributions
+    ## because logd0 (log density for 0 obs) is plug-in
+    ## logd0 needs to incorporate offsets but not weights
+    nll_ZIP_PL <- function(parms, logd0) {
+        phi <- as.vector(linkinvz(Z %*% parms + offsetz))
+        loglik0 <- log(phi + exp(log(1 - phi) + logd0))
+        loglik1 <- log(1 - phi) + log(1 - exp(logd0))
+        loglik <- sum(weights * ifelse(Y==0, loglik0, loglik1))
+        if (!is.finite(loglik) || is.na(loglik))
+            loglik <- -good.num.limit[2]
+        loglik
+    }
+
+    ## >>> ZI-NEGBIN
+    ## linkinvx=exp
+    ## theta is precision
+    nll_NB_ML <- function(parms) {
+        mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
+        theta <- exp(parms[kx + 1])
+        d <- suppressWarnings(dnbinom(Y,
+            size = theta, mu = mu, log = TRUE))
+        loglik <- sum(weights * d)
+        if (!is.finite(loglik) || is.na(loglik))
+            loglik <- -good.num.limit[2]
+        loglik
+    }
+    nll_ZINB_ML <- function(parms) {
+        mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
+        theta <- exp(parms[kx + 1])
+        phi <- as.vector(linkinvz(Z %*% parms[(kx+1+1):(kx+kz+1)] + offsetz))
+        loglik0 <- log(phi + exp(log(1 - phi) + suppressWarnings(dnbinom(0,
+            size = theta, mu = mu, log = TRUE))))
+        loglik1 <- log(1 - phi) + suppressWarnings(dnbinom(Y,
+            size = theta, mu = mu, log = TRUE))
+        loglik <- sum(weights[id0] * loglik0[id0]) + sum(weights[id1] *
+            loglik1[id1])
+        if (!is.finite(loglik) || is.na(loglik))
+            loglik <- -good.num.limit[2]
+        loglik
+    }
+    nll_ZINB_CL <- function(parms) {
+        mu1 <- as.vector(linkinvx(X1 %*% parms[1:kx] + offsetx1))
+        theta <- exp(parms[kx + 1])
+        ## P(Y=y|Y>0)=f(y;theta)/(1-0)=f(y;theta)
+        num <- suppressWarnings(dnbinom(Y1,
+            size = theta, mu = mu1, log = TRUE))
+        den <- log(1 - exp(suppressWarnings(dnbinom(0,
+            size = theta, mu = mu1, log = TRUE))))
+        loglik <- sum(weights1 * (num - den))
+        if (!is.finite(loglik) || is.na(loglik))
+            loglik <- -good.num.limit[2]
+        loglik
+    }
+    logd0_ZINB <- function(parms) {
+        mu <- as.vector(linkinvx(X %*% parms[1:kx] + offsetx))
+        theta <- exp(parms[kx + 1])
+        suppressWarnings(dnbinom(0, size = theta, mu = mu, log = TRUE))
+    }
+    nll_ZINB_PL <- nll_ZIP_PL
+
+    good.num.limit <- c(.Machine$double.xmin, .Machine$double.xmax)^(1/3)
+
+    kx <- ncol(X)
+    kz <- ncol(Z)
+    np <- kx + kz
+    n <- length(Y)
+    if (distr == "negbin")
+        np <- np + 1
+    if (missing(offsetx))
+        offsetx <- rep(0, n)
+    if (missing(offsetz))
+        offsetz <- rep(0, n)
+    if (missing(weights))
+        weights <- rep(1, n)
+    linkinvx <- poisson("log")$linkinv
+    linkinvz <- binomial(link)$linkinv
+    id1 <- Y > 0
+    id0 <- !id1
+    W <- ifelse(id1, 1L, 0L)
+    Y1 <- Y[id1]
+    X1 <- X[id1,,drop=FALSE]
+    Z1 <- Z[id1,,drop=FALSE]
+    offsetx1 <- offsetx[id1]
+    offsetz1 <- offsetz[id1]
+    weights1 <- weights[id1]
+    if (is.null(inits))
+        inits <- rep(0, np)
+    control$fnscale <- -1 # maximize
+
+    ## CL conditional likelihood step
+    nll_CL <- switch(distr,
+        "poisson" = nll_ZIP_CL,
+        "negbin" = nll_ZINB_CL)
+    res_CL <- suppressWarnings(stats::optim(inits[1:(np-kz)], nll_CL,
+        method=method, 
+        hessian=FALSE, 
+        control=control, ...))
+
+    if (!zi) {
+        nll_ML <- switch(distr,
+            "poisson" = nll_P_ML,
+            "negbin" = nll_NB_ML)
+        res_CL$value <- nll_ML(res_CL$par)
+        if (hessian) {
+            res_CL$hessian <- stats::optimHess(res_CL$par, nll_ML)
+        }
+        return(res_CL)
+    }
+
+    ## PL pseudo likelihood step
+    ## logd0 (log density for 0 obs) is plug-in
+    ## logd0 needs to incorporate offsets but not weights
+    logd0_fun <- switch(distr,
+        "poisson" = logd0_ZIP,
+        "negbin" = logd0_ZINB)
+    logd0 <- logd0_fun(res_CL$par)
+
+    nll_PL <- switch(distr,
+        "poisson" = nll_ZIP_PL,
+        "negbin" = nll_ZINB_PL)
+    res_PL <- suppressWarnings(stats::optim(inits[(np-kz+1):np], nll_PL,
+        logd0=logd0,
+        method=method, 
+        hessian=FALSE, 
+        control=control, ...))
+
+    ## CL+PL
+    nll_ML <- switch(distr,
+        "poisson" = nll_ZIP_ML,
+        "negbin" = nll_ZINB_ML)
+    res_CLPL <- list(par = c(res_CL$par, res_PL$par))
+    res_CLPL$value <- nll_ML(res_CLPL$par)
+    res_CLPL$convergence <- max(res_CL$convergence, res_PL$convergence)
+    if (hessian) {
+        res_CLPL$hessian <- stats::optimHess(res_CLPL$par, nll_ML)
+    }
+    if (distr == "negbin") {
+        u <- c(1:kx, (kx+1+1):(kx+kz+1), kx+1)
+        res_CLPL$par <- res_CLPL$par[u]
+        res_CLPL$hessian <- res_CLPL$hessian[u,u]
+    }
+
+    res_CLPL
+}
