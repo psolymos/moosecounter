@@ -271,7 +271,8 @@ server <- function(input, output, session) {
                                         zi_vars = !!.$var_zero,
                                         dist = !!.$dist,
                                         weighted = !!.$weighted,
-                                        robust = !!.$robust))),
+                                        robust = !!.$robust,
+                                        intercept = !!.$intercept))),
           silent = TRUE)))))
   })
 
@@ -304,7 +305,8 @@ server <- function(input, output, session) {
       robust = as.logical(input$total_model_robust),
       weighted = as.logical(input$total_model_weighted),
       var_count = input$total_model_var_count,
-      var_zero = input$total_model_var_zero)
+      var_zero = input$total_model_var_zero,
+      intercept = tolower(input$total_model_int))
   }) %>%
     bindEvent(input$total_model_add)
 
