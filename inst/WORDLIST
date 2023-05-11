@@ -16,10 +16,15 @@ VGAM
 ZI
 ZINB
 adaptively
+al
 coefs
 compositional
 ctree
+doi
+env
+et
 ggplot
+https
 magrittr
 mc
 mincriterion
@@ -33,6 +38,7 @@ rowsum
 sightability
 solvenear
 srv
+subsetters
 tcltk
 unsurveyed
 valies

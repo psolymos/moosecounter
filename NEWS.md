@@ -1,3 +1,7 @@
+# Version 0.7-1 -- May 10, 2023
+
+* Add option to remove intercept(s) in regression to allow regression through the origin.
+
 # Version 0.7-0 -- March 24, 2023
 
 * Add robust regression option.
