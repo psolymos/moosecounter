@@ -26,6 +26,7 @@ mc_fit_total(
   dist = "ZINB",
   weighted = FALSE,
   robust = FALSE,
+  intercept = c("both", "count", "zero", "none"),
   ...
 )
 
@@ -69,6 +70,9 @@ predictors for the zero model.}
 influential observations.}
 
 \item{robust}{Logical, use robust regression approach.}
+
+\item{intercept}{Which intercepts to keep. Dropped intercepts lead to
+regression through the origin (at the linear predictor scale).}
 
 \item{...}{Other arguments passed to `zeroinfl2()`.}
 

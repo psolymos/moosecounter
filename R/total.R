@@ -17,6 +17,8 @@
 #' @param dist Count distribution (`P`, `NB`, `ZIP`, `ZINB`).
 #' @param weighted Logical, to use weighting to moderate
 #'   influential observations.
+#' @param intercept Which intercepts to keep. Dropped intercepts lead to
+#'   regression through the origin (at the linear predictor scale).
 #' @param robust Logical, use robust regression approach.
 #' @param ... Other arguments passed to `zeroinfl2()`.
 #' @param type The type of the response, can be `"total"` or
@@ -117,19 +119,29 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 #' @rdname total
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
-    dist="ZINB", weighted=FALSE, robust=FALSE, ...) {
+    dist="ZINB", weighted=FALSE, robust=FALSE, 
+    intercept = c("both", "count", "zero", "none"), ...) {
+    intercept <- match.arg(intercept)
     opts <- getOption("moose_options")
     if (is.null(vars)) {
+        if (intercept %in% c("zero", "none"))
+            warning("Cannot remove intercept for the count model.")
         CNT <- "1"
     } else {
         vars <- vars[!(vars %in% c(opts$Ntot, opts$composition))]
         CNT <- paste(vars, collapse=" + ")
+        if (intercept %in% c("zero", "none"))
+            CNT <- paste0(CNT, " - 1")
     }
     if (is.null(zi_vars)) {
+        if (intercept %in% c("count", "none"))
+            warning("Cannot remove intercept for the zero model.")
         ZI <- "1"
     } else {
         zi_vars <- zi_vars[!(zi_vars %in% c(opts$Ntot, opts$composition))]
         ZI <- paste(zi_vars, collapse=" + ")
+        if (intercept %in% c("count", "none"))
+            ZI <- paste0(ZI, " - 1")
     }
     Form <- stats::as.formula(paste(opts$Ntot, "~", CNT, "|", ZI))
     out <- zeroinfl2(
