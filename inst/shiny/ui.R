@@ -112,9 +112,10 @@ ui_total_univar <- fluidRow(
                           choices = c("P", "NB", "ZIP", "ZINB"),
                           selected = "NB")),
          box(width = 12,
-             column(width = 4, girafeOutput("uni_graph1", height = "100%")),
-             column(width = 4, girafeOutput("uni_graph2", height = "100%")),
-             column(width = 4, girafeOutput("uni_graph3", height = "100%"))
+             girafeOutput("uni_graph", height = "100%")
+             #column(width = 4, girafeOutput("uni_graph1", height = "100%")),
+             #column(width = 4, girafeOutput("uni_graph2", height = "100%")),
+             #column(width = 4, girafeOutput("uni_graph3", height = "100%"))
          )
   )
 )

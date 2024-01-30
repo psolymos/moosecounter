@@ -227,6 +227,8 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
       tot <- stats::aggregate(dat[, c("y", "zhat")], list(z = dat$z), mean)
       tot$z_int <- as.integer(tot$z)
 
+      # TODO: Technically ggiraph plots look the same as ggplot2 plots if not
+      #       'served' with girafe(), so we don't really need the `interactive` switch...
       if(interactive) {
         out <- dplyr::group_by(dat, .data$z)
         out <- dplyr::mutate(out,
@@ -246,10 +248,10 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
         p <- p +
           ggiraph::geom_boxplot_interactive(
             data = dat, fill = "grey", outlier.shape = NA, # omit outliers
-            ggplot2::aes(tooltip = .data$tt, data_id = .data$tt)) +
+            ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID)) +
           ggiraph::geom_point_interactive(                 # manually add outliers
             data = out, size = 3, alpha = 0.75,
-            ggplot2::aes(tooltip = .data$tt, data_id = .data$tt)) +
+            ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID)) +
           ggiraph::geom_point_interactive(
             data = tot, size = 3, col = 4,
             ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
@@ -282,7 +284,7 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
       if(interactive){
         p <- p + ggiraph::geom_point_interactive(
           data = dat, size = 3, alpha = 0.75,
-          ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
+          ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID))
       } else {
         p <- p + ggplot2::geom_point()
       }
@@ -292,13 +294,15 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
   if (type == "map") {
     p <- ggplot2::ggplot(data = x,
                          ggplot2::aes(x = .data$CENTRLON, y = .data$CENTRLAT,
-                                      fill = .data[[i]])) +
+                                      fill = .data[[i]], alpha = .data$srv)) +
       ggplot2::coord_map() +
       ggplot2::theme_minimal() +
       ggplot2::theme(legend.position = "top",
                      legend.title = ggplot2::element_text(size = 9),
                      legend.box.margin = ggplot2::margin(0, 0, -20, 0),
-                     plot.margin = ggplot2::unit(c(0,0,0,0), "pt"))
+                     plot.margin = ggplot2::unit(c(0,0,0,0), "pt")) +
+      ggplot2::scale_alpha_manual(values = c("TRUE" = 1, "FALSE" = 0.65), guide = "none") +
+      ggplot2::labs(caption = "Pale points are un-surveyed")
 
     if(interactive) {
       if(!CAT) x$label <- round(x[[i]], 2) else x$label <- x[[i]]
@@ -306,30 +310,36 @@ mc_plot_univariate <- function(i, x, dist="ZINB") {
                                         "<br>", .env$i, ": ", .data$label))
       p <- p + ggiraph::geom_tile_interactive(
         data = x,
-        ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
+        ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID))
     } else {
       p <- p + ggplot2::geom_tile()
     }
 
-    if (CAT) p <- p + ggplot2::scale_fill_discrete(type = ggplot2::scale_fill_viridis_d)
+    if (CAT) p <- p + ggplot2::scale_fill_viridis_d(end = 0.8)
     if (!CAT) p <- p + ggplot2::scale_fill_binned(type = "viridis")
 
-  }
-
-  if(interactive) {
-    p <- ggiraph::girafe(ggobj = p, width_svg = 5, height_svg = 4,
-                         options = list(ggiraph::opts_selection(type = "none"),
-                                        ggiraph::opts_toolbar(saveaspng = FALSE)))
-
-    if(type == "density" && !CAT) {  #Otherwise get funny outlines
-      p <- ggiraph::girafe_options(
-        x = p,
-        ggiraph::opts_hover(css = "stroke-width:3px;fill-opacity:0.8;"))
-    }
   }
   p
 }
 
+mc_ggiraph <- function(p, width, height, type) {
+
+  # Use `girafe_css` to specify different css for different types
+  # - https://www.ardata.fr/ggiraph-book/customize.html#sec-global-opt
+  # - https://www.ardata.fr/ggiraph-book/customize.html#detailled-control
+
+  ggiraph::girafe(
+    ggobj = p, width_svg = width, height_svg = height,
+    options = list(
+      ggiraph::opts_selection(type = "none"),
+      ggiraph::opts_toolbar(saveaspng = FALSE),
+      ggiraph::opts_hover(
+        css = ggiraph::girafe_css(
+          css = "fill:orange;",
+          line = "fill:none;stroke:black;",
+          point = "fill:orange;fill-opacity:1;r:3pt;stroke-width:3px;stroke-opacity:1;stroke:orange;"))))
+
+}
 
 
 
