@@ -674,7 +674,11 @@ server <- function(input, output, session) {
     req(input$total_pi_plot_col,
         input$total_pi_plot_col != "No variables")
 
-    mc_plot_predfit(input$total_pi_plot_col, total_pi()$pi, interactive = TRUE)
+    req(input$total_pi_subset_col)
+    ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
+    ss <- ss %in% input$total_pi_subset_group
+
+    mc_plot_predfit(input$total_pi_plot_col, total_pi()$pi, ss = ss, interactive = TRUE)
   })
 
   output$total_pi_density_selected <- reactive({

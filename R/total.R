@@ -706,11 +706,12 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
 
 #' @rdname total
 #' @export
-mc_plot_predfit <- function(i, PI, interactive = FALSE) {
+mc_plot_predfit <- function(i, PI, ss = NULL, interactive = FALSE) {
 
-  dat <- PI$data[,c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU")]
-  dat$Surveyed <- PI$data$srv
-  dat$z <- PI$data[[i]]
+  dat <- PI$data[, c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU", "srv", i)]
+  names(dat)[names(dat) == "srv"] <- "Surveyed"
+  names(dat)[names(dat) == i] <- "z"
+  if(!is.null(ss)) dat <- dat[ss, , drop = FALSE]
 
   p <- ggplot2::ggplot(dat, ggplot2::aes(x = .data$z, y = .data$Cell.mean,
                                          colour = .data$Surveyed)) +
