@@ -169,25 +169,16 @@ server <- function(input, output, session) {
                        survey_sub())
   })
 
-  output$uni_graph1 <- renderGirafe({
+  output$uni_graph <- renderGirafe({
     req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
 
-    mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
-                     base = FALSE, type = "density", interactive = TRUE)
-  })
-
-  output$uni_graph2 <- renderGirafe({
-    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
-
-    mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
-                     base = FALSE, type = "map", interactive = TRUE)
-  })
-
-  output$uni_graph3 <- renderGirafe({
-    req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
-
-    mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
-                     base = FALSE, type = "fit", interactive = TRUE)
+    p1 <- mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                             base = FALSE, type = "density", interactive = TRUE)
+    p2 <- mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                             base = FALSE, type = "map", interactive = TRUE)
+    p3 <- mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
+                             base = FALSE, type = "fit", interactive = TRUE)
+    mc_ggiraph(p1 + p2 + p3, width = 15, height = 4)
   })
 
 

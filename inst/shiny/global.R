@@ -16,6 +16,7 @@ library(ggplot2) # Requires package mapproj for coord_map()
 library(kableExtra)
 library(openxlsx)
 library(purrr)
+library(patchwork)
 
 options(DT.options = list(scrollX = TRUE))
 
