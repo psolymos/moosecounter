@@ -174,11 +174,7 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
                              x = .data$Value,
                              y = .data$n,
                              fill = .data$Surveyed,
-                             group = .data$Surveyed)) +
-        ggplot2::theme_minimal() +
-        ggplot2::scale_fill_viridis_d(end = 0.8) +
-        ggplot2::ylab("Density") +
-        ggplot2::xlab(i)
+                             group = .data$Surveyed))
 
       if(interactive) {
         dd <- dplyr::mutate(dd,
@@ -187,7 +183,7 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
 
         p <- p + ggiraph::geom_bar_interactive(
           data = dd,
-          ggplot2::aes(tooltip = .data$tt, data_id = .data$tt),
+          ggplot2::aes(tooltip = .data$tt, data_id = .data$Surveyed),
           stat = "identity", position = "dodge",
           colour = "black")
       } else {
@@ -199,35 +195,33 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
       d <- data.frame(Surveyed = srv, Variable = z)
 
       p <- ggplot2::ggplot(
-        data.frame(
-          Surveyed = srv,
-          Variable = z),
+        data = d,
         ggplot2::aes(
           x = .data$Variable,
           fill = .data$Surveyed,
           color = .data$Surveyed)) +
-        ggplot2::geom_rug(data = data.frame(
-          Surveyed = srv,
-          Variable = z)[!srv,], sides="b") +
-        ggplot2::geom_rug(data = data.frame(
-          Surveyed = srv,
-          Variable = z)[srv,], sides="t") +
-        ggplot2::theme_minimal() +
-        ggplot2::scale_fill_viridis_d(end = 0.8, aesthetics = c("fill", "colour")) +
-        ggplot2::ylab("Density") +
-        ggplot2::xlab(i)
+        ggplot2::geom_rug(data = d[!srv, ], sides = "b") +
+        ggplot2::geom_rug(data = d[srv, ], sides = "t")
 
       if(interactive) {
         d <- dplyr::mutate(d, tt = paste0("Surveyed: ", .data$Surveyed))
         p <- p + ggiraph::geom_density_interactive(
           data = d, alpha = 0.50,
-          ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
+          ggplot2::aes(tooltip = .data$tt, data_id = .data$Surveyed))
       } else {
-       p <- p + ggplot2::geom_density(alpha = 0.5)
+        p <- p + ggplot2::geom_density(alpha = 0.5)
       }
-
     }
+
+    p <- p +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(legend.position = "top") +
+      ggplot2::scale_fill_viridis_d(end = 0.8, aesthetics = c("fill", "colour")) +
+      ggplot2::ylab("Density") +
+      ggplot2::xlab(i)
+
   }
+
   if (type == "fit") {
     if (CAT) {
       p <- ggplot2::ggplot(
