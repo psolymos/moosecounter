@@ -359,7 +359,7 @@ server <- function(input, output, session) {
 
     map(total_models(), "model") %>%
       mc_models_total(survey_sub()) %>%
-      dplyr::mutate(across(everything(), round, 2))
+      dplyr::mutate(across(everything(), ~round(.x, 2)))
   })
 
   output$total_model_aic1 <- renderTable({
@@ -589,8 +589,8 @@ server <- function(input, output, session) {
       paste0("Cannot plot. No variability in ", input$total_pi_col)))
 
     g <- ggplot(data = d,
-                aes_string(x = "CENTRLON", y = "CENTRLAT",
-                           fill = input$total_pi_col, data_id = "cell")) +
+                aes(x = .data$CENTRLON, y = .data$CENTRLAT,
+                    fill = .data[[input$total_pi_col]], data_id = .data$cell)) +
       geom_tile_interactive(aes(tooltip = tooltip))+
       coord_map() +
       scale_fill_binned(type = "viridis", n.breaks = input$total_pi_bins)
@@ -851,7 +851,7 @@ server <- function(input, output, session) {
     map(comp_models(), "model") %>%
       mc_models_comp() %>%
       as.data.frame() %>%
-      dplyr::mutate(across(everything(), round, 2))
+      dplyr::mutate(across(everything(), ~round(.x, 2)))
   })
 
   output$comp_model_aic <- renderTable({
