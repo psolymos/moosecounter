@@ -421,17 +421,6 @@ server <- function(input, output, session) {
                  value = 1, min = 1, max = nrow(total_pi()$pi$data), step = 1)
   })
 
-  output$total_pi_bins_all_ui <- renderUI({
-    sliderInput("total_pi_bins_all", label = "Number of Bins",
-                min = 1, max = 100, value = 30)
-  })
-
-  output$total_pi_bins_cell_ui <- renderUI({
-    sliderInput("total_pi_bins_cell", label = "Number of Bins",
-                min = 1, max = 50, value = 10)
-  })
-
-
   total_pi_done <- reactiveVal(FALSE)
   total_pi <- reactive({
     req(length(total_models()) > 0, input$total_pi_average)
