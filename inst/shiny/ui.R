@@ -214,13 +214,13 @@ ui_total_pi <- fluidRow(
            tabPanel("Diagnostic Plots", plotOutput("total_pi_predpi")),
            tabPanel(
              "Total Moose PI",
-             div(sliderInput("total_pi_bins_all", label = "Number of Bins",
-                             min = 1, max = 100, value = 30), style = "margin:auto"),
+             sliderInput("total_pi_bins_all", label = "Number of Bins",
+                         min = 1, max = 100, value = 30),
              plotOutput("total_pi_pidistr_all")),
            tabPanel(
              "Cell Level PI",
-             div(sliderInput("total_pi_bins_cell", label = "Number of Bins",
-                             min = 1, max = 50, value = 10), style = "margin:auto"),
+             sliderInput("total_pi_bins_cell", label = "Number of Bins",
+                         min = 1, max = 50, value = 10),
              plotOutput("total_pi_pidistr_cell")),
            tabPanel("Bootstrap Results",
                     div(style = "overflow-x: scroll", DTOutput("total_pi_boot"))))
