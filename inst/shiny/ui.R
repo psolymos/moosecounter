@@ -228,8 +228,9 @@ ui_total_pi <- fluidRow(
 ui_total_pi_map <- fluidRow(
   column(width = 12,
          h2("Exploring Predictions"),
-         p(downloadButton(
-             "total_boot_download", "Download full results as Excel file")),
+         p(strong("Download Results to Excel:"),
+           downloadButton("total_boot_download", "Full Results"),
+           downloadButton("total_boot_download_subset", "Subset Results")),
          shinydashboard::box(width = 3,
              h4("Subsets"),
              uiOutput("total_pi_subset_col"),

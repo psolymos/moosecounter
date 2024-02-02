@@ -521,17 +521,19 @@ server <- function(input, output, session) {
                    multiple = TRUE)
   })
 
+  # NOTE: total_pi() contains `pi` AND `opts, in contrast, `total_pi_sub() is
+  #  just `pi`
   total_pi_subset <- reactive({
     req(input$total_pi_subset_col)
     ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
     ss <- ss %in% input$total_pi_subset_group
 
-    mc_get_pred(total_pi()$pi, ss = ss)$data
+    mc_get_pred(total_pi()$pi, ss = ss)
   })
 
 
   output$total_pi_data <- renderDT({
-    d <- total_pi_subset()
+    d <- total_pi_subset()$data
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred", "Cell.PIL", "Cell.PIU",
       "Cell.accuracy")] <- NA
     v <- c("SU_ID", "observed_values", "fitted_values",
@@ -555,10 +557,10 @@ server <- function(input, output, session) {
              "First create models in the \"Models\" tab") %then%
         need(!is.null(input$total_pi_models),
              "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(nrow(total_pi_subset()) > 0,
+        need(nrow(total_pi_subset()$data) > 0,
              "No predictions. Make sure at least one group subset is selected"))
 
-    d <- total_pi_subset()
+    d <- total_pi_subset()$data
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
                "Cell.PIL", "Cell.PIU", "Cell.accuracy")] <- NA
 
@@ -619,30 +621,38 @@ server <- function(input, output, session) {
     bindEvent(input$total_pi_reset)
 
   # PI/bootstrap download
-  get_xlslist <- reactive({
+  total_xlslist <- reactive({
     req(input$survey_file, total_pi())
-    o <- mc_options()
-    o <- append(o, c("random seed" = input$opts_seed))
-    list(
-      Info=data.frame(moosecounter=paste0(
-        c("R package version: ", "Date of analysis: ", "File: "),
-        c(ver, format(Sys.time(), "%Y-%m-%d"), input$survey_file$name))),
-      Settings=data.frame(
-        Option=names(o),
-        Value=sapply(o, paste, sep="", collapse=", ")),
-      Summary=pred_density_moose_PI(total_pi()$pi),
-      Data=mc_get_pred(total_pi()$pi)$data,
-      Boot=mc_get_pred(total_pi()$pi)$boot_full)
+    PI_xlslist(input$survey_file, pred = total_pi()$pi, seed = input$opts_seed)
+  })
+
+  total_xlslist_subset <- reactive({
+    req(input$survey_file, total_pi_subset(),
+        input$total_pi_subset_group, input$total_pi_subset_col)
+    PI_xlslist(input$survey_file, pred = total_pi_subset(), seed = input$opts_seed,
+               subset = paste0(input$total_pi_subset_col, ": ",
+                               paste0(input$total_pi_subset_group, collapse = ", ")))
   })
 
   output$total_boot_download <- downloadHandler(
-        filename = function() {
-            paste0("Moose_Total_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
-        },
-        content = function(file) {
-            write.xlsx(get_xlslist(), file=file, overwrite=TRUE)
-        },
-        contentType="application/octet-stream"
+    filename = function() {
+      paste0("Moose_Total_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
+    },
+    content = function(file) {
+      write.xlsx(total_xlslist(), file = file, overwrite = TRUE)
+    },
+    contentType="application/octet-stream"
+  )
+
+
+  output$total_boot_download_subset <- downloadHandler(
+    filename = function() {
+      paste0("Moose_Total_subset_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
+    },
+    content = function(file) {
+      write.xlsx(total_xlslist_subset(), file = file, overwrite = TRUE)
+    },
+    contentType="application/octet-stream"
   )
 
 
@@ -654,7 +664,7 @@ server <- function(input, output, session) {
              "First create models in the \"Models\" tab") %then%
         need(!is.null(input$total_pi_models),
              "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(nrow(total_pi_subset()) > 0,
+        need(nrow(total_pi_subset()$data) > 0,
              "No predictions. Make sure at least one group subset is selected"))
 
     m <- unique(total_pi()$pi$model_select_id)
@@ -689,14 +699,14 @@ server <- function(input, output, session) {
              "First create models in the \"Models\" tab") %then%
         need(!is.null(input$total_pi_models),
              "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(nrow(total_pi_subset()) > 0,
+        need(nrow(total_pi_subset()$data) > 0,
              "No predictions. Make sure at least one group subset is selected"))
 
     req(input$total_pi_subset_col)
     ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
     ss <- ss %in% input$total_pi_subset_group
 
-    d <- mc_get_pred(total_pi()$pi, ss = ss)$total
+    d <- total_pi_subset()$total
 
     d %>%
       as.data.frame() %>%

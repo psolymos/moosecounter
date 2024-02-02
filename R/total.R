@@ -476,8 +476,9 @@ mc_get_pred <- function(PI, ss=NULL) {
 
 #' @rdname total
 #' @export
-pred_density_moose_PI <- function(PI){
+pred_density_moose_PI <- function(PI, nms = NULL) {
     out <- round(PI$total, 2)
+    if(!is.null(nms)) row.names(out) <- nms
     cat("Total Moose PI summary:\n\n")
     print(out)
     if (length(PI$issues) > 0L) {
