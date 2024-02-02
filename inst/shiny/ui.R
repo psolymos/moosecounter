@@ -212,10 +212,14 @@ ui_total_pi <- fluidRow(
 
     tabBox(width = 12, id = "total_pi_panel",
            tabPanel("Diagnostic Plots", plotOutput("total_pi_predpi")),
-           tabPanel("Total Moose PI",
-                    plotOutput("total_pi_pidistr_all")),
-           tabPanel("Cell Level PI",
-                    plotOutput("total_pi_pidistr_cell")),
+           tabPanel(
+             "Total Moose PI",
+             uiOutput("total_pi_bins_all_ui", style = "margin:auto"),
+             plotOutput("total_pi_pidistr_all")),
+           tabPanel(
+             "Cell Level PI",
+             uiOutput("total_pi_bins_cell_ui", style = "margin:auto"),
+             plotOutput("total_pi_pidistr_cell")),
            tabPanel("Bootstrap Results",
                     div(style = "overflow-x: scroll", DTOutput("total_pi_boot"))))
   )

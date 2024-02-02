@@ -421,6 +421,17 @@ server <- function(input, output, session) {
                  value = 1, min = 1, max = nrow(total_pi()$pi$data), step = 1)
   })
 
+  output$total_pi_bins_all_ui <- renderUI({
+    sliderInput("total_pi_bins_all", label = "Number of Bins",
+                min = 1, max = 100, value = 30)
+  })
+
+  output$total_pi_bins_cell_ui <- renderUI({
+    sliderInput("total_pi_bins_cell", label = "Number of Bins",
+                min = 1, max = 50, value = 10)
+  })
+
+
   total_pi_done <- reactiveVal(FALSE)
   total_pi <- reactive({
     req(length(total_models()) > 0, input$total_pi_average)
@@ -484,16 +495,17 @@ server <- function(input, output, session) {
   # Plots
   output$total_pi_predpi <- renderPlot(mc_plot_predpi(total_pi()$pi), res = 125)
   output$total_pi_pidistr_all <- renderPlot({
-    mc_plot_pidistr(total_pi()$pi)
+    req(input$total_pi_bins_all)
+    mc_plot_pidistr(total_pi()$pi, breaks = input$total_pi_bins_all)
   }, res = 100)
   output$total_pi_pidistr_cell <- renderPlot({
-    req(input$total_pi_cell)
+    req(input$total_pi_cell, input$total_pi_bins_cell)
     validate(need(input$total_pi_cell <= nrow(total_pi()$pi$data) &
                     input$total_pi_cell > 0,
                   paste0("Out of cell range: There are only ",
                          nrow(total_pi()$pi$data),
                          " cells in the data")))
-    mc_plot_pidistr(total_pi()$pi, id = input$total_pi_cell)
+    mc_plot_pidistr(total_pi()$pi, id = input$total_pi_cell, breaks = input$total_pi_bins_cell)
   }, res = 100)
 
   # Bootstraps table
