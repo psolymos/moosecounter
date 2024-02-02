@@ -223,44 +223,40 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
   }
 
   if (type == "fit") {
-    if (CAT) {
-      p <- ggplot2::ggplot(
-        dat,
-        ggplot2::aes(
-          y = .data$y,
-          x = .data$z)) +
-        ggplot2::theme_minimal() +
-        ggplot2::ylab("Total Moose") +
-        ggplot2::xlab(i)
+
+    if(!CAT) dat$label <- round(dat$z, 2) else dat$label <- dat$z
+    dat <- dplyr::mutate(
+      dat,
+      tt = paste0("SU_ID: ", .data$SU_ID,
+                  "<br>", .env$i, ": ", .data$label,
+                  "<br>Total Moose: ", .data$y))
+
+    p <- ggplot2::ggplot(
+      dat,
+      ggplot2::aes(
+        y = .data$y,
+        x = .data$z)) +
+      ggplot2::theme_minimal() +
+      ggplot2::ylab("Total Moose") +
+      ggplot2::xlab(i)
+
+
+    if(CAT) {
 
       tot <- stats::aggregate(dat[, c("y", "zhat")], list(z = dat$z), mean)
       tot$z_int <- as.integer(tot$z)
+      tot <- dplyr::mutate(tot, tt = paste0(.data$z,
+                                            "<br>Mean: ", round(.data$zhat, 2)))
 
-      # TODO: Technically ggiraph plots look the same as ggplot2 plots if not
-      #       'served' with girafe(), so we don't really need the `interactive` switch...
       if(interactive) {
-        out <- dplyr::group_by(dat, .data$z)
-        out <- dplyr::mutate(out,
-                             IQR = stats::IQR(.data$y),
-                             q75 = stats::quantile(.data$y, 0.75),
-                             q25 = stats::quantile(.data$y, 0.25))
-        out <- dplyr::filter(out,
-                             .data$y > (.data$q75 + (1.5 * .data$IQR)) |
-                               .data$y < (.data$q25 - (1.5 * .data$IQR)))
-        out <- dplyr::mutate(out, tt = paste0("SU_ID: ", .data$SU_ID,
-                                              "<br>", .env$i, ": ", .data$z,
-                                              "<br>Total Moose: ", .data$y))
-        dat <- dplyr::mutate(dat, tt = .data$z)
-        tot <- dplyr::mutate(tot, tt = paste0(.data$z,
-                                              "<br>Mean: ", round(.data$zhat, 2)))
-
         p <- p +
           ggiraph::geom_boxplot_interactive(
             data = dat, fill = "grey", outlier.shape = NA, # omit outliers
-            ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID)) +
+            ggplot2::aes(tooltip = .data$z, data_id = .data$SU_ID)) +
           ggiraph::geom_point_interactive(                 # manually add outliers
-            data = out, size = 3, alpha = 0.75,
-            ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID)) +
+            data = dat, size = 3, alpha = 0.75,
+            ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID),
+            position = ggplot2::position_jitter(width = 0.05)) +
           ggiraph::geom_point_interactive(
             data = tot, size = 3, col = 4,
             ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
@@ -276,19 +272,8 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
           data = tot, col = 4)
 
     } else {
-      p <- ggplot2::ggplot(
-        dat,
-        ggplot2::aes(
-          y = .data$y,
-          x = .data$z)) +
-        ggplot2::geom_line(ggplot2::aes(x = .data$z, y = .data$zhat), col = 4) +
-        ggplot2::theme_minimal() +
-        ggplot2::ylab("Total Moose") +
-        ggplot2::xlab(i)
-
-      dat <- dplyr::mutate(dat, tt = paste0("SU_ID: ", .data$SU_ID,
-                                            "<br>", .env$i, ": ", round(.data$z, 2),
-                                            "<br>Total Moose: ", .data$y))
+      p <- p +
+        ggplot2::geom_line(ggplot2::aes(x = .data$z, y = .data$zhat), col = 4)
 
       if(interactive){
         p <- p + ggiraph::geom_point_interactive(
