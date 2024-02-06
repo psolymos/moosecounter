@@ -101,16 +101,6 @@ model_errors <- function(m) {
     map_lgl(~ "try-error" %in% class(.))
 }
 
-validate_models <- function(m) {
-  validate(need(!any(model_errors(m)),
-                paste0("Some models have problems (see 'Models' tab), ",
-                       "adjust settings or remove models")))
-}
-
-`%then%` <- function(a, b) {
-  if (is.null(a)) b else a
-}
-
 missing_levels <- function(x, cols) {
   map_lgl(cols, ~any(table(x[[.]], x$srv) == 0L))
 }

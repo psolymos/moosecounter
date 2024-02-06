@@ -161,8 +161,7 @@ server <- function(input, output, session) {
   # Total Moose --------------------------------------------------------------
   ## Univariate Exploration --------------------------
   output$uni_var_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
+    validate_flow(input$survey_file)
 
     select_explanatory("uni_var",
                        "Univariate variable to explore",
@@ -184,8 +183,7 @@ server <- function(input, output, session) {
 
   ## Multivariate Exploration ---------------------
   output$multi_var_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
+    validate_flow(input$survey_file)
     select_explanatory("multi_var",
                        "Multivariate variables to explore",
                        survey_sub(),
@@ -203,8 +201,6 @@ server <- function(input, output, session) {
   ## Add models -----------------------------------
 
   output$total_model_id_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
     if(length(total_models_list$m) == 0 || is.null(total_models())) {
       val <- "A"
     } else {
@@ -302,6 +298,7 @@ server <- function(input, output, session) {
     bindEvent(input$total_model_add)
 
   output$total_model_table <- function() {
+    validate_flow(input$survey_file)
     imap_dfr(total_models(), ~{
       d <- data.frame(Model = .y,
                       `Count variables` = paste(.x$var_count, collapse = ", "),
@@ -355,7 +352,7 @@ server <- function(input, output, session) {
   total_model_aic <- reactive({
     req(length(total_models()) > 0)
     req(opts())
-    validate_models(total_models())
+    validate_model_errors(total_models())
 
     map(total_models(), "model") %>%
       mc_models_total(survey_sub()) %>%
@@ -374,9 +371,8 @@ server <- function(input, output, session) {
   ## Model residuals / diagnostics ------------------------------
 
   output$total_resid_models_ui <- renderUI({
-    validate(need(length(total_models_list$m) > 0,
-                  "First create models in the \"Models\" tab"))
-    validate_models(total_models())
+    validate_flow(input$survey_file, models = total_models_list$m)
+    validate_model_errors(total_models())
 
     radioButtons("total_resid_model", label = "Model", inline = TRUE,
                  choices = sort(names(total_models())))
@@ -384,7 +380,7 @@ server <- function(input, output, session) {
 
   output$total_resid_plot <- renderPlot({
     req(length(total_models()) > 0, input$total_resid_model)
-    validate_models(total_models())
+    validate_model_errors(total_models())
 
     map(total_models(), "model") %>%
       mc_plot_residuals(input$total_resid_model, ., survey_sub())
@@ -392,7 +388,7 @@ server <- function(input, output, session) {
 
   output$total_resid_summary <- renderPrint({
     req(length(total_models()) > 0, input$total_resid_model)
-    validate_models(total_models())
+    validate_model_errors(total_models())
 
     cat("Model:", input$total_resid_model, "\n")
     cat("Model type:", total_models()[[input$total_resid_model]][["dist"]],
@@ -407,10 +403,6 @@ server <- function(input, output, session) {
 
   # UI elements
   output$total_pi_models_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab") %then%
-               need(length(total_models_list$m) > 0,
-                    "First create models in the \"Models\" tab"))
     selectInput("total_pi_models",
                 label = "Model(s) to use",
                 choices = names(total_models()), multiple = TRUE)
@@ -425,7 +417,7 @@ server <- function(input, output, session) {
   total_pi <- reactive({
     req(length(total_models()) > 0, input$total_pi_average)
     validate(need(input$total_pi_models, "Please choose your model(s)"))
-    validate_models(total_models())
+    validate_model_errors(total_models())
 
     updateButton(session, "total_pi_calc", style = "primary",
                  label = "Calculate PI")
@@ -441,6 +433,7 @@ server <- function(input, output, session) {
 
   # Tables
   output$total_pi_density <- function() {
+    validate_flow(input$survey_file, models = total_models_list$m)
     total_pi()$pi$total %>%
       as.data.frame() %>%
       dplyr::mutate(" " = c("Total Moose",
@@ -525,7 +518,7 @@ server <- function(input, output, session) {
   # NOTE: total_pi() contains `pi` AND `opts, in contrast, `total_pi_sub() is
   #  just `pi`
   total_pi_subset <- reactive({
-    req(input$total_pi_subset_col)
+    req(input$total_pi_subset_col, input$total_pi_subset_group)
     ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
     ss <- ss %in% input$total_pi_subset_group
 
@@ -551,15 +544,8 @@ server <- function(input, output, session) {
 
   # Render map
   output$total_pi_map <- renderGirafe({
-    validate(
-      need(input$survey_file,
-           "First select a data set in the \"Data\" tab") %then%
-        need(length(total_models_list$m) > 0,
-             "First create models in the \"Models\" tab") %then%
-        need(!is.null(input$total_pi_models),
-             "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(nrow(total_pi_subset()$data) > 0,
-             "No predictions. Make sure at least one group subset is selected"))
+    validate_flow(input$survey_file, models = total_models_list$m,
+                  pi = total_pi(), pi_subset = total_pi_subset())
 
     d <- total_pi_subset()$data
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
@@ -658,15 +644,8 @@ server <- function(input, output, session) {
 
 
   output$total_pi_plot_col <- renderUI({
-    validate(
-      need(input$survey_file,
-           "First select a data set in the \"Data\" tab") %then%
-        need(length(total_models_list$m) > 0,
-             "First create models in the \"Models\" tab") %then%
-        need(!is.null(input$total_pi_models),
-             "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(nrow(total_pi_subset()$data) > 0,
-             "No predictions. Make sure at least one group subset is selected"))
+    validate_flow(input$survey_file, models = total_models_list$m,
+                  pi = input$total_pi_models, pi_subset = total_pi_subset()$data)
 
     m <- unique(total_pi()$pi$model_select_id)
 
@@ -693,15 +672,8 @@ server <- function(input, output, session) {
   })
 
   output$total_pi_density_selected <- reactive({
-    validate(
-      need(input$survey_file,
-           "First select a data set in the \"Data\" tab") %then%
-        need(length(total_models_list$m) > 0,
-             "First create models in the \"Models\" tab") %then%
-        need(!is.null(input$total_pi_models),
-             "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(nrow(total_pi_subset()$data) > 0,
-             "No predictions. Make sure at least one group subset is selected"))
+    validate_flow(input$survey_file, models = total_models_list$m,
+                  pi = input$total_pi_models, pi_subset = total_pi_subset()$data)
 
     req(input$total_pi_subset_col)
     ss <- total_pi()$pi$data[[input$total_pi_subset_col]]
@@ -725,8 +697,7 @@ server <- function(input, output, session) {
 
   ## Exploration ---------------------------
   output$comp_explore_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
+    validate_flow(input$survey_file)
 
     select_explanatory("comp_explore_var",
                        "Variable to explore",
@@ -750,9 +721,6 @@ server <- function(input, output, session) {
   comp_models_list <- reactiveValues(m = list())
 
   output$comp_model_id_ui <- renderUI({
-    validate(need(input$survey_file,
-                  "First select a data set in the \"Data\" tab"))
-
     if(length(comp_models_list$m) == 0 || is.null(comp_models())) {
       val <- "A"
     } else {
@@ -818,6 +786,7 @@ server <- function(input, output, session) {
     bindEvent(input$comp_model_add)
 
   output$comp_model_table <- function() {
+    validate_flow(input$survey_file)
     imap_dfr(comp_models(),
              ~data.frame(Model = .y,
                          Variables = paste(.x$var, collapse = ", "))) %>%
@@ -857,7 +826,7 @@ server <- function(input, output, session) {
   comp_model_aic <- reactive({
     req(length(comp_models()) > 0)
     req(opts())
-    validate_models(comp_models())
+    validate_model_errors(comp_models())
 
     map(comp_models(), "model") %>%
       mc_models_comp() %>%
@@ -874,9 +843,8 @@ server <- function(input, output, session) {
   ## Comp model residuals / diagnostics ------------------------------
 
   output$comp_resid_models_ui <- renderUI({
-    validate(need(length(comp_models_list$m) > 0,
-                  "First create models in the \"Composition Model Fit\" tab"))
-    validate_models(comp_models())
+    validate_flow(input$survey_file, models_comp = comp_models_list$m)
+    validate_model_errors(comp_models())
 
     radioButtons("comp_resid_model", label = "Composition Model", inline = TRUE,
                  choices = sort(names(comp_models())))
@@ -889,7 +857,7 @@ server <- function(input, output, session) {
 
   output$comp_resid_summary <- renderPrint({
     req(length(comp_models()) > 0, input$comp_resid_model)
-    validate_models(comp_models())
+    validate_model_errors(comp_models())
 
     cat("Composition Model:", input$comp_resid_model, "\n")
     VGAM::summaryvglm(comp_models()[[input$comp_resid_model]][["model"]])
@@ -900,14 +868,6 @@ server <- function(input, output, session) {
 
   # UI elements
   output$comp_pi_models_ui <- renderUI({
-    validate(
-      need(input$survey_file,
-           "First select a data set in the \"Data\" tab") %then%
-        need(length(total_models_list$m) > 0,
-             "First create Total Models in the Total > Models tab") %then%
-        need(length(comp_models_list$m) > 0,
-             "First create Composition Models in the Composition > Models tab"))
-
     tagList(
       selectInput("comp_pi_models1",
                   label = "Total model(s) to use",
@@ -933,8 +893,8 @@ server <- function(input, output, session) {
       !is.null(input$comp_pi_models1) & !is.null(input$comp_pi_models2),
       "Please choose your model(s)"))
 
-    validate_models(total_models())
-    validate_models(comp_models())
+    validate_model_errors(total_models())
+    validate_model_errors(comp_models())
 
     updateButton(session, "comp_pi_calc", style = "primary",
                  label = "Calculate PI")
@@ -960,6 +920,8 @@ server <- function(input, output, session) {
 
   # Tables
   output$comp_pi_density <- function() {
+    validate_flow(input$survey_file,
+                  models = total_models_list$m, models_comp = comp_models_list$m)
     req(comp_pi())
     pred_density_moose_CPI(comp_pi()$pi) %>%
       as.data.frame() %>%
@@ -1033,7 +995,7 @@ server <- function(input, output, session) {
   })
 
   comp_pi_subset <- reactive({
-    req(input$comp_pi_subset_col)
+    req(input$comp_pi_subset_col, input$comp_pi_subset_group)
     ss <- comp_pi()$pi$data[[input$comp_pi_subset_col]]
     ss <- ss %in% input$comp_pi_subset_group
 
@@ -1047,15 +1009,9 @@ server <- function(input, output, session) {
   })
 
   output$comp_pi_summary <- renderDT({
-    validate(
-      need(input$survey_file,
-           "First select a data set in the \"Data\" tab") %then%
-        need(length(comp_models_list$m) > 0,
-             "First create models in the \"Models\" tab") %then%
-        need(input$comp_pi_calc > 0,
-             "First create the predictions in the \"Prediction Intervals\" tab") %then%
-        need(length(comp_pi_subset()) > 0,
-             "No predictions. Make sure at least one group subset is selected"))
+    validate_flow(input$survey_file, models = total_models_list$m,
+                  models_comp = comp_models_list$m, pi = comp_pi(),
+                  pi_subset = comp_pi_subset())
 
     cpi <- data.frame(SU_ID = comp_pi_subset()$data$SU_ID,
                       comp_pi_subset()$cells)
