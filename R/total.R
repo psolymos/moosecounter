@@ -119,7 +119,7 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 #' @rdname total
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
-    dist="ZINB", weighted=FALSE, robust=FALSE, 
+    dist="ZINB", weighted=FALSE, robust=FALSE,
     intercept = c("both", "count", "zero", "none"), ...) {
     intercept <- match.arg(intercept)
     opts <- getOption("moose_options")
@@ -476,9 +476,8 @@ mc_get_pred <- function(PI, ss=NULL) {
 
 #' @rdname total
 #' @export
-pred_density_moose_PI <- function(PI, nms = NULL) {
+pred_density_moose_PI <- function(PI) {
     out <- round(PI$total, 2)
-    if(!is.null(nms)) row.names(out) <- nms
     cat("Total Moose PI summary:\n\n")
     print(out)
     if (length(PI$issues) > 0L) {

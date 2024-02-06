@@ -94,7 +94,7 @@ find_mode <- function(x) {
 NULL
 
 #' @noRd
-PI_xlslist <- function(file, pred, seed, subset = "Full") {
+PI_xlslist <- function(file, pred, summary, seed, subset = "Full") {
   o <- mc_options()
   o <- append(o, c("random seed" = seed))
 
@@ -107,9 +107,9 @@ PI_xlslist <- function(file, pred, seed, subset = "Full") {
     Value = sapply(o, paste, sep = "", collapse = ", ")) %>%
     rbind(cbind(Option = "Subset", Value = subset))
 
-  summary <- pred_density_moose_PI(
-    pred,
-    nms = c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2"))
+  # Ensure measurements included in output
+  summary <- as.data.frame(summary)
+  summary <- cbind(measurement = rownames(summary), summary)
 
   list(
     Info = info,

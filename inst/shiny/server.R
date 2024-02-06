@@ -610,17 +610,28 @@ server <- function(input, output, session) {
   # PI/bootstrap download
   total_xlslist <- reactive({
     req(input$survey_file, total_pi())
-    PI_xlslist(input$survey_file, pred = total_pi()$pi, seed = input$opts_seed)
+    PI_xlslist(input$survey_file,
+               pred = total_pi()$pi,
+               summary = pred_density_moose_PI(total_pi()$pi),
+               seed = input$opts_seed)
   })
 
   total_xlslist_subset <- reactive({
     req(input$survey_file, total_pi_subset(),
         input$total_pi_subset_group, input$total_pi_subset_col)
-    PI_xlslist(input$survey_file, pred = total_pi_subset(), seed = input$opts_seed,
+
+    s <- pred_density_moose_PI(total_pi_subset())
+    rownames(s) <- c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2")
+
+    PI_xlslist(input$survey_file,
+               pred = total_pi_subset(),
+               summary = s,
+               seed = input$opts_seed,
                subset = paste0(input$total_pi_subset_col, ": ",
                                paste0(input$total_pi_subset_group, collapse = ", ")))
   })
 
+  # Downloader - Full Data
   output$total_boot_download <- downloadHandler(
     filename = function() {
       paste0("Moose_Total_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
@@ -628,10 +639,10 @@ server <- function(input, output, session) {
     content = function(file) {
       write.xlsx(total_xlslist(), file = file, overwrite = TRUE)
     },
-    contentType="application/octet-stream"
+    contentType = "application/octet-stream"
   )
 
-
+  # Downloader - Subset Data
   output$total_boot_download_subset <- downloadHandler(
     filename = function() {
       paste0("Moose_Total_subset_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
@@ -639,8 +650,25 @@ server <- function(input, output, session) {
     content = function(file) {
       write.xlsx(total_xlslist_subset(), file = file, overwrite = TRUE)
     },
-    contentType="application/octet-stream"
+    contentType = "application/octet-stream"
   )
+
+  # Downloader - Enable once have PIs
+  observe({
+    req(total_pi())
+    shinyjs::enable("total_boot_download")
+  })
+
+  # Downloader - If Subset same as full, disable subset button
+  observe({
+    req(survey_sub(), input$total_pi_subset_col, input$total_pi_subset_group, total_pi())
+
+    choices <- unique(survey_sub()[[input$total_pi_subset_col]])
+    selected <- input$total_pi_subset_group
+
+    shinyjs::toggleState(id = "total_boot_download_subset",
+                    condition = !all(choices %in% selected))
+  })
 
 
   output$total_pi_plot_col <- renderUI({
@@ -1029,35 +1057,63 @@ server <- function(input, output, session) {
       kable_styling(bootstrap_options = "condensed")
   }
 
-  # Download summary
   # PI/bootstrap download
-  comp_summary_xlsx <- reactive({
-    req(input$survey_file, comp_pi())
-    o <- mc_options()
-    o <- append(o, c("random seed" = input$opts_seed))
-
-    list(
-      Info = data.frame(moosecounter = paste0(
-        c("R package version: ", "Date of analysis: ", "File: "),
-        c(ver, format(Sys.time(), "%Y-%m-%d"), input$survey_file$name))),
-      Settings = data.frame(
-        Option = names(o),
-        Value = sapply(o, paste, sep="", collapse=", ")),
-      Summary = pred_density_moose_CPI(comp_pi()$pi),
-      Data = comp_pi()$pi$data,
-      Boot = comp_pi()$pi$boot_full)
+  comp_xlslist <- reactive({
+    req(comp_pi())
+    PI_xlslist(input$survey_file,
+               pred = comp_pi()$pi,
+               summary = pred_density_moose_CPI(comp_pi()$pi),
+               seed = input$opts_seed)
   })
 
+  comp_xlslist_subset <- reactive({
+    req(comp_pi_subset())
+    PI_xlslist(input$survey_file,
+               pred = comp_pi_subset(),
+               summary = pred_density_moose_CPI(comp_pi_subset()),
+               seed = input$opts_seed,
+               subset = paste0(input$comp_pi_subset_col, ": ",
+                               paste0(input$comp_pi_subset_group, collapse = ", ")))
+  })
+
+  # Downloader - Full Data
   output$comp_boot_download <- downloadHandler(
     filename = function() {
       paste0("Moose_Composition_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
     },
     content = function(file) {
-      write.xlsx(comp_summary_xlsx(), file = file, overwrite = TRUE)
+      write.xlsx(comp_xlslist(), file = file, overwrite = TRUE)
     },
     contentType = "application/octet-stream"
   )
 
+  # Downloader - Subset Data
+  output$comp_boot_download_subset <- downloadHandler(
+    filename = function() {
+      paste0("Moose_Composition_subset_", format(Sys.time(), "%Y-%m-%d"), ".xlsx")
+    },
+    content = function(file) {
+      write.xlsx(comp_xlslist_subset(), file = file, overwrite = TRUE)
+    },
+    contentType = "application/octet-stream"
+  )
+
+  # Downloader - Enable once have PIs
+  observe({
+    req(comp_pi())
+    shinyjs::enable("comp_boot_download")
+  })
+
+  # Downloader - If Subset same as full, disable subset button
+  observe({
+    req(survey_sub(), input$comp_pi_subset_col, input$comp_pi_subset_group, comp_pi())
+
+    choices <- unique(survey_sub()[[input$comp_pi_subset_col]])
+    selected <- input$comp_pi_subset_group
+
+    shinyjs::toggleState(id = "comp_boot_download_subset",
+                         condition = !all(choices %in% selected))
+  })
 }
 
 
