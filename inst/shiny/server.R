@@ -69,7 +69,7 @@ server <- function(input, output, session) {
       names()
 
     # Check for missing levels in filtered data
-    isolate({vars <- vars[missing_levels(survey_sub(), vars)]})
+    isolate({vars <- vars[moosecounter:::missing_levels(survey_sub(), vars)]})
 
     selectInput("survey_omit",
                 label = "Omit variables with too few surveyed levels",
@@ -317,7 +317,7 @@ server <- function(input, output, session) {
     }) %>%
       kable() %>%
       kable_styling() %>%
-      row_spec(which(model_errors(total_models())), background = "#f2dede")
+      row_spec(which(moosecounter:::model_errors(total_models())), background = "#f2dede")
   }
 
   # Dynamically create delete buttons for each model
@@ -352,7 +352,7 @@ server <- function(input, output, session) {
   total_model_aic <- reactive({
     req(length(total_models()) > 0)
     req(opts())
-    validate_model_errors(total_models())
+    validate_moosecounter:::model_errors(total_models())
 
     map(total_models(), "model") %>%
       mc_models_total(survey_sub()) %>%
@@ -372,7 +372,7 @@ server <- function(input, output, session) {
 
   output$total_resid_models_ui <- renderUI({
     validate_flow(input$survey_file, models = total_models_list$m)
-    validate_model_errors(total_models())
+    validate_moosecounter:::model_errors(total_models())
 
     radioButtons("total_resid_model", label = "Model", inline = TRUE,
                  choices = sort(names(total_models())))
@@ -380,7 +380,7 @@ server <- function(input, output, session) {
 
   output$total_resid_plot <- renderPlot({
     req(length(total_models()) > 0, input$total_resid_model)
-    validate_model_errors(total_models())
+    validate_moosecounter:::model_errors(total_models())
 
     map(total_models(), "model") %>%
       mc_plot_residuals(input$total_resid_model, ., survey_sub())
@@ -388,7 +388,7 @@ server <- function(input, output, session) {
 
   output$total_resid_summary <- renderPrint({
     req(length(total_models()) > 0, input$total_resid_model)
-    validate_model_errors(total_models())
+    validate_moosecounter:::model_errors(total_models())
 
     cat("Model:", input$total_resid_model, "\n")
     cat("Model type:", total_models()[[input$total_resid_model]][["dist"]],
@@ -417,7 +417,7 @@ server <- function(input, output, session) {
   total_pi <- reactive({
     req(length(total_models()) > 0, input$total_pi_average)
     validate(need(input$total_pi_models, "Please choose your model(s)"))
-    validate_model_errors(total_models())
+    validate_moosecounter:::model_errors(total_models())
 
     updateButton(session, "total_pi_calc", style = "primary",
                  label = "Calculate PI")
@@ -820,7 +820,7 @@ server <- function(input, output, session) {
                          Variables = paste(.x$var, collapse = ", "))) %>%
       kable() %>%
       kable_styling() %>%
-      row_spec(which(model_errors(comp_models())), background = "#f2dede")
+      row_spec(which(moosecounter:::model_errors(comp_models())), background = "#f2dede")
   }
 
   # Dynamically create delete buttons for each model
@@ -854,7 +854,7 @@ server <- function(input, output, session) {
   comp_model_aic <- reactive({
     req(length(comp_models()) > 0)
     req(opts())
-    validate_model_errors(comp_models())
+    validate_moosecounter:::model_errors(comp_models())
 
     map(comp_models(), "model") %>%
       mc_models_comp() %>%
@@ -872,7 +872,7 @@ server <- function(input, output, session) {
 
   output$comp_resid_models_ui <- renderUI({
     validate_flow(input$survey_file, models_comp = comp_models_list$m)
-    validate_model_errors(comp_models())
+    validate_moosecounter:::model_errors(comp_models())
 
     radioButtons("comp_resid_model", label = "Composition Model", inline = TRUE,
                  choices = sort(names(comp_models())))
@@ -885,7 +885,7 @@ server <- function(input, output, session) {
 
   output$comp_resid_summary <- renderPrint({
     req(length(comp_models()) > 0, input$comp_resid_model)
-    validate_model_errors(comp_models())
+    validate_moosecounter:::model_errors(comp_models())
 
     cat("Composition Model:", input$comp_resid_model, "\n")
     VGAM::summaryvglm(comp_models()[[input$comp_resid_model]][["model"]])
@@ -921,8 +921,8 @@ server <- function(input, output, session) {
       !is.null(input$comp_pi_models1) & !is.null(input$comp_pi_models2),
       "Please choose your model(s)"))
 
-    validate_model_errors(total_models())
-    validate_model_errors(comp_models())
+    validate_moosecounter:::model_errors(total_models())
+    validate_moosecounter:::model_errors(comp_models())
 
     updateButton(session, "comp_pi_calc", style = "primary",
                  label = "Calculate PI")
