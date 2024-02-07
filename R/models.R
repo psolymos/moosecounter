@@ -23,7 +23,6 @@
 #' @param robust Logical, use CL/PL robust regression approach.
 #' @param dist Count distribution, one of `"ZIP"`, `"ZINB"`, `"P"`, `"NB"`.
 #' @param link Link function for the zero model.
-#' @param hurdle Logical, fit hurdle model or zero inflated.
 #' @param object A model as returned by `zeroinfl2()`.
 #' @param pass_data Logical, to pass the data or not.
 #' @param x  Arguments for `pscl::zeroinfl()` or a
@@ -118,7 +117,7 @@ zeroinfl2 <- function (formula, data,
     link = c("logit", "probit", "cloglog"),
     control = NULL,
     model = TRUE, y = TRUE, x = FALSE,
-    solveH=TRUE, robust=FALSE, hurdle = FALSE, ...) {
+    solveH=TRUE, robust=FALSE, ...) {
 
     dist0 <- dist
     dist <- switch(dist,
@@ -126,10 +125,13 @@ zeroinfl2 <- function (formula, data,
         "NB"="NB",
         "ZIP"="poisson",
         "ZINB"="negbin",
+        "HP"="poisson",
+        "HNB"="negbin",
         "poisson"="poisson",
         "negbin"="negbin",
-        stop("dist must be one of P, NB, ZIP, or ZINB"))
+        stop("dist must be one of P, NB, HP, HNB, ZIP, or ZINB"))
 
+    hurdle <- dist0 %in% c("HP", "HNB")
     if (is.null(control)) {
         control <- if (hurdle)
             pscl::hurdle.control(...) else pscl::zeroinfl.control(...)

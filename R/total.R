@@ -20,7 +20,6 @@
 #' @param intercept Which intercepts to keep. Dropped intercepts lead to
 #'   regression through the origin (at the linear predictor scale).
 #' @param robust Logical, use robust regression approach.
-#' @param hurdle Logical, fit hurdle model or zero inflated.
 #' @param xv Logical, should leave-one-out error be calculated.
 #' @param ... Other arguments passed to `zeroinfl2()`.
 #' @param type The type of the response, can be `"total"` or
