@@ -18,11 +18,14 @@ by the Government of Yukon._
 
 Install dependencies and the package from GitHub:
 
+
+
 ```R
 install.packages(c('dplyr', 'DT', 'ggiraph','ggplot2', 'kableExtra',
     'magrittr', 'mapproj', 'markdown', 'MASS', 'Matrix', 'openxlsx',
     'partykit', 'pbapply', 'pscl', 'purrr', 'remotes', 'shiny', 'shinyBS',
-    'shinydashboard'))
+    'shinydashboard', 'VGAM', 'rlang', 'shinytest', 'systemfonts',
+    'testthat', 'patchwork', 'shinyjs'))
 remotes::install_github('psolymos/moosecounter')
 ```
 
