@@ -392,8 +392,8 @@ server <- function(input, output, session) {
 
     cat("Model:", input$total_resid_model, "\n")
     cat("Model type:", total_models()[[input$total_resid_model]][["dist"]],
-        if (total_models()[[input$total_resid_model]][["weighted"]])
-          "(weighted)" else "", "\n")
+        if (total_models()[[input$total_resid_model]][["weighted"]]) "(weighted)" else "",
+        "\n")
     summary(total_models()[[input$total_resid_model]][["model"]])
   })
 
