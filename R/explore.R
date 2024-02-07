@@ -174,11 +174,7 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
                              x = .data$Value,
                              y = .data$n,
                              fill = .data$Surveyed,
-                             group = .data$Surveyed)) +
-        ggplot2::theme_minimal() +
-        ggplot2::scale_fill_viridis_d(end = 0.8) +
-        ggplot2::ylab("Density") +
-        ggplot2::xlab(i)
+                             group = .data$Surveyed))
 
       if(interactive) {
         dd <- dplyr::mutate(dd,
@@ -187,7 +183,7 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
 
         p <- p + ggiraph::geom_bar_interactive(
           data = dd,
-          ggplot2::aes(tooltip = .data$tt, data_id = .data$tt),
+          ggplot2::aes(tooltip = .data$tt, data_id = .data$Surveyed),
           stat = "identity", position = "dodge",
           colour = "black")
       } else {
@@ -199,72 +195,68 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
       d <- data.frame(Surveyed = srv, Variable = z)
 
       p <- ggplot2::ggplot(
-        data.frame(
-          Surveyed = srv,
-          Variable = z),
+        data = d,
         ggplot2::aes(
           x = .data$Variable,
           fill = .data$Surveyed,
           color = .data$Surveyed)) +
-        ggplot2::geom_rug(data = data.frame(
-          Surveyed = srv,
-          Variable = z)[!srv,], sides="b") +
-        ggplot2::geom_rug(data = data.frame(
-          Surveyed = srv,
-          Variable = z)[srv,], sides="t") +
-        ggplot2::theme_minimal() +
-        ggplot2::scale_fill_viridis_d(end = 0.8, aesthetics = c("fill", "colour")) +
-        ggplot2::ylab("Density") +
-        ggplot2::xlab(i)
+        ggplot2::geom_rug(data = d[!srv, ], sides = "b") +
+        ggplot2::geom_rug(data = d[srv, ], sides = "t")
 
       if(interactive) {
         d <- dplyr::mutate(d, tt = paste0("Surveyed: ", .data$Surveyed))
         p <- p + ggiraph::geom_density_interactive(
           data = d, alpha = 0.50,
-          ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
+          ggplot2::aes(tooltip = .data$tt, data_id = .data$Surveyed))
       } else {
-       p <- p + ggplot2::geom_density(alpha = 0.5)
+        p <- p + ggplot2::geom_density(alpha = 0.5)
       }
-
     }
+
+    p <- p +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(legend.position = "top") +
+      ggplot2::scale_fill_viridis_d(end = 0.8, aesthetics = c("fill", "colour")) +
+      ggplot2::ylab("Density") +
+      ggplot2::xlab(i)
+
   }
+
   if (type == "fit") {
-    if (CAT) {
-      p <- ggplot2::ggplot(
-        dat,
-        ggplot2::aes(
-          y = .data$y,
-          x = .data$z)) +
-        ggplot2::theme_minimal() +
-        ggplot2::ylab("Total Moose") +
-        ggplot2::xlab(i)
+
+    if(!CAT) dat$label <- round(dat$z, 2) else dat$label <- dat$z
+    dat <- dplyr::mutate(
+      dat,
+      tt = paste0("SU_ID: ", .data$SU_ID,
+                  "<br>", .env$i, ": ", .data$label,
+                  "<br>Total Moose: ", .data$y))
+
+    p <- ggplot2::ggplot(
+      dat,
+      ggplot2::aes(
+        y = .data$y,
+        x = .data$z)) +
+      ggplot2::theme_minimal() +
+      ggplot2::ylab("Total Moose") +
+      ggplot2::xlab(i)
+
+
+    if(CAT) {
 
       tot <- stats::aggregate(dat[, c("y", "zhat")], list(z = dat$z), mean)
       tot$z_int <- as.integer(tot$z)
+      tot <- dplyr::mutate(tot, tt = paste0(.data$z,
+                                            "<br>Mean: ", round(.data$zhat, 2)))
 
       if(interactive) {
-        out <- dplyr::group_by(dat, .data$z)
-        out <- dplyr::mutate(out,
-                             IQR = stats::IQR(.data$y),
-                             q75 = stats::quantile(.data$y, 0.75),
-                             q25 = stats::quantile(.data$y, 0.25))
-        out <- dplyr::filter(out,
-                             .data$y > (.data$q75 + (1.5 * .data$IQR)) |
-                               .data$y < (.data$q25 - (1.5 * .data$IQR)))
-        out <- dplyr::mutate(out, tt = paste0("SU_ID: ", .data$SU_ID,
-                                              "<br>", .env$i, ": ", .data$z,
-                                              "<br>Total Moose: ", .data$y))
-        dat <- dplyr::mutate(dat, tt = .data$z)
-        tot <- dplyr::mutate(tot, tt = paste0(.data$z,
-                                              "<br>Mean: ", round(.data$zhat, 2)))
-
         p <- p +
           ggiraph::geom_boxplot_interactive(
             data = dat, fill = "grey", outlier.shape = NA, # omit outliers
-            ggplot2::aes(tooltip = .data$tt, data_id = .data$tt)) +
+            ggplot2::aes(tooltip = .data$z, data_id = .data$SU_ID)) +
           ggiraph::geom_point_interactive(                 # manually add outliers
-            data = out, size = 3, alpha = 0.75,
-            ggplot2::aes(tooltip = .data$tt, data_id = .data$tt)) +
+            data = dat, size = 3, alpha = 0.75,
+            ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID),
+            position = ggplot2::position_jitter(width = 0.05)) +
           ggiraph::geom_point_interactive(
             data = tot, size = 3, col = 4,
             ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
@@ -280,24 +272,13 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
           data = tot, col = 4)
 
     } else {
-      p <- ggplot2::ggplot(
-        dat,
-        ggplot2::aes(
-          y = .data$y,
-          x = .data$z)) +
-        ggplot2::geom_line(ggplot2::aes(x = .data$z, y = .data$zhat), col = 4) +
-        ggplot2::theme_minimal() +
-        ggplot2::ylab("Total Moose") +
-        ggplot2::xlab(i)
-
-      dat <- dplyr::mutate(dat, tt = paste0("SU_ID: ", .data$SU_ID,
-                                            "<br>", .env$i, ": ", round(.data$z, 2),
-                                            "<br>Total Moose: ", .data$y))
+      p <- p +
+        ggplot2::geom_line(ggplot2::aes(x = .data$z, y = .data$zhat), col = 4)
 
       if(interactive){
         p <- p + ggiraph::geom_point_interactive(
           data = dat, size = 3, alpha = 0.75,
-          ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
+          ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID))
       } else {
         p <- p + ggplot2::geom_point()
       }
@@ -307,13 +288,15 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
   if (type == "map") {
     p <- ggplot2::ggplot(data = x,
                          ggplot2::aes(x = .data$CENTRLON, y = .data$CENTRLAT,
-                                      fill = .data[[i]])) +
+                                      fill = .data[[i]], alpha = .data$srv)) +
       ggplot2::coord_map() +
       ggplot2::theme_minimal() +
       ggplot2::theme(legend.position = "top",
                      legend.title = ggplot2::element_text(size = 9),
                      legend.box.margin = ggplot2::margin(0, 0, -20, 0),
-                     plot.margin = ggplot2::unit(c(0,0,0,0), "pt"))
+                     plot.margin = ggplot2::unit(c(0,0,0,0), "pt")) +
+      ggplot2::scale_alpha_manual(values = c("TRUE" = 1, "FALSE" = 0.65), guide = "none") +
+      ggplot2::labs(caption = "Pale points are un-surveyed")
 
     if(interactive) {
       if(!CAT) x$label <- round(x[[i]], 2) else x$label <- x[[i]]
@@ -321,30 +304,36 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
                                         "<br>", .env$i, ": ", .data$label))
       p <- p + ggiraph::geom_tile_interactive(
         data = x,
-        ggplot2::aes(tooltip = .data$tt, data_id = .data$tt))
+        ggplot2::aes(tooltip = .data$tt, data_id = .data$SU_ID))
     } else {
       p <- p + ggplot2::geom_tile()
     }
 
-    if (CAT) p <- p + ggplot2::scale_fill_discrete(type = ggplot2::scale_fill_viridis_d)
+    if (CAT) p <- p + ggplot2::scale_fill_viridis_d(end = 0.8)
     if (!CAT) p <- p + ggplot2::scale_fill_binned(type = "viridis")
 
-  }
-
-  if(interactive) {
-    p <- ggiraph::girafe(ggobj = p, width_svg = 5, height_svg = 4,
-                         options = list(ggiraph::opts_selection(type = "none"),
-                                        ggiraph::opts_toolbar(saveaspng = FALSE)))
-
-    if(type == "density" && !CAT) {  #Otherwise get funny outlines
-      p <- ggiraph::girafe_options(
-        x = p,
-        ggiraph::opts_hover(css = "stroke-width:3px;fill-opacity:0.8;"))
-    }
   }
   p
 }
 
+mc_ggiraph <- function(p, width, height, type) {
+
+  # Use `girafe_css` to specify different css for different types
+  # - https://www.ardata.fr/ggiraph-book/customize.html#sec-global-opt
+  # - https://www.ardata.fr/ggiraph-book/customize.html#detailled-control
+
+  ggiraph::girafe(
+    ggobj = p, width_svg = width, height_svg = height,
+    options = list(
+      ggiraph::opts_selection(type = "none"),
+      ggiraph::opts_toolbar(saveaspng = FALSE),
+      ggiraph::opts_hover(
+        css = ggiraph::girafe_css(
+          css = "fill:orange;",
+          line = "fill:none;stroke:black;",
+          point = "fill:orange;fill-opacity:1;r:3pt;stroke-width:3px;stroke-opacity:1;stroke:orange;"))))
+
+}
 
 
 

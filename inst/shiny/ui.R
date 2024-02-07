@@ -115,9 +115,7 @@ ui_total_univar <- fluidRow(
                           choices = c("P", "NB", "ZIP", "ZINB"),
                           selected = "NB")),
          shinydashboard::box(width = 12,
-             column(width = 4, girafeOutput("uni_graph1", height = "100%")),
-             column(width = 4, girafeOutput("uni_graph2", height = "100%")),
-             column(width = 4, girafeOutput("uni_graph3", height = "100%"))
+             girafeOutput("uni_graph", height = "100%")
          )
   )
 )
@@ -214,24 +212,29 @@ ui_total_pi <- fluidRow(
 
     tabBox(width = 12, id = "total_pi_panel",
            tabPanel("Diagnostic Plots", plotOutput("total_pi_predpi")),
-           tabPanel("Total Moose PI",
-                    plotOutput("total_pi_pidistr_all")),
-           tabPanel("Cell Level PI",
-                    plotOutput("total_pi_pidistr_cell")),
+           tabPanel(
+             "Total Moose PI",
+             sliderInput("total_pi_bins_all", label = "Number of Bins",
+                         min = 1, max = 100, value = 30),
+             plotOutput("total_pi_pidistr_all")),
+           tabPanel(
+             "Cell Level PI",
+             sliderInput("total_pi_bins_cell", label = "Number of Bins",
+                         min = 1, max = 50, value = 10),
+             plotOutput("total_pi_pidistr_cell")),
            tabPanel("Bootstrap Results",
                     div(style = "overflow-x: scroll", DTOutput("total_pi_boot"))))
   )
 )
 
 
-
-
 ## Explore PI -----------------------------------------------------------------
 ui_total_pi_map <- fluidRow(
   column(width = 12,
          h2("Exploring Predictions"),
-         p(downloadButton(
-             "total_boot_download", "Download full results as Excel file")),
+         p(strong("Download Results to Excel:"),
+           shinyjs::disabled(downloadButton("total_boot_download", "Full Results")),
+           shinyjs::disabled(downloadButton("total_boot_download_subset", "Subset Results"))),
          shinydashboard::box(width = 3,
              h4("Subsets"),
              uiOutput("total_pi_subset_col"),
@@ -342,8 +345,9 @@ ui_comp_pi <- fluidRow(
 ui_comp_sum <- fluidRow(
   column(width = 12,
          h2("Composition Summary"),
-         p(downloadButton(
-           "comp_boot_download", "Download full results as Excel file")),
+         p(strong("Download Results to Excel:"),
+          shinyjs::disabled(downloadButton("comp_boot_download", "Full Results")),
+          shinyjs::disabled(downloadButton("comp_boot_download_subset", "Subset Results"))),
          shinydashboard::box(width = 3,
              h4("Subsets"),
              uiOutput("comp_pi_subset_col"),
@@ -401,6 +405,7 @@ dashboardPage(
 
   ## Body -----------------------
   dashboardBody(
+    shinyjs::useShinyjs(),
     tabItems(
       tabItem("home", ui_home),
       tabItem("docs", ui_docs),

@@ -119,7 +119,7 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 #' @rdname total
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
-    dist="ZINB", weighted=FALSE, robust=FALSE, 
+    dist="ZINB", weighted=FALSE, robust=FALSE,
     intercept = c("both", "count", "zero", "none"), ...) {
     intercept <- match.arg(intercept)
     opts <- getOption("moose_options")
@@ -476,7 +476,7 @@ mc_get_pred <- function(PI, ss=NULL) {
 
 #' @rdname total
 #' @export
-pred_density_moose_PI <- function(PI){
+pred_density_moose_PI <- function(PI) {
     out <- round(PI$total, 2)
     cat("Total Moose PI summary:\n\n")
     print(out)
@@ -706,11 +706,12 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
 
 #' @rdname total
 #' @export
-mc_plot_predfit <- function(i, PI, interactive = FALSE) {
+mc_plot_predfit <- function(i, PI, ss = NULL, interactive = FALSE) {
 
-  dat <- PI$data[,c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU")]
-  dat$Surveyed <- PI$data$srv
-  dat$z <- PI$data[[i]]
+  dat <- PI$data[, c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU", "srv", i)]
+  names(dat)[names(dat) == "srv"] <- "Surveyed"
+  names(dat)[names(dat) == i] <- "z"
+  if(!is.null(ss)) dat <- dat[ss, , drop = FALSE]
 
   p <- ggplot2::ggplot(dat, ggplot2::aes(x = .data$z, y = .data$Cell.mean,
                                          colour = .data$Surveyed)) +
