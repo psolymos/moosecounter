@@ -58,14 +58,14 @@ switch_response("total")
 ## this also sets total cows value
 x <- mc_update_total(x)
 
-## univariate exploration
-mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
-
-## multivariate exploration
 vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
     "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
     "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
 
+## univariate exploration
+mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
+
+## multivariate exploration
 mc_plot_multivariate(vars, x)
 
 ## build model list
@@ -75,11 +75,14 @@ mc_plot_multivariate(vars, x)
 # ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
 # ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
 
+xv <- FALSE
+hurdle <- TRUE
+
 ML <- list()
-ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", xv=TRUE)
-ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", xv=TRUE)
-ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", xv=TRUE)
-ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", xv=TRUE)
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", xv=xv, hurdle=hurdle)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", xv=xv, hurdle=hurdle)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", xv=xv, hurdle=hurdle)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", xv=xv, hurdle=hurdle)
 
 # m <- zeroinfl2(MOOSE_TOTA ~ 1, x)
 # mm <- loo(m)
