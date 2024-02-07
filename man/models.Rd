@@ -3,6 +3,7 @@
 \name{models}
 \alias{models}
 \alias{wzi}
+\alias{loo}
 \alias{zeroinfl2}
 \alias{summary.non_zeroinfl}
 \alias{print.summary.non_zeroinfl}
@@ -10,6 +11,8 @@
 \title{Internal Functions: Models}
 \usage{
 wzi(object, pass_data = FALSE, ...)
+
+loo(object, ...)
 
 zeroinfl2(
   formula,

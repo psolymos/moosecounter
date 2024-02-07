@@ -19,10 +19,14 @@ m1 <- zeroinfl2(Y ~ x | 1, dist="ZIP")
 m2 <- zeroinfl2(Y ~ x | 1, dist="ZIP", robust=TRUE)
 m3 <- .zeroinfl_clpl(Y, X, Z, distr="ZIP")
 
-coef(m1)
-coef(m2)
-sqrt(diag(vcov(m1)))
-sqrt(diag(vcov(m2)))
+cbind(zi2=coef(m1),
+    zi2robust=coef(m2),
+    clpl=m3$par)
+cbind(zi2=sqrt(diag(vcov(m1))),
+    zi2robust=sqrt(diag(vcov(m2))),
+    clpl=sqrt(diag(solve(-m3$hessian))))
+
+
 
 ## Poisson
 Y <- rpois(n, exp(mu))
@@ -31,13 +35,15 @@ m1 <- zeroinfl2(Y ~ x | 1, dist="P")
 m2 <- zeroinfl2(Y ~ x | 1, dist="P", robust=TRUE)
 m3 <- .zeroinfl_clpl(Y, X, Z, distr="P")
 
-coef(m1)
-coef(m2)
-sqrt(diag(vcov(m1)))
-sqrt(diag(vcov(m2)))
+cbind(zi2=coef(m1),
+    zi2robust=coef(m2),
+    clpl=c(m3$par, NA))
+cbind(zi2=sqrt(diag(vcov(m1))),
+    zi2robust=sqrt(diag(vcov(m2))),
+    clpl=c(sqrt(diag(solve(-m3$hessian))),NA))
 
 
-## NegBin
+## ZI NegBin
 
 n <- 10000
 phi <- 0.7
@@ -63,9 +69,10 @@ sqrt(diag(vcov(m1)))
 sqrt(diag(vcov(m2)))
 log(m1$theta)
 log(m2$theta)
+m3$par
 
 
-## NB
+## NegBin
 Y <- stats:::rnbinom(n, size=theta, mu=lambda)
 
 m1 <- zeroinfl2(Y ~ x | 1, dist="NB")
@@ -78,3 +85,4 @@ sqrt(diag(vcov(m1)))
 sqrt(diag(vcov(m2)))
 log(m1$theta)
 log(m2$theta)
+m3$par

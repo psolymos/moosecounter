@@ -47,9 +47,15 @@ wzi <- function(object, pass_data=FALSE, ...) {
         method = getOption("moose_options")$method,
         start = attr(object, "parms.start"))
     d <- stats::model.frame(object)
+    Form <- stats::as.formula(object$chrformula)
     for (i in seq_len(n)) {
-        m <- try(suppressWarnings(stats::update(object, data=d[-i,,drop=FALSE],
-            weights=w[-i], control=ctrl)), silent=TRUE)
+        m <- try(suppressWarnings(stats::update(
+            object, 
+            data=d[-i,,drop=FALSE],
+            weights=w[-i], 
+            control=ctrl,
+            robust = object$robust,
+            dist = object$dist)), silent=FALSE)
         ll[i] <- if (inherits(m, "try-error"))
             (n-1)*ll0/n else as.numeric(stats::logLik(m))
     }
@@ -73,10 +79,40 @@ wzi <- function(object, pass_data=FALSE, ...) {
 
 #' @rdname models
 #' @export
+## calculate leave-one-out error as blended Chi-square distance
+loo <- function(object, ...) {
+    if (is.null(object$y))
+        stop("Please use y=TRUE when fitting the model object.")
+    n <- stats::nobs(object)
+    xv <- rep(NA_real_, n)
+    ctrl <- pscl::zeroinfl.control(
+        method = getOption("moose_options")$method,
+        start = attr(object, "parms.start"))
+    d <- stats::model.frame(object)
+    Form <- stats::as.formula(object$chrformula)
+    for (i in seq_len(n)) {
+        print(object$call)
+        m <- try(suppressWarnings(stats::update(
+            object, 
+            data=d[-i,,drop=FALSE], 
+            control=ctrl,
+            robust = object$robust,
+            dist = object$dist)), silent=FALSE)
+        if (!inherits(m, "try-error")) {
+            pr <- stats::predict(m, newdata = d[i,,drop=FALSE], type = "response")
+            xv[i] <- (pr - object$y[i])^2 / (0.5*pr + 0.5*object$y[i])
+        }
+    }
+    object$xv <- xv
+    object
+}
+
+#' @rdname models
+#' @export
 # poisson=ZIP, negbin=ZINB, P=poisson (non-ZI), NB=negbin (non-ZI)
 zeroinfl2 <- function (formula, data,
     subset, na.action, weights, offset,
-    dist = c("ZIP", "ZINB", "P", "NB"),
+    dist = "ZIP",
     link = c("logit", "probit", "cloglog"),
     control = NULL,
     model = TRUE, y = TRUE, x = FALSE,
@@ -90,6 +126,8 @@ zeroinfl2 <- function (formula, data,
         "NB"="NB",
         "ZIP"="poisson",
         "ZINB"="negbin",
+        "poisson"="poisson",
+        "negbin"="negbin",
         stop("dist must be one of P, NB, ZIP, or ZINB"))
     .model_offset_2 <- function (x, terms = NULL, offset = TRUE) {
             if (is.null(terms))
@@ -389,6 +427,8 @@ zeroinfl2 <- function (formula, data,
                 if (dist %in% c("negbin", "NB")) log(start$theta) else NULL,
                 start$zero), 
             control=control, hessian=hessian)
+        str(fit)
+        str(control)
         if (dist0 == "P") {
             fit$par <- c(fit$par[1:kx], rep(-100,kz))
             if (hessian) {
@@ -451,7 +491,7 @@ zeroinfl2 <- function (formula, data,
     nobs <- sum(weights > 0)
     rval <- list(coefficients = list(count = coefc, zero = coefz),
         residuals = res, fitted.values = Yhat, 
-        optim = fit, #robust = fit2,
+        optim = fit, robust = robust,
         method = method,
         control = ocontrol, start = start, weights = if (identical(as.vector(weights),
             rep.int(1L, n))) NULL else weights, offset = list(count = if (identical(offsetx,
@@ -589,7 +629,6 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
     }
     nll_ZIP_CL <- function(parms) {
         mu1 <- as.vector(linkinvx(X1 %*% parms[1:kx] + offsetx1))
-        ## P(Y=y|Y>0)=f(y;theta)/(1-0)=f(y;theta)
         num <- stats::dpois(Y1, mu1, log = TRUE)
         den <- log(1 - exp(-mu1))
         loglik <- sum(weights1 * (num - den))
@@ -643,7 +682,6 @@ method="Nelder-Mead", inits=NULL, control=list(), hessian=TRUE,  ...){
     nll_ZINB_CL <- function(parms) {
         mu1 <- as.vector(linkinvx(X1 %*% parms[1:kx] + offsetx1))
         theta <- exp(parms[kx + 1])
-        ## P(Y=y|Y>0)=f(y;theta)/(1-0)=f(y;theta)
         num <- suppressWarnings(stats::dnbinom(Y1,
             size = theta, mu = mu1, log = TRUE))
         den <- log(1 - exp(suppressWarnings(stats::dnbinom(0,

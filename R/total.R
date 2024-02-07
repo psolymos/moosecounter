@@ -20,6 +20,7 @@
 #' @param intercept Which intercepts to keep. Dropped intercepts lead to
 #'   regression through the origin (at the linear predictor scale).
 #' @param robust Logical, use robust regression approach.
+#' @param xv Logical, should leave-one-out error be calculated.
 #' @param ... Other arguments passed to `zeroinfl2()`.
 #' @param type The type of the response, can be `"total"` or
 #'   `"cows"` for `switch_response`.
@@ -120,7 +121,8 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
     dist="ZINB", weighted=FALSE, robust=FALSE, 
-    intercept = c("both", "count", "zero", "none"), ...) {
+    intercept = c("both", "count", "zero", "none"), 
+    xv = FALSE, ...) {
     intercept <- match.arg(intercept)
     opts <- getOption("moose_options")
     if (is.null(vars)) {
@@ -143,7 +145,8 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         if (intercept %in% c("count", "none"))
             ZI <- paste0(ZI, " - 1")
     }
-    Form <- stats::as.formula(paste(opts$Ntot, "~", CNT, "|", ZI))
+    chrForm <- paste(opts$Ntot, "~", CNT, "|", ZI)
+    Form <- stats::as.formula(chrForm)
     out <- zeroinfl2(
         formula=Form,
         data=x[x$srv,],
@@ -152,9 +155,12 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         method=opts$method,
         robust=robust,
         ...)
+    if (xv)
+        out <- loo(out)
     if (weighted)
         out <- wzi(out) # wzi know about method
     out$call <- match.call()
+    out$chrformula <- chrForm
     out
 }
 

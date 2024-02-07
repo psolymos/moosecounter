@@ -1,6 +1,7 @@
-# Version 0.7-1 -- May 10, 2023
+# Version 0.7-1 -- June 13, 2023
 
 * Add option to remove intercept(s) in regression to allow regression through the origin.
+* The new `loo` function calculates the leave-one-out error as blended Chi-square distance in `$xv`.
 
 # Version 0.7-0 -- March 24, 2023
 

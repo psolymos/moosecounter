@@ -69,11 +69,20 @@ vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
 mc_plot_multivariate(vars, x)
 
 ## build model list
+# ML <- list()
+# ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+# ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
+# ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
+# ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+
 ML <- list()
-ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
-ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
-ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
-ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", xv=TRUE)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", xv=TRUE)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", xv=TRUE)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", xv=TRUE)
+
+# m <- zeroinfl2(MOOSE_TOTA ~ 1, x)
+# mm <- loo(m)
 
 mc_models_total(ML, x)
 mc_plot_residuals("Model 3", ML, x)
