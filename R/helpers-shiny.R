@@ -5,7 +5,7 @@
 }
 
 validate_model_errors <- function(m) {
-  validate(need(!any(model_errors(m)),
+  shiny::validate(shiny::need(!any(model_errors(m)),
                 paste0("Some models have problems (see 'Models' tab), ",
                        "adjust settings or remove models")))
 }
@@ -30,13 +30,13 @@ validate_flow <- function(survey_file, models, models_comp, pi, pi_subset) {
 
   if(!missing(pi)) {
     pi <- shiny::need(
-      isTruthy(try(pi, silent = TRUE)) && length(pi) > 0,
+      shiny::isTruthy(try(pi, silent = TRUE)) && length(pi) > 0,
       "First create the predictions in the Prediction Intervals tab")
   } else pi <- NULL
 
   if(!missing(pi_subset)) {
     pi_subset <- shiny::need(
-      isTruthy(try(pi_subset, silent = TRUE)) && length(pi_subset) > 0,
+      shiny::isTruthy(try(pi_subset, silent = TRUE)) && length(pi_subset) > 0,
       "No predictions. Make sure at least one group subset is selected")
   } else pi_subset <- NULL
 

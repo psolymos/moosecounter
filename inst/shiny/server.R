@@ -69,7 +69,7 @@ server <- function(input, output, session) {
       names()
 
     # Check for missing levels in filtered data
-    isolate({vars <- vars[missing_levels(survey_sub(), vars)]})
+    isolate({vars <- vars[moosecounter:::missing_levels(survey_sub(), vars)]})
 
     selectInput("survey_omit",
                 label = "Omit variables with too few surveyed levels",
@@ -161,7 +161,7 @@ server <- function(input, output, session) {
   # Total Moose --------------------------------------------------------------
   ## Univariate Exploration --------------------------
   output$uni_var_ui <- renderUI({
-    validate_flow(input$survey_file)
+    moosecounter:::validate_flow(input$survey_file)
 
     select_explanatory("uni_var",
                        "Univariate variable to explore",
@@ -177,13 +177,13 @@ server <- function(input, output, session) {
                              base = FALSE, type = "map", interactive = TRUE)
     p3 <- mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
                              base = FALSE, type = "fit", interactive = TRUE)
-    mc_ggiraph(p1 + p2 + p3, width = 15, height = 4)
+    moosecounter:::mc_ggiraph(p1 + p2 + p3, width = 15, height = 4)
   })
 
 
   ## Multivariate Exploration ---------------------
   output$multi_var_ui <- renderUI({
-    validate_flow(input$survey_file)
+    moosecounter:::validate_flow(input$survey_file)
     select_explanatory("multi_var",
                        "Multivariate variables to explore",
                        survey_sub(),
@@ -298,7 +298,7 @@ server <- function(input, output, session) {
     bindEvent(input$total_model_add)
 
   output$total_model_table <- function() {
-    validate_flow(input$survey_file)
+    moosecounter:::validate_flow(input$survey_file)
     imap_dfr(total_models(), ~{
       d <- data.frame(Model = .y,
                       `Count variables` = paste(.x$var_count, collapse = ", "),
@@ -317,7 +317,7 @@ server <- function(input, output, session) {
     }) %>%
       kable() %>%
       kable_styling() %>%
-      row_spec(which(model_errors(total_models())), background = "#f2dede")
+      row_spec(which(moosecounter:::model_errors(total_models())), background = "#f2dede")
   }
 
   # Dynamically create delete buttons for each model
@@ -352,7 +352,7 @@ server <- function(input, output, session) {
   total_model_aic <- reactive({
     req(length(total_models()) > 0)
     req(opts())
-    validate_model_errors(total_models())
+    moosecounter:::validate_model_errors(total_models())
 
     map(total_models(), "model") %>%
       mc_models_total(survey_sub()) %>%
@@ -371,8 +371,8 @@ server <- function(input, output, session) {
   ## Model residuals / diagnostics ------------------------------
 
   output$total_resid_models_ui <- renderUI({
-    validate_flow(input$survey_file, models = total_models_list$m)
-    validate_model_errors(total_models())
+    moosecounter:::validate_flow(input$survey_file, models = total_models_list$m)
+    moosecounter:::validate_model_errors(total_models())
 
     radioButtons("total_resid_model", label = "Model", inline = TRUE,
                  choices = sort(names(total_models())))
@@ -380,7 +380,7 @@ server <- function(input, output, session) {
 
   output$total_resid_plot <- renderPlot({
     req(length(total_models()) > 0, input$total_resid_model)
-    validate_model_errors(total_models())
+    moosecounter:::validate_model_errors(total_models())
 
     map(total_models(), "model") %>%
       mc_plot_residuals(input$total_resid_model, ., survey_sub())
@@ -388,7 +388,7 @@ server <- function(input, output, session) {
 
   output$total_resid_summary <- renderPrint({
     req(length(total_models()) > 0, input$total_resid_model)
-    validate_model_errors(total_models())
+    moosecounter:::validate_model_errors(total_models())
 
     cat("Model:", input$total_resid_model, "\n")
     cat("Model type:", total_models()[[input$total_resid_model]][["dist"]],
@@ -417,7 +417,7 @@ server <- function(input, output, session) {
   total_pi <- reactive({
     req(length(total_models()) > 0, input$total_pi_average)
     validate(need(input$total_pi_models, "Please choose your model(s)"))
-    validate_model_errors(total_models())
+    moosecounter:::validate_model_errors(total_models())
 
     updateButton(session, "total_pi_calc", style = "primary",
                  label = "Calculate PI")
@@ -433,7 +433,7 @@ server <- function(input, output, session) {
 
   # Tables
   output$total_pi_density <- function() {
-    validate_flow(input$survey_file, models = total_models_list$m)
+    moosecounter:::validate_flow(input$survey_file, models = total_models_list$m)
     total_pi()$pi$total %>%
       as.data.frame() %>%
       dplyr::mutate(" " = c("Total Moose",
@@ -544,7 +544,7 @@ server <- function(input, output, session) {
 
   # Render map
   output$total_pi_map <- renderGirafe({
-    validate_flow(input$survey_file, models = total_models_list$m,
+    moosecounter:::validate_flow(input$survey_file, models = total_models_list$m,
                   pi = total_pi(), pi_subset = total_pi_subset())
 
     d <- total_pi_subset()$data
@@ -672,7 +672,7 @@ server <- function(input, output, session) {
 
 
   output$total_pi_plot_col <- renderUI({
-    validate_flow(input$survey_file, models = total_models_list$m,
+    moosecounter:::validate_flow(input$survey_file, models = total_models_list$m,
                   pi = input$total_pi_models, pi_subset = total_pi_subset()$data)
 
     m <- unique(total_pi()$pi$model_select_id)
@@ -700,7 +700,7 @@ server <- function(input, output, session) {
   })
 
   output$total_pi_density_selected <- reactive({
-    validate_flow(input$survey_file, models = total_models_list$m,
+    moosecounter:::validate_flow(input$survey_file, models = total_models_list$m,
                   pi = input$total_pi_models, pi_subset = total_pi_subset()$data)
 
     req(input$total_pi_subset_col)
@@ -725,7 +725,7 @@ server <- function(input, output, session) {
 
   ## Exploration ---------------------------
   output$comp_explore_ui <- renderUI({
-    validate_flow(input$survey_file)
+    moosecounter:::validate_flow(input$survey_file)
 
     select_explanatory("comp_explore_var",
                        "Variable to explore",
@@ -814,13 +814,13 @@ server <- function(input, output, session) {
     bindEvent(input$comp_model_add)
 
   output$comp_model_table <- function() {
-    validate_flow(input$survey_file)
+    moosecounter:::validate_flow(input$survey_file)
     imap_dfr(comp_models(),
              ~data.frame(Model = .y,
                          Variables = paste(.x$var, collapse = ", "))) %>%
       kable() %>%
       kable_styling() %>%
-      row_spec(which(model_errors(comp_models())), background = "#f2dede")
+      row_spec(which(moosecounter:::model_errors(comp_models())), background = "#f2dede")
   }
 
   # Dynamically create delete buttons for each model
@@ -854,7 +854,7 @@ server <- function(input, output, session) {
   comp_model_aic <- reactive({
     req(length(comp_models()) > 0)
     req(opts())
-    validate_model_errors(comp_models())
+    moosecounter:::validate_model_errors(comp_models())
 
     map(comp_models(), "model") %>%
       mc_models_comp() %>%
@@ -871,8 +871,8 @@ server <- function(input, output, session) {
   ## Comp model residuals / diagnostics ------------------------------
 
   output$comp_resid_models_ui <- renderUI({
-    validate_flow(input$survey_file, models_comp = comp_models_list$m)
-    validate_model_errors(comp_models())
+    moosecounter:::validate_flow(input$survey_file, models_comp = comp_models_list$m)
+    moosecounter:::validate_model_errors(comp_models())
 
     radioButtons("comp_resid_model", label = "Composition Model", inline = TRUE,
                  choices = sort(names(comp_models())))
@@ -885,7 +885,7 @@ server <- function(input, output, session) {
 
   output$comp_resid_summary <- renderPrint({
     req(length(comp_models()) > 0, input$comp_resid_model)
-    validate_model_errors(comp_models())
+    moosecounter:::validate_model_errors(comp_models())
 
     cat("Composition Model:", input$comp_resid_model, "\n")
     VGAM::summaryvglm(comp_models()[[input$comp_resid_model]][["model"]])
@@ -921,8 +921,8 @@ server <- function(input, output, session) {
       !is.null(input$comp_pi_models1) & !is.null(input$comp_pi_models2),
       "Please choose your model(s)"))
 
-    validate_model_errors(total_models())
-    validate_model_errors(comp_models())
+    moosecounter:::validate_model_errors(total_models())
+    moosecounter:::validate_model_errors(comp_models())
 
     updateButton(session, "comp_pi_calc", style = "primary",
                  label = "Calculate PI")
@@ -948,7 +948,7 @@ server <- function(input, output, session) {
 
   # Tables
   output$comp_pi_density <- function() {
-    validate_flow(input$survey_file,
+    moosecounter:::validate_flow(input$survey_file,
                   models = total_models_list$m, models_comp = comp_models_list$m)
     req(comp_pi())
     pred_density_moose_CPI(comp_pi()$pi) %>%
@@ -1037,7 +1037,7 @@ server <- function(input, output, session) {
   })
 
   output$comp_pi_summary <- renderDT({
-    validate_flow(input$survey_file, models = total_models_list$m,
+    moosecounter:::validate_flow(input$survey_file, models = total_models_list$m,
                   models_comp = comp_models_list$m, pi = comp_pi(),
                   pi_subset = comp_pi_subset())
 

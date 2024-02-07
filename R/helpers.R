@@ -98,6 +98,7 @@ PI_xlslist <- function(file, pred, summary, seed, subset = "Full") {
   o <- mc_options()
   o <- append(o, c("random seed" = seed))
 
+  ver <- read.dcf(file=system.file("DESCRIPTION", package="moosecounter"), fields=c("Version"))[1L]
   info <- data.frame(moosecounter = paste0(
     c("R package version: ", "Date of analysis: ", "File: "),
     c(ver, format(Sys.time(), "%Y-%m-%d"), file$name)))
@@ -117,5 +118,16 @@ PI_xlslist <- function(file, pred, summary, seed, subset = "Full") {
     Summary = summary,
     Data = pred$data,
     Boot = pred$boot_full)
+}
+
+#' @noRd
+model_errors <- function(m) {
+  purrr::map(m, "model") %>%
+    purrr::map_lgl(~ "try-error" %in% class(.))
+}
+
+#' @noRd
+missing_levels <- function(x, cols) {
+  purrr::map_lgl(cols, ~any(table(x[[.]], x$srv) == 0L))
 }
 

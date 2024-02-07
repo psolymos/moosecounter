@@ -94,13 +94,3 @@ select_explanatory <- function(id, name, x, multiple = FALSE) {
   if(!multiple) opts <- c("none", opts)
   selectInput(id, name, opts, multiple = multiple)
 }
-
-
-model_errors <- function(m) {
-  map(m, "model") %>%
-    map_lgl(~ "try-error" %in% class(.))
-}
-
-missing_levels <- function(x, cols) {
-  map_lgl(cols, ~any(table(x[[.]], x$srv) == 0L))
-}

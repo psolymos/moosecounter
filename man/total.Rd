@@ -45,7 +45,7 @@ mc_plot_predpi(PI)
 
 mc_plot_pidistr(PI, id = NULL, plot = TRUE, breaks = "Sturges")
 
-mc_plot_predfit(i, PI, interactive = FALSE)
+mc_plot_predfit(i, PI, ss = NULL, interactive = FALSE)
 }
 \arguments{
 \item{type}{The type of the response, can be `"total"` or

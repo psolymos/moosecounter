@@ -1,4 +1,9 @@
-# Version 0.7-1 -- June 13, 2023
+# Version 0.7-2 -- February 6, 2024
+
+* Shiny app improvements (#21): Crosstalk-like behavior for univariate plots,
+  Histogram binning, Total Prediction map/summary subsets, Export data checks.
+
+# Version 0.7-1 -- May 10, 2023
 
 * Add option to remove intercept(s) in regression to allow regression through the origin.
 * The new `loo` function calculates the leave-one-out error as blended Chi-square distance in `$xv`.
