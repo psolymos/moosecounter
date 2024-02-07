@@ -106,6 +106,10 @@ mc_plot_pidistr(PI, id=1)
 mc_plot_predfit("SubShrub250_Fire8212DEM815", PI)
 mc_plot_predfit("SubShrub250_Fire8212DEM815", PI, interactive = TRUE)
 
+# Subsets
+mc_plot_predfit("SubShrub250_Fire8212DEM815", PI, ss = PI$data$SURVEY_NAM != "Mayo")
+mc_plot_predfit("SubShrub250_Fire8212DEM815", PI, ss = PI$data$SURVEY_NAM != "Mayo", interactive = TRUE)
+
 # shinyBS shinydashboard
 run_app()
 

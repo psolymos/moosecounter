@@ -16,6 +16,7 @@ library(ggplot2) # Requires package mapproj for coord_map()
 library(kableExtra)
 library(openxlsx)
 library(purrr)
+library(patchwork)
 
 options(DT.options = list(scrollX = TRUE))
 
@@ -98,16 +99,6 @@ select_explanatory <- function(id, name, x, multiple = FALSE) {
 model_errors <- function(m) {
   map(m, "model") %>%
     map_lgl(~ "try-error" %in% class(.))
-}
-
-validate_models <- function(m) {
-  validate(need(!any(model_errors(m)),
-                paste0("Some models have problems (see 'Models' tab), ",
-                       "adjust settings or remove models")))
-}
-
-`%then%` <- function(a, b) {
-  if (is.null(a)) b else a
 }
 
 missing_levels <- function(x, cols) {

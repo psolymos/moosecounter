@@ -92,3 +92,30 @@ find_mode <- function(x) {
 #' @param rhs A function call using the magrittr semantics.
 #' @return The result of calling `rhs(lhs)`.
 NULL
+
+#' @noRd
+PI_xlslist <- function(file, pred, summary, seed, subset = "Full") {
+  o <- mc_options()
+  o <- append(o, c("random seed" = seed))
+
+  info <- data.frame(moosecounter = paste0(
+    c("R package version: ", "Date of analysis: ", "File: "),
+    c(ver, format(Sys.time(), "%Y-%m-%d"), file$name)))
+
+  settings <- data.frame(
+    Option = names(o),
+    Value = sapply(o, paste, sep = "", collapse = ", ")) %>%
+    rbind(cbind(Option = "Subset", Value = subset))
+
+  # Ensure measurements included in output
+  summary <- as.data.frame(summary)
+  summary <- cbind(measurement = rownames(summary), summary)
+
+  list(
+    Info = info,
+    Settings = settings,
+    Summary = summary,
+    Data = pred$data,
+    Boot = pred$boot_full)
+}
+
