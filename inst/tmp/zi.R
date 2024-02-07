@@ -100,11 +100,10 @@ X <- model.matrix(~x)
 mu <- drop(X %*% beta)
 z <- rbinom(n, 1, 1-phi)
 Z <- matrix(1, n, 1)
-
 Y <- rpois(n, exp(mu) * z)
 
 
-mh <- zeroinfl2(Y ~ x | 1, dist="ZIP", hurdle = TRUE)
+mh <- zeroinfl2(Y ~ x | 1, dist="HP")
 
 
 
