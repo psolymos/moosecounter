@@ -13,4 +13,4 @@ p1 <- .plot_univariate(i, x, dist="ZINB", type = "density", interactive = TRUE)
 p2 <- .plot_univariate(i, x, dist="ZINB", type = "map", interactive = TRUE)
 p3 <- .plot_univariate(i, x, dist="ZINB", type = "fit", interactive = TRUE)
 
-mc_ggiraph(p1 + p2 + p3, width = 15, height = 4)
+moosecounter:::mc_ggiraph(p1 + p2 + p3, width = 15, height = 4)
