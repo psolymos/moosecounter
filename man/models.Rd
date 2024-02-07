@@ -21,7 +21,7 @@ zeroinfl2(
   na.action,
   weights,
   offset,
-  dist = c("ZIP", "ZINB", "P", "NB"),
+  dist = "ZIP",
   link = c("logit", "probit", "cloglog"),
   control = NULL,
   model = TRUE,
@@ -29,6 +29,7 @@ zeroinfl2(
   x = FALSE,
   solveH = TRUE,
   robust = FALSE,
+  hurdle = FALSE,
   ...
 )
 
@@ -64,6 +65,8 @@ model as returned by `zeroinfl2()` for the methods.}
 \item{solveH}{Logical, to use robust matrix inversion to get VCV.}
 
 \item{robust}{Logical, use CL/PL robust regression approach.}
+
+\item{hurdle}{Logical, fit hurdle model or zero inflated.}
 
 \item{digits}{Digits for print method.}
 }
