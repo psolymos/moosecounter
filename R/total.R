@@ -154,7 +154,6 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         link="logit",
         method=opts$method,
         robust=robust,
-        hurdle=hurdle,
         ...)
     if (xv)
         out <- loo(out)
