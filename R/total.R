@@ -122,7 +122,6 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
     dist="ZINB", weighted=FALSE, robust=FALSE, 
     intercept = c("both", "count", "zero", "none"),
-    hurdle = FALSE,
     xv = FALSE, ...) {
     intercept <- match.arg(intercept)
     opts <- getOption("moose_options")
