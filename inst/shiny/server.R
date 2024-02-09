@@ -626,7 +626,7 @@ server <- function(input, output, session) {
   # PI/bootstrap download
   total_xlslist <- reactive({
     req(input$survey_file, total_pi())
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = total_pi()$pi,
                summary = pred_density_moose_PI(total_pi()$pi),
                seed = input$opts_seed)
@@ -639,7 +639,7 @@ server <- function(input, output, session) {
     s <- pred_density_moose_PI(total_pi_subset())
     rownames(s) <- c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2")
 
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = total_pi_subset(),
                summary = s,
                seed = input$opts_seed,
@@ -1076,7 +1076,7 @@ server <- function(input, output, session) {
   # PI/bootstrap download
   comp_xlslist <- reactive({
     req(comp_pi())
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = comp_pi()$pi,
                summary = pred_density_moose_CPI(comp_pi()$pi),
                seed = input$opts_seed)
@@ -1084,7 +1084,7 @@ server <- function(input, output, session) {
 
   comp_xlslist_subset <- reactive({
     req(comp_pi_subset())
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = comp_pi_subset(),
                summary = pred_density_moose_CPI(comp_pi_subset()),
                seed = input$opts_seed,
