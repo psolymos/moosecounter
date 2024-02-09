@@ -1,6 +1,7 @@
 # Version 0.7-3 -- February 7, 2024
 
 * Hurdle models added as `HP` and `HNB` options for the `dist` argument.
+* The weighted and robust options removed from the Shiny app UI.
 * The new `loo` function calculates the leave-one-out error as blended Chi-square distance in `$xv`.
 
 # Version 0.7-2 -- February 6, 2024
