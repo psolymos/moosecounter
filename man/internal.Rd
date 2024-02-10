@@ -3,12 +3,21 @@
 \name{internal}
 \alias{internal}
 \alias{rZINB}
+\alias{r0truncpois}
+\alias{r0truncnegbin}
+\alias{rHurdle}
 \alias{solvenear}
 \alias{find_mode}
 \alias{\%>\%}
 \title{Internal Functions: Helpers}
 \usage{
 rZINB(N, mu.nb, theta.nb, phi.zi)
+
+r0truncpois(n, lambda)
+
+r0truncnegbin(n, lambda, theta)
+
+rHurdle(N, mu.nb, theta.nb, phi.zi)
 
 solvenear(x)
 
@@ -17,11 +26,11 @@ find_mode(x)
 lhs \%>\% rhs
 }
 \arguments{
-\item{N}{The number of random numbers to produce.}
+\item{N, n}{The number of random numbers to produce.}
 
-\item{mu.nb}{The mean of the NB distribution.}
+\item{mu.nb, lambda}{The mean of the NB distribution.}
 
-\item{theta.nb}{The dispersion parameter of the NB distribution,
+\item{theta.nb, theta}{The dispersion parameter of the NB distribution,
 a single non-negative numeric value or `NULL` (this refers to
 no overdispersion, thus a Poisson or ZIP distribution).}
 

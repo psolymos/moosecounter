@@ -27,7 +27,6 @@ mc_fit_total(
   weighted = FALSE,
   robust = FALSE,
   intercept = c("both", "count", "zero", "none"),
-  hurdle = FALSE,
   xv = FALSE,
   ...
 )
@@ -75,8 +74,6 @@ influential observations.}
 
 \item{intercept}{Which intercepts to keep. Dropped intercepts lead to
 regression through the origin (at the linear predictor scale).}
-
-\item{hurdle}{Logical, fit hurdle model or zero inflated.}
 
 \item{xv}{Logical, should leave-one-out error be calculated.}
 
