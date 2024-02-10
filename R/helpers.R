@@ -62,10 +62,10 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
 #' @rdname internal
 #' @export
 r0truncpois <- function(n, lambda) {
-  U <- runif(n)
+  U <- stats::runif(n)
   nu <- -log(1 - U*(1 - exp(-lambda)))
-  T1 <- (mu - nu)
-  r <- rpois(n, T1) + 1
+  T1 <- (lambda - nu)
+  r <- stats::rpois(n, T1) + 1
   r
 }
 
