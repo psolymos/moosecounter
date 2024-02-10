@@ -17,9 +17,9 @@
 #' the function is used in the context of count data models
 #' and predictions.
 #'
-#' @param N The number of random numbers to produce.
-#' @param mu.nb The mean of the NB distribution.
-#' @param theta.nb The dispersion parameter of the NB distribution,
+#' @param N,n The number of random numbers to produce.
+#' @param mu.nb,lambda The mean of the NB distribution.
+#' @param theta.nb,theta The dispersion parameter of the NB distribution,
 #'   a single non-negative numeric value or `NULL` (this refers to
 #'   no overdispersion, thus a Poisson or ZIP distribution).
 #' @param phi.zi The probability of the non-zero valies in the ZI part.
@@ -54,6 +54,47 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
         Z <- stats::rpois(N, lambda=mu.nb)
     }
     Y <- A * Z
+    Y
+}
+
+# after https://stat.ethz.ch/pipermail/r-help/2005-May/070680.html
+# lambda is pre-truncation mean of Poisson
+#' @rdname internal
+#' @export
+r0truncpois <- function(n, lambda) {
+  U <- runif(n)
+  nu <- -log(1 - U*(1 - exp(-lambda)))
+  T1 <- (mu - nu)
+  r <- rpois(n, T1) + 1
+  r
+}
+
+#' @rdname internal
+#' @export
+r0truncnegbin <- function(n, lambda, theta) {
+  r <- numeric(n)
+  while(any(r < 1)) {
+    i <- r < 1
+    m <- sum(i)
+    r[i] <- MASS::rnegbin(m, mu=lambda, theta=rep(theta, m))
+  }
+  r
+}
+
+#' @rdname internal
+#' @export
+rHurdle <- function(N, mu.nb, theta.nb, phi.zi) {
+    if (length(phi.zi) < N)
+        phi.zi <- rep(phi.zi, N)[seq_len(N)]
+    Y <- stats::rbinom(N, 1, phi.zi)
+    i <- Y > 0
+    m <- sum(i)
+    if (!is.null(theta.nb)) {
+        Z <- r0truncnegbin(m, mu.nb, theta.nb)
+    } else {
+        Z <- r0truncpois(m, mu.nb)
+    }
+    Y[i] <- Z
     Y
 }
 
