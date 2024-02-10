@@ -374,14 +374,19 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                     Bm.NS <- stats::predict(model.Boot, newdata = x_uns, type="count")
                     Btheta.nb <- model.Boot$theta
                     if (inherits(fit, "hurdle")) {
-                        Bphi.zi <- stats::predict(model.Boot, newdata = x_uns, type="prob", at = 0:1)[,1]
+                        Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="prob", at = 0:1)[,1]
+                        # need truncated Pois here for hurdle
+                        boot.out[,b] <- rHurdle(NS,
+                            mu.nb = Bm.NS,
+                            theta.nb=Btheta.nb,
+                            phi.zi=Bphi.zi) # this is prob of 1 (not 0) and is correct
                     } else {
                         Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="zero")
+                        boot.out[,b] <- rZINB(NS,
+                            mu.nb = Bm.NS,
+                            theta.nb=Btheta.nb,
+                            phi.zi=Bphi.zi) # this is prob of 1 (not 0) and is correct
                     }
-                    boot.out[,b] <- rZINB(NS,
-                        mu.nb = Bm.NS,
-                        theta.nb=Btheta.nb,
-                        phi.zi=Bphi.zi) # this is prob of 1 (not 0) and is correct
                     if (DUAL && inherits(fit, "wzi")) {
                         Bm.NSout <- stats::predict(model.Boot$unweighted_model,
                                             newdata = x_uns[!x_uns$area_srv,], type="count")
