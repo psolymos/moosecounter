@@ -20,6 +20,7 @@
 #' @param intercept Which intercepts to keep. Dropped intercepts lead to
 #'   regression through the origin (at the linear predictor scale).
 #' @param robust Logical, use robust regression approach.
+#' @param xv Logical, should leave-one-out error be calculated.
 #' @param ... Other arguments passed to `zeroinfl2()`.
 #' @param type The type of the response, can be `"total"` or
 #'   `"cows"` for `switch_response`.
@@ -119,8 +120,9 @@ mc_update_total <- function(x, srv=NULL, ss=NULL) {
 #' @rdname total
 #' @export
 mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
-    dist="ZINB", weighted=FALSE, robust=FALSE,
-    intercept = c("both", "count", "zero", "none"), ...) {
+    dist="ZINB", weighted=FALSE, robust=FALSE, 
+    intercept = c("both", "count", "zero", "none"),
+    xv = FALSE, ...) {
     intercept <- match.arg(intercept)
     opts <- getOption("moose_options")
     if (is.null(vars)) {
@@ -143,7 +145,8 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         if (intercept %in% c("count", "none"))
             ZI <- paste0(ZI, " - 1")
     }
-    Form <- stats::as.formula(paste(opts$Ntot, "~", CNT, "|", ZI))
+    chrForm <- paste(opts$Ntot, "~", CNT, "|", ZI)
+    Form <- stats::as.formula(chrForm)
     out <- zeroinfl2(
         formula=Form,
         data=x[x$srv,],
@@ -152,9 +155,12 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         method=opts$method,
         robust=robust,
         ...)
+    if (xv)
+        out <- loo(out)
     if (weighted)
         out <- wzi(out) # wzi know about method
     out$call <- match.call()
+    out$chrformula <- chrForm
     out
 }
 
@@ -308,6 +314,15 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
 
         fit.out[,b] <- fit$fitted.values
 
+        # if (inherits(fit, "hurdle")) {
+        #     parms.start <- list(count = fit$coef$count,
+        #         theta = fit$theta,
+        #         zero = fit$coef$zero)
+        # } else {
+        #     parms.start <- list(count = fit$coef$count,
+        #         zero = fit$coef$zero,
+        #         theta = fit$theta)
+        # }
         parms.start <- list(count = fit$coef$count,
             zero = fit$coef$zero,
             theta = fit$theta)
@@ -321,12 +336,19 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
         if (max(BSurvey.data[[opts$Ntot]]) != 0){
 
             if (do_boot) {
+                # ctrl <- fit$control
+                # ctrl$start = parms.start
+                # ctrl$method = opts$method
+                # ctrl$separate <- fit$separate
+                ctrl <- if (inherits(fit, "hurdle")) {
+                    pscl::hurdle.control(start = parms.start, method = opts$method, separate = fit$separate)
+                } else {
+                    pscl::zeroinfl.control(start = parms.start, method = opts$method)
+                }
                 model.Boot <- try(suppressWarnings(stats::update(fit,
                     x = BSurvey.data,
                     weights=rep(1, nrow(BSurvey.data)),
-                    control = pscl::zeroinfl.control(
-                        start = parms.start,
-                        method = opts$method))), silent = TRUE)
+                    control = ctrl)), silent = TRUE)
                 if (!inherits(model.Boot, "try-error")) {
                     attr(model.Boot, "parms.start") <- parms.start
                     if (inherits(fit, "wzi"))
@@ -345,20 +367,37 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                     predict.BNS
                 }
 
-                if (max(predict.BNS, predict.BNSout) <= MAXCELL && model.Boot$optim$convergence == 0) {
+                # hurdle has a list of count & zero, zeroinfl has just a single optim object
+                CONVERGED <- model.Boot$optim$convergence == 0 || model.Boot$optim$count$convergence == 0 || model.Boot$optim$zero$convergence == 0
+
+                if (max(predict.BNS, predict.BNSout) <= MAXCELL && CONVERGED) {
                     Bm.NS <- stats::predict(model.Boot, newdata = x_uns, type="count")
                     Btheta.nb <- model.Boot$theta
-                    Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="zero")
-                    boot.out[,b] <- rZINB(NS,
-                        mu.nb = Bm.NS,
-                        theta.nb=Btheta.nb,
-                        phi.zi=Bphi.zi) # this os prob of 1 (not 0) and is correct
+                    if (inherits(fit, "hurdle")) {
+                        Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="prob", at = 0:1)[,1]
+                        # need truncated Pois here for hurdle
+                        boot.out[,b] <- rHurdle(NS,
+                            mu.nb = Bm.NS,
+                            theta.nb=Btheta.nb,
+                            phi.zi=Bphi.zi) # this is prob of 1 (not 0) and is correct
+                    } else {
+                        Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="zero")
+                        boot.out[,b] <- rZINB(NS,
+                            mu.nb = Bm.NS,
+                            theta.nb=Btheta.nb,
+                            phi.zi=Bphi.zi) # this is prob of 1 (not 0) and is correct
+                    }
                     if (DUAL && inherits(fit, "wzi")) {
                         Bm.NSout <- stats::predict(model.Boot$unweighted_model,
                                             newdata = x_uns[!x_uns$area_srv,], type="count")
                         Btheta.nbout <- model.Boot$unweighted_model$theta
-                        Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
-                                               newdata = x_uns[!x_uns$area_srv,], type="zero")
+                        if (inherits(fit, "hurdle")) {
+                            Bphi.ziout <- stats::predict(model.Boot$unweighted_model,
+                                                newdata = x_uns[!x_uns$area_srv,], type="prob", at = 0:1)[,1]
+                        } else {
+                            Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
+                                                newdata = x_uns[!x_uns$area_srv,], type="zero")
+                        }
                         boot.out[!x_uns$area_srv,b] <- rZINB(sum(!x_uns$area_srv),
                             mu.nb = Bm.NSout,
                             theta.nb=Btheta.nbout,

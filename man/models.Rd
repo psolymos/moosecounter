@@ -3,6 +3,7 @@
 \name{models}
 \alias{models}
 \alias{wzi}
+\alias{loo}
 \alias{zeroinfl2}
 \alias{summary.non_zeroinfl}
 \alias{print.summary.non_zeroinfl}
@@ -11,6 +12,8 @@
 \usage{
 wzi(object, pass_data = FALSE, ...)
 
+loo(object, ...)
+
 zeroinfl2(
   formula,
   data,
@@ -18,7 +21,7 @@ zeroinfl2(
   na.action,
   weights,
   offset,
-  dist = c("ZIP", "ZINB", "P", "NB"),
+  dist = "ZIP",
   link = c("logit", "probit", "cloglog"),
   control = NULL,
   model = TRUE,

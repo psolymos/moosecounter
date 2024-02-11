@@ -257,8 +257,8 @@ server <- function(input, output, session) {
                                         vars = !!.$var_count,
                                         zi_vars = !!.$var_zero,
                                         dist = !!.$dist,
-                                        weighted = !!.$weighted,
-                                        robust = !!.$robust,
+                                        # weighted = !!.$weighted,
+                                        # robust = !!.$robust,
                                         intercept = !!.$intercept))),
           silent = TRUE)))))
   })
@@ -285,33 +285,49 @@ server <- function(input, output, session) {
 
 
   observe({
-    req(input$total_model_dist, input$total_model_id, input$total_model_weighted, input$total_model_robust)
+    req(input$total_model_dist, input$total_model_id)
+    # req(input$total_model_dist, input$total_model_id, input$total_model_weighted, input$total_model_robust)
 
     total_models_list$m[[input$total_model_id]] <- list(
       dist = input$total_model_dist,
-      robust = as.logical(input$total_model_robust),
-      weighted = as.logical(input$total_model_weighted),
+      # robust = as.logical(input$total_model_robust),
+      # weighted = as.logical(input$total_model_weighted),
       var_count = input$total_model_var_count,
       var_zero = input$total_model_var_zero,
       intercept = tolower(input$total_model_int))
   }) %>%
     bindEvent(input$total_model_add)
 
+  # find total surveyed moose
+  observed_total <- reactive({
+    s <- survey_sub()
+    s <- s[s$srv,]
+    n <- nrow(s)
+    N <- sum(s[[opts()$Ntot]])
+    c(n=n, N=N)
+  })
+
   output$total_model_table <- function() {
     moosecounter:::validate_flow(input$survey_file)
+    tot <- observed_total()
     imap_dfr(total_models(), ~{
       d <- data.frame(Model = .y,
                       `Count variables` = paste(.x$var_count, collapse = ", "),
                       `Zero variables` = paste(.x$var_zero, collapse = ", "),
                       Distribution = .x$dist,
-                      Weighted = .x$weighted,
-                      Robust = .x$robust)
+                      # Surveys = tot$n,
+                      # Total = tot$N,
+                      check.names = FALSE)
+                      # Weighted = .x$weighted,
+                      # Robust = .x$robust)
+      d <- dplyr::mutate(d,
+        Total = paste0(tot["N"], " (n = ", tot["n"], ")"))
       if("try-error" %in% class(.x$model)) {
         d <- dplyr::mutate(d, method = "MODEL PROBLEM", response = "MODEL PROBLEM")
       } else {
         d <- dplyr::mutate(d,
-                    method = .x$model$method,
-                    response = names(.x$model$model)[1])
+                    Method = .x$model$method,
+                    Response = names(.x$model$model)[1])
       }
       d
     }) %>%
@@ -392,8 +408,8 @@ server <- function(input, output, session) {
 
     cat("Model:", input$total_resid_model, "\n")
     cat("Model type:", total_models()[[input$total_resid_model]][["dist"]],
-        if (total_models()[[input$total_resid_model]][["weighted"]])
-          "(weighted)" else "", "\n")
+        # if (total_models()[[input$total_resid_model]][["weighted"]]) "(weighted)" else "",
+        "\n")
     summary(total_models()[[input$total_resid_model]][["model"]])
   })
 
@@ -610,7 +626,7 @@ server <- function(input, output, session) {
   # PI/bootstrap download
   total_xlslist <- reactive({
     req(input$survey_file, total_pi())
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = total_pi()$pi,
                summary = pred_density_moose_PI(total_pi()$pi),
                seed = input$opts_seed)
@@ -623,7 +639,7 @@ server <- function(input, output, session) {
     s <- pred_density_moose_PI(total_pi_subset())
     rownames(s) <- c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2")
 
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = total_pi_subset(),
                summary = s,
                seed = input$opts_seed,
@@ -1060,7 +1076,7 @@ server <- function(input, output, session) {
   # PI/bootstrap download
   comp_xlslist <- reactive({
     req(comp_pi())
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = comp_pi()$pi,
                summary = pred_density_moose_CPI(comp_pi()$pi),
                seed = input$opts_seed)
@@ -1068,7 +1084,7 @@ server <- function(input, output, session) {
 
   comp_xlslist_subset <- reactive({
     req(comp_pi_subset())
-    PI_xlslist(input$survey_file,
+    moosecounter:::PI_xlslist(input$survey_file,
                pred = comp_pi_subset(),
                summary = pred_density_moose_CPI(comp_pi_subset()),
                seed = input$opts_seed,

@@ -58,22 +58,34 @@ switch_response("total")
 ## this also sets total cows value
 x <- mc_update_total(x)
 
-## univariate exploration
-mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
-
-## multivariate exploration
 vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
     "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
     "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
 
+## univariate exploration
+mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
+
+## multivariate exploration
 mc_plot_multivariate(vars, x)
 
 ## build model list
+# ML <- list()
+# ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+# ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
+# ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
+# ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+
+xv <- FALSE
+hurdle <- TRUE
+
 ML <- list()
-ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
-ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
-ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
-ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", xv=xv, hurdle=hurdle)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", xv=xv, hurdle=hurdle)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", xv=xv, hurdle=hurdle)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", xv=xv, hurdle=hurdle)
+
+# m <- zeroinfl2(MOOSE_TOTA ~ 1, x)
+# mm <- loo(m)
 
 mc_models_total(ML, x)
 mc_plot_residuals("Model 3", ML, x)
@@ -416,3 +428,21 @@ pred.numbers <- CPI2$results$unsurveyed
 Total_Cows <- c(
     Survey.data$COW_1C + Survey.data$COW_2C + Survey.data$LONE_COW,
     pred.numbers$COW_1C + pred.numbers$COW_2C + pred.numbers$LONE_COW)
+
+
+# after https://stat.ethz.ch/pipermail/r-help/2005-May/070680.html
+n <- 10^6
+lam <- 3.4        # pre-truncation mean of Poisson
+
+d1 <- rpois(n, lam)
+d1 <- d1[d1>0]
+d2 <- r0truncpois(n, lam)
+summary(d1)
+summary(d2)
+
+thet <- 1.5
+d1 <- MASS::rnegbin(n, mu=lam, theta=rep(thet, n))
+d1 <- d1[d1>0]
+d2 <- r0truncnegbin(n, lam, thet)
+summary(d1)
+summary(d2)
