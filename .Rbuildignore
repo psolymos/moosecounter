@@ -3,6 +3,7 @@
 ^README\.md$
 ^docs/*$
 ^_pkgdown\.yml$
-^RELEASE.R$
+^RELEASE\.R$
 ^inst/shiny/tests/*$
 ^_tmp/*$
+^\.github/*$
