@@ -34,7 +34,7 @@ jobs:
 
       - name: Build site
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        run: Rscript -e 'pkgdown::build_site_github_pages(install=TRUE)'
+        run: Rscript -e 'pkgdown::build_site_github_pages(install=TRUE, examples=FALSE)'
 
       - name: Deploy site
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
