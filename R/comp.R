@@ -36,10 +36,10 @@
 #'     "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
 #'     "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
 #' ML <- list()
-#' ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
-#' ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
-#' ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
-#' ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+#' ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB")
+#' ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB")
+#' ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP")
+#' ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB")
 #'
 #' ## Composition odel list
 #' CML <- list()

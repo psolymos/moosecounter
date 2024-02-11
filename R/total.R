@@ -59,10 +59,10 @@
 #' mc_plot_multivariate(vars, x)
 #'
 #' ML <- list()
-#' ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
-#' ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
-#' ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
-#' ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+#' ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB")
+#' ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB")
+#' ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP")
+#' ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB")
 #'
 #' mc_models_total(ML, x)
 #' mc_plot_residuals("Model 3", ML, x)
