@@ -155,12 +155,12 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         method=opts$method,
         robust=robust,
         ...)
-    if (xv)
-        out <- loo(out)
-    if (weighted)
-        out <- wzi(out) # wzi know about method
-    out$call <- match.call()
     out$chrformula <- chrForm
+    if (xv)
+        out <- loo(out) # loo knows about method
+    if (weighted)
+        out <- wzi(out) # wzi knows about method
+    out$call <- match.call()
     out
 }
 
