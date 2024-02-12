@@ -397,14 +397,18 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                         if (inherits(fit, "hurdle")) {
                             Bphi.ziout <- stats::predict(model.Boot$unweighted_model,
                                                 newdata = x_uns[!x_uns$area_srv,], type="prob", at = 0:1)[,1]
+                            boot.out[!x_uns$area_srv,b] <- rHurdle(sum(!x_uns$area_srv),
+                                mu.nb = Bm.NSout,
+                                theta.nb=Btheta.nbout,
+                                phi.zi=Bphi.ziout)
                         } else {
                             Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
                                                 newdata = x_uns[!x_uns$area_srv,], type="zero")
+                            boot.out[!x_uns$area_srv,b] <- rZINB(sum(!x_uns$area_srv),
+                                mu.nb = Bm.NSout,
+                                theta.nb=Btheta.nbout,
+                                phi.zi=Bphi.ziout)
                         }
-                        boot.out[!x_uns$area_srv,b] <- rZINB(sum(!x_uns$area_srv),
-                            mu.nb = Bm.NSout,
-                            theta.nb=Btheta.nbout,
-                            phi.zi=Bphi.ziout)
                     }
                     if (max(boot.out[,b]) <= MAXCELL) {
                         pbapply::setpb(pb, b)

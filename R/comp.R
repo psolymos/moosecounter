@@ -331,13 +331,19 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
           count = total_fit$coef$count,
           zero = total_fit$coef$zero,
           theta = total_fit$theta)
-      w <- rep(1, nrow(BSurvey.data))
+      # w <- rep(1, nrow(BSurvey.data))
+      ctrl <- if (inherits(total_fit, "hurdle")) {
+          pscl::hurdle.control(start = parms.start, method = opts$method, separate = total_fit$separate)
+      } else {
+          pscl::zeroinfl.control(start = parms.start, method = opts$method)
+      }
       model.Boot <- try(suppressWarnings(stats::update(total_fit,
         #data = BSurvey.data,
         x = BSurvey.data,
-        control = pscl::zeroinfl.control(
-          start = parms.start,
-          method = opts$method))), silent = TRUE)
+        weights=rep(1, nrow(BSurvey.data)),
+        control = ctrl,
+        xv = FALSE # no need to use LOO
+      )), silent = TRUE)
     } else {
       total_fit <- model_list_total[[PI$model_select_id[b]]]
       model.Boot <- total_fit
@@ -369,20 +375,42 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
             ## here 'count' refers to the abundance model (no ZI considered)
             Bm.NS <- stats::predict(model.Boot, newdata=Unsurvey.data, type="count")
             Btheta.nb <- model.Boot$theta
-            #Bphi.zi <- 1 - plogis(coef(model.Boot)[length(coef(model.Boot))])
-            Bphi.zi <- 1 - stats::predict(model.Boot, newdata=Unsurvey.data, type="zero")
-            PUnsurvey.data <- rZINB(NS, mu.nb=Bm.NS,
-              theta.nb=Btheta.nb, phi.zi=Bphi.zi)
+
+            if (inherits(total_fit, "hurdle")) {
+                Bphi.zi <- 1 - stats::predict(model.Boot, newdata=Unsurvey.data, type="prob", at = 0:1)[,1]
+                PUnsurvey.data <- rHurdle(NS, 
+                  mu.nb=Bm.NS,
+                  theta.nb=Btheta.nb, 
+                  phi.zi=Bphi.zi)
+            } else {
+                Bphi.zi <- 1 - stats::predict(model.Boot, newdata=Unsurvey.data, type="zero")
+                PUnsurvey.data <- rZINB(NS, 
+                  mu.nb=Bm.NS,
+                  theta.nb=Btheta.nb, 
+                  phi.zi=Bphi.zi)
+            }
+
             if (DUAL && inherits(total_fit, "wzi")) {
               Bm.NSout <- stats::predict(model.Boot$unweighted_model,
                   newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="count")
               Btheta.nbout <- model.Boot$unweighted_model$theta
-              Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
-                  newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="zero")
-              PUnsurvey.data[!Unsurvey.data$area_srv] <- rZINB(sum(!Unsurvey.data$area_srv),
-                  mu.nb = Bm.NSout,
-                  theta.nb=Btheta.nbout,
-                  phi.zi=Bphi.ziout)
+
+              if (inherits(total_fit, "hurdle")) {
+                  Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
+                      newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="prob", at = 0:1)[,1]
+                  PUnsurvey.data[!Unsurvey.data$area_srv] <- rHurdle(sum(!Unsurvey.data$area_srv),
+                      mu.nb = Bm.NSout,
+                      theta.nb=Btheta.nbout,
+                      phi.zi=Bphi.ziout)
+              } else {
+                  Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
+                      newdata = Unsurvey.data[!Unsurvey.data$area_srv,], type="zero")
+                  PUnsurvey.data[!Unsurvey.data$area_srv] <- rZINB(sum(!Unsurvey.data$area_srv),
+                      mu.nb = Bm.NSout,
+                      theta.nb=Btheta.nbout,
+                      phi.zi=Bphi.ziout)
+              }
+
             }
           } else {
             if (fix_mean) {
