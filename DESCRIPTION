@@ -6,7 +6,8 @@ Author:
   Subhash Lele [aut],
   Sophie Czetwertynski [aut],
   Peter Solymos [aut, cre] (<https://orcid.org/0000-0001-7337-1740>),
-  Steffi LaZerte [aut]
+  Steffi LaZerte [aut],
+  Government of Yukon [fnd]
 Maintainer: Peter Solymos <psolymos@gmail.com>
 Description: Adaptive Moose surveys.
 Imports: 
