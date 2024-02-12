@@ -188,7 +188,7 @@ get_coefs <- function(ML) {
 mc_models_total <- function(ml, x, coefs=TRUE) {
     aic <- sapply(ml, stats::AIC)
     bic <- sapply(ml, stats::BIC)
-    Chi2 <- sapply(ml, function(z) { if (is.null(z$xv)) NA_real_ else sum(z$xv) })
+    Chi2 <- sapply(ml, function(z) { if (is.null(z$chi2)) NA_real_ else sum(z$chi2) })
     ic <- data.frame(
         AIC=aic,
         BIC=bic,
@@ -349,7 +349,9 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                 model.Boot <- try(suppressWarnings(stats::update(fit,
                     x = BSurvey.data,
                     weights=rep(1, nrow(BSurvey.data)),
-                    control = ctrl)), silent = TRUE)
+                    control = ctrl,
+                    xv = FALSE # no need to use LOO
+                )), silent = TRUE)
                 if (!inherits(model.Boot, "try-error")) {
                     attr(model.Boot, "parms.start") <- parms.start
                     if (inherits(fit, "wzi"))
