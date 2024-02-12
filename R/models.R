@@ -43,9 +43,13 @@ wzi <- function(object, pass_data=FALSE, ...) {
     ll0 <- as.numeric(stats::logLik(object))
     ll <- numeric(n)
     w <- rep(1, n)
-    ctrl <- pscl::zeroinfl.control(
-        method = getOption("moose_options")$method,
-        start = attr(object, "parms.start"))
+    opts <- getOption("moose_options")
+    parms.start <- attr(object, "parms.start")
+    ctrl <- if (inherits(object, "hurdle")) {
+        pscl::hurdle.control(start = parms.start, method = opts$method, separate = object$separate)
+    } else {
+        pscl::zeroinfl.control(start = parms.start, method = opts$method)
+    }
     d <- stats::model.frame(object)
     Form <- stats::as.formula(object$chrformula)
     for (i in seq_len(n)) {
@@ -85,13 +89,16 @@ loo <- function(object, ...) {
         stop("Please use y=TRUE when fitting the model object.")
     n <- stats::nobs(object)
     xv <- rep(NA_real_, n)
-    ctrl <- pscl::zeroinfl.control(
-        method = getOption("moose_options")$method,
-        start = attr(object, "parms.start"))
+    opts <- getOption("moose_options")
+    parms.start <- attr(object, "parms.start")
+    ctrl <- if (inherits(object, "hurdle")) {
+        pscl::hurdle.control(start = parms.start, method = opts$method, separate = object$separate)
+    } else {
+        pscl::zeroinfl.control(start = parms.start, method = opts$method)
+    }
     d <- stats::model.frame(object)
     Form <- stats::as.formula(object$chrformula)
     for (i in seq_len(n)) {
-        print(object$call)
         m <- try(suppressWarnings(stats::update(
             object, 
             data=d[-i,,drop=FALSE], 
