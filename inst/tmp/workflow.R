@@ -79,11 +79,11 @@ xv <- TRUE
 
 ML <- list()
 ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", xv=xv)
-ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", xv=xv)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="HP", xv=xv)
 ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", xv=xv)
-ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", xv=xv)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="HNB", xv=xv)
 
-sapply(ML, \(x) sum(x$xv))
+sapply(ML, \(x) sum(x$chi2))
 
 m <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
 
@@ -94,9 +94,9 @@ summary(weights(mm))
 summary(weights(mm$unweighted_model))
 
 mm <- loo(m)
-m$xv
-summary(mm$xv)
-sum(mm$xv)
+m$chi2
+summary(mm$chi2)
+sum(mm$chi2)
 
 mc_models_total(ML, x)
 
@@ -109,6 +109,8 @@ PI <- mc_predict_total(
     ml=ML,
     x=x,
     do_boot=TRUE, do_avg=TRUE)
+
+PI <- mc_predict_total(model_id="Model 3", ml=ML, x=x, do_boot=TRUE)
 
 mc_get_pred(PI)
 pred_density_moose_PI(PI)
