@@ -370,7 +370,10 @@ mc_predict_comp <- function(total_model_id, comp_model_id,
           predict.BNS <- predict.BNSout <- PI$boot_full[!srv,b]
         }
 
-        if (max(predict.BNS, predict.BNSout) <= MAXCELL & model.Boot$optim$convergence == 0) { # loop 2
+        # hurdle has a list of count & zero, zeroinfl has just a single optim object
+        CONVERGED <- model.Boot$optim$convergence == 0 || model.Boot$optim$count$convergence == 0 || model.Boot$optim$zero$convergence == 0
+
+        if (max(predict.BNS, predict.BNSout) <= MAXCELL && CONVERGED) { # loop 2
           if (newPI) {
             ## here 'count' refers to the abundance model (no ZI considered)
             Bm.NS <- stats::predict(model.Boot, newdata=Unsurvey.data, type="count")
