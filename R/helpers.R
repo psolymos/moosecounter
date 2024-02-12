@@ -76,7 +76,7 @@ r0truncnegbin <- function(n, lambda, theta) {
   while(any(r < 1)) {
     i <- r < 1
     m <- sum(i)
-    r[i] <- MASS::rnegbin(m, mu=lambda, theta=rep(theta, m))
+    r[i] <- MASS::rnegbin(m, mu=lambda[i], theta=rep(theta, m))
   }
   r
 }
@@ -90,9 +90,9 @@ rHurdle <- function(N, mu.nb, theta.nb, phi.zi) {
     i <- Y > 0
     m <- sum(i)
     if (!is.null(theta.nb)) {
-        Z <- r0truncnegbin(m, mu.nb, theta.nb)
+        Z <- r0truncnegbin(m, mu.nb[i], theta.nb)
     } else {
-        Z <- r0truncpois(m, mu.nb)
+        Z <- r0truncpois(m, mu.nb[i])
     }
     Y[i] <- Z
     Y
