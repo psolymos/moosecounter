@@ -50,6 +50,11 @@ wzi <- function(object, pass_data=FALSE, ...) {
     } else {
         pscl::zeroinfl.control(start = parms.start, method = opts$method)
     }
+    dist <- if (inherits(object, "hurdle")) {
+        switch(object$dist$count, "poisson" = "HP", "negbin" = "HNB")
+    } else {
+        object$dist
+    }
     d <- stats::model.frame(object)
     Form <- stats::as.formula(object$chrformula)
     for (i in seq_len(n)) {
@@ -59,7 +64,7 @@ wzi <- function(object, pass_data=FALSE, ...) {
             weights=w[-i], 
             control=ctrl,
             robust = object$robust,
-            dist = object$dist)), silent=FALSE)
+            dist = dist)), silent=FALSE)
         ll[i] <- if (inherits(m, "try-error"))
             (n-1)*ll0/n else as.numeric(stats::logLik(m))
     }
@@ -96,6 +101,11 @@ loo <- function(object, ...) {
     } else {
         pscl::zeroinfl.control(start = parms.start, method = opts$method)
     }
+    dist <- if (inherits(object, "hurdle")) {
+        switch(object$dist$count, "poisson" = "HP", "negbin" = "HNB")
+    } else {
+        object$dist
+    }
     d <- stats::model.frame(object)
     Form <- stats::as.formula(object$chrformula)
     for (i in seq_len(n)) {
@@ -104,7 +114,7 @@ loo <- function(object, ...) {
             data=d[-i,,drop=FALSE], 
             control=ctrl,
             robust = object$robust,
-            dist = object$dist)), silent=FALSE)
+            dist = dist)), silent=FALSE)
         if (!inherits(m, "try-error")) {
             pr <- stats::predict(m, newdata = d[i,,drop=FALSE], type = "response")
             xv[i] <- (pr - object$y[i])^2 / (0.5*pr + 0.5*object$y[i])
@@ -1026,6 +1036,11 @@ function (x, digits = max(3, getOption("digits") - 3), ...)
 #' @importFrom stats nobs
 #' @export
 nobs.zeroinfl <- function(object, ...) object$n
+
+#' @rdname models
+#' @importFrom stats nobs
+#' @export
+nobs.hurdle <- function(object, ...) object$n
 
 
 #' Internal function for CL/PL robust fitting
