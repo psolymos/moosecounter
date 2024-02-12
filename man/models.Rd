@@ -8,6 +8,7 @@
 \alias{summary.non_zeroinfl}
 \alias{print.summary.non_zeroinfl}
 \alias{nobs.zeroinfl}
+\alias{nobs.hurdle}
 \title{Internal Functions: Models}
 \usage{
 wzi(object, pass_data = FALSE, ...)
@@ -37,6 +38,8 @@ zeroinfl2(
 \method{print}{summary.non_zeroinfl}(x, digits = max(3, getOption("digits") - 3), ...)
 
 \method{nobs}{zeroinfl}(object, ...)
+
+\method{nobs}{hurdle}(object, ...)
 }
 \arguments{
 \item{object}{A model as returned by `zeroinfl2()`.}

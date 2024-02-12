@@ -155,12 +155,12 @@ mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
         method=opts$method,
         robust=robust,
         ...)
-    if (xv)
-        out <- loo(out)
-    if (weighted)
-        out <- wzi(out) # wzi know about method
-    out$call <- match.call()
     out$chrformula <- chrForm
+    if (xv)
+        out <- loo(out) # loo knows about method
+    if (weighted)
+        out <- wzi(out) # wzi knows about method
+    out$call <- match.call()
     out
 }
 
@@ -188,14 +188,15 @@ get_coefs <- function(ML) {
 mc_models_total <- function(ml, x, coefs=TRUE) {
     aic <- sapply(ml, stats::AIC)
     bic <- sapply(ml, stats::BIC)
+    Chi2 <- sapply(ml, function(z) { if (is.null(z$chi2)) NA_real_ else sum(z$chi2) })
     ic <- data.frame(
-        ic=aic,
+        AIC=aic,
         BIC=bic,
         df=sapply(ml, function(z) length(stats::coef(z))),
         logLik=sapply(ml, function(z) as.numeric(stats::logLik(z))))
-    ic$delta <- ic$ic - min(ic$ic)
+    ic$delta <- ic$AIC - min(ic$AIC)
     ic$weight <- exp( -0.5 * ic$delta) / sum(exp( -0.5 * ic$delta))
-    colnames(ic)[colnames(ic) == "ic"] <- "AIC"
+    ic$Chi2 <- Chi2
 
     D <- t(sapply(ml, pred_density_moose, x=x))
     out <- data.frame(ic, D)
@@ -348,7 +349,9 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                 model.Boot <- try(suppressWarnings(stats::update(fit,
                     x = BSurvey.data,
                     weights=rep(1, nrow(BSurvey.data)),
-                    control = ctrl)), silent = TRUE)
+                    control = ctrl,
+                    xv = FALSE # no need to use LOO
+                )), silent = TRUE)
                 if (!inherits(model.Boot, "try-error")) {
                     attr(model.Boot, "parms.start") <- parms.start
                     if (inherits(fit, "wzi"))
@@ -394,14 +397,18 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
                         if (inherits(fit, "hurdle")) {
                             Bphi.ziout <- stats::predict(model.Boot$unweighted_model,
                                                 newdata = x_uns[!x_uns$area_srv,], type="prob", at = 0:1)[,1]
+                            boot.out[!x_uns$area_srv,b] <- rHurdle(sum(!x_uns$area_srv),
+                                mu.nb = Bm.NSout,
+                                theta.nb=Btheta.nbout,
+                                phi.zi=Bphi.ziout)
                         } else {
                             Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
                                                 newdata = x_uns[!x_uns$area_srv,], type="zero")
+                            boot.out[!x_uns$area_srv,b] <- rZINB(sum(!x_uns$area_srv),
+                                mu.nb = Bm.NSout,
+                                theta.nb=Btheta.nbout,
+                                phi.zi=Bphi.ziout)
                         }
-                        boot.out[!x_uns$area_srv,b] <- rZINB(sum(!x_uns$area_srv),
-                            mu.nb = Bm.NSout,
-                            theta.nb=Btheta.nbout,
-                            phi.zi=Bphi.ziout)
                     }
                     if (max(boot.out[,b]) <= MAXCELL) {
                         pbapply::setpb(pb, b)

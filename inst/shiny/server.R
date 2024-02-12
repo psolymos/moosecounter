@@ -6,7 +6,7 @@ server <- function(input, output, session) {
         input$opts_method,
         input$opts_b,
         input$opts_alpha,
-        input$opts_wscale,
+        # input$opts_wscale,
         input$opts_sightability)
 
     switch_response(input$opts_response)
@@ -14,7 +14,7 @@ server <- function(input, output, session) {
       method = input$opts_method,
       B = input$opts_b,
       alpha = as.numeric(input$opts_alpha),
-      wscale = input$opts_wscale,
+      # wscale = input$opts_wscale,
       sightability = input$opts_sightability)
     #mc_options(srv = "")
     #mc_options(MAXCELL = "")
@@ -257,6 +257,7 @@ server <- function(input, output, session) {
                                         vars = !!.$var_count,
                                         zi_vars = !!.$var_zero,
                                         dist = !!.$dist,
+                                        xv = !!.$xv,
                                         # weighted = !!.$weighted,
                                         # robust = !!.$robust,
                                         intercept = !!.$intercept))),
@@ -285,11 +286,12 @@ server <- function(input, output, session) {
 
 
   observe({
-    req(input$total_model_dist, input$total_model_id)
+    req(input$total_model_dist, input$total_model_id, input$total_model_xv)
     # req(input$total_model_dist, input$total_model_id, input$total_model_weighted, input$total_model_robust)
 
     total_models_list$m[[input$total_model_id]] <- list(
       dist = input$total_model_dist,
+      xv = input$total_model_xv,
       # robust = as.logical(input$total_model_robust),
       # weighted = as.logical(input$total_model_weighted),
       var_count = input$total_model_var_count,

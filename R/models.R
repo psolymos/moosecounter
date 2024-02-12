@@ -43,9 +43,18 @@ wzi <- function(object, pass_data=FALSE, ...) {
     ll0 <- as.numeric(stats::logLik(object))
     ll <- numeric(n)
     w <- rep(1, n)
-    ctrl <- pscl::zeroinfl.control(
-        method = getOption("moose_options")$method,
-        start = attr(object, "parms.start"))
+    opts <- getOption("moose_options")
+    parms.start <- attr(object, "parms.start")
+    ctrl <- if (inherits(object, "hurdle")) {
+        pscl::hurdle.control(start = parms.start, method = opts$method, separate = object$separate)
+    } else {
+        pscl::zeroinfl.control(start = parms.start, method = opts$method)
+    }
+    dist <- if (inherits(object, "hurdle")) {
+        switch(object$dist$count, "poisson" = "HP", "negbin" = "HNB")
+    } else {
+        object$dist
+    }
     d <- stats::model.frame(object)
     Form <- stats::as.formula(object$chrformula)
     for (i in seq_len(n)) {
@@ -55,7 +64,7 @@ wzi <- function(object, pass_data=FALSE, ...) {
             weights=w[-i], 
             control=ctrl,
             robust = object$robust,
-            dist = object$dist)), silent=FALSE)
+            dist = dist)), silent=FALSE)
         ll[i] <- if (inherits(m, "try-error"))
             (n-1)*ll0/n else as.numeric(stats::logLik(m))
     }
@@ -85,25 +94,33 @@ loo <- function(object, ...) {
         stop("Please use y=TRUE when fitting the model object.")
     n <- stats::nobs(object)
     xv <- rep(NA_real_, n)
-    ctrl <- pscl::zeroinfl.control(
-        method = getOption("moose_options")$method,
-        start = attr(object, "parms.start"))
+    opts <- getOption("moose_options")
+    parms.start <- attr(object, "parms.start")
+    ctrl <- if (inherits(object, "hurdle")) {
+        pscl::hurdle.control(start = parms.start, method = opts$method, separate = object$separate)
+    } else {
+        pscl::zeroinfl.control(start = parms.start, method = opts$method)
+    }
+    dist <- if (inherits(object, "hurdle")) {
+        switch(object$dist$count, "poisson" = "HP", "negbin" = "HNB")
+    } else {
+        object$dist
+    }
     d <- stats::model.frame(object)
     Form <- stats::as.formula(object$chrformula)
     for (i in seq_len(n)) {
-        print(object$call)
         m <- try(suppressWarnings(stats::update(
             object, 
             data=d[-i,,drop=FALSE], 
             control=ctrl,
             robust = object$robust,
-            dist = object$dist)), silent=FALSE)
+            dist = dist)), silent=FALSE)
         if (!inherits(m, "try-error")) {
             pr <- stats::predict(m, newdata = d[i,,drop=FALSE], type = "response")
             xv[i] <- (pr - object$y[i])^2 / (0.5*pr + 0.5*object$y[i])
         }
     }
-    object$xv <- xv
+    object$chi2 <- xv
     object
 }
 
@@ -1019,6 +1036,11 @@ function (x, digits = max(3, getOption("digits") - 3), ...)
 #' @importFrom stats nobs
 #' @export
 nobs.zeroinfl <- function(object, ...) object$n
+
+#' @rdname models
+#' @importFrom stats nobs
+#' @export
+nobs.hurdle <- function(object, ...) object$n
 
 
 #' Internal function for CL/PL robust fitting
