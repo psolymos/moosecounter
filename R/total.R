@@ -188,14 +188,15 @@ get_coefs <- function(ML) {
 mc_models_total <- function(ml, x, coefs=TRUE) {
     aic <- sapply(ml, stats::AIC)
     bic <- sapply(ml, stats::BIC)
+    Chi2 <- sapply(ml, function(z) { if (is.null(z$xv)) NA_real_ else sum(z$xv) })
     ic <- data.frame(
-        ic=aic,
+        AIC=aic,
         BIC=bic,
         df=sapply(ml, function(z) length(stats::coef(z))),
         logLik=sapply(ml, function(z) as.numeric(stats::logLik(z))))
-    ic$delta <- ic$ic - min(ic$ic)
+    ic$delta <- ic$AIC - min(ic$AIC)
     ic$weight <- exp( -0.5 * ic$delta) / sum(exp( -0.5 * ic$delta))
-    colnames(ic)[colnames(ic) == "ic"] <- "AIC"
+    ic$Chi2 <- Chi2
 
     D <- t(sapply(ml, pred_density_moose, x=x))
     out <- data.frame(ic, D)
