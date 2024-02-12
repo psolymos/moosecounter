@@ -120,7 +120,7 @@ loo <- function(object, ...) {
             xv[i] <- (pr - object$y[i])^2 / (0.5*pr + 0.5*object$y[i])
         }
     }
-    object$xv <- xv
+    object$chi2 <- xv
     object
 }
 
