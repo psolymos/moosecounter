@@ -75,17 +75,30 @@ mc_plot_multivariate(vars, x)
 # ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
 # ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
 
-xv <- FALSE
-hurdle <- TRUE
+xv <- TRUE
 
 ML <- list()
-ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", xv=xv, hurdle=hurdle)
-ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", xv=xv, hurdle=hurdle)
-ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", xv=xv, hurdle=hurdle)
-ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", xv=xv, hurdle=hurdle)
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", xv=xv)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", xv=xv)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", xv=xv)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", xv=xv)
 
-# m <- zeroinfl2(MOOSE_TOTA ~ 1, x)
-# mm <- loo(m)
+sapply(ML, \(x) sum(x$xv))
+
+m <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+
+mm <- wzi(m)
+coef(mm)
+coef(mm$unweighted_model)
+summary(weights(mm))
+summary(weights(mm$unweighted_model))
+
+mm <- loo(m)
+m$xv
+summary(mm$xv)
+sum(mm$xv)
+
+mc_models_total(ML, x)
 
 mc_models_total(ML, x)
 mc_plot_residuals("Model 3", ML, x)
