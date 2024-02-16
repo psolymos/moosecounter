@@ -168,7 +168,7 @@ server <- function(input, output, session) {
                        survey_sub())
   })
 
-  output$uni_graph <- renderGirafe({
+  uni_graph <- reactive({
     req(input$uni_var, input$uni_dist, input$uni_var != "none", opts())
 
     p1 <- mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
@@ -177,8 +177,13 @@ server <- function(input, output, session) {
                              base = FALSE, type = "map", interactive = TRUE)
     p3 <- mc_plot_univariate(input$uni_var, survey_sub(), input$uni_dist,
                              base = FALSE, type = "fit", interactive = TRUE)
-    moosecounter:::mc_ggiraph(p1 + p2 + p3, width = 15, height = 4)
+    p1 + p2 + p3
   })
+
+  observe(shinyjs::toggleState("dl_uni_graph", is_ready(uni_graph())))
+  output$uni_graph <- renderGirafe(moosecounter:::mc_ggiraph(uni_graph(), width = 15, height = 4))
+  output$dl_uni_graph <- plot_download(uni_graph(), "total_uni_var.png",
+                                       dims = c(15, 4))
 
 
   ## Multivariate Exploration ---------------------
@@ -190,12 +195,16 @@ server <- function(input, output, session) {
                        multiple = TRUE)
   })
 
-  output$multi_graph <- renderPlot({
+  multi_graph <- reactive({
     req(input$multi_var != "none", opts(), input$multi_alpha)
-
     mc_plot_multivariate(vars = input$multi_var, x = survey_sub(),
                          alpha = input$multi_alpha)
-  }, res = 100)
+    grDevices::recordPlot()
+  })
+  observe(shinyjs::toggleState("dl_multi_graph", is_ready(multi_graph())))
+  output$multi_graph <- renderPlot(multi_graph(), res = 100)
+  output$dl_multi_graph <- plot_download(multi_graph(), "total_multi_var.png",
+                                         dims = c(10, 5))
 
 
   ## Add models -----------------------------------

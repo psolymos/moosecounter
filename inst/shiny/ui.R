@@ -114,8 +114,10 @@ ui_total_univar <- fluidRow(
              radioButtons("uni_dist", "Distribution", inline = TRUE,
                           choices = c("P", "NB", "ZIP", "ZINB"),
                           selected = "NB")),
-         shinydashboard::box(width = 12,
-             girafeOutput("uni_graph", height = "100%")
+         shinydashboard::box(
+           width = 12,
+           ui_plot_download("uni_graph"),
+           girafeOutput("uni_graph", height = "100%")
          )
   )
 )
@@ -128,7 +130,10 @@ ui_total_multivar <- fluidRow(
          shinydashboard::box(width = 6, sliderInput("multi_alpha", label = "alpha level for split",
                                     value = 0.01,
                                     min = 0.001, max = 0.5, step = 0.01)),
-         shinydashboard::box(width = 12, plotOutput("multi_graph"))
+         shinydashboard::box(
+           width = 12,
+           ui_plot_download("multi_graph"),
+           plotOutput("multi_graph"))
   )
 )
 

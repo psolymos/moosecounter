@@ -31,11 +31,10 @@ Suggests:
     openxlsx,
     shinyBS (>= 0.61),
     shinydashboard (>= 0.7.1),
-    shinytest (>= 1.5.1),
+    shinyjs (>= 2.1.0),
     systemfonts (>= 0.3.0),
     testthat (>= 3.0.0),
-    patchwork (>= 1.2.0),
-    shinyjs
+    patchwork (>= 1.2.0)
 License: GPL-2
 RoxygenNote: 7.2.3
 Encoding: UTF-8
