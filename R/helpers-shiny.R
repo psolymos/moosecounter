@@ -96,3 +96,28 @@ is_ready <- function(reactive) {
   !inherits(t, "try-error")
 }
 
+
+
+mc_ggiraph <- function(p, width, height, hover = "standard", selection_type = "none") {
+
+  # Use `girafe_css` to specify different css for different types
+  # - https://www.ardata.fr/ggiraph-book/customize.html#sec-global-opt
+  # - https://www.ardata.fr/ggiraph-book/customize.html#detailled-control
+
+  if(hover == "fancy") {
+    hover <- ggiraph::opts_hover(ggiraph::girafe_css(
+      css = "fill:orange;",
+      line = "fill:none;stroke:black;",
+      point = "fill:orange;fill-opacity:1;r:3pt;stroke-width:3px;stroke-opacity:1;stroke:orange;"))
+  } else hover <- ggiraph::opts_hover()
+
+
+  ggiraph::girafe(
+    ggobj = p, width_svg = width, height_svg = height,
+    options = list(
+      ggiraph::opts_selection(type = selection_type),
+      ggiraph::opts_toolbar(saveaspng = FALSE),
+      hover))
+
+}
+

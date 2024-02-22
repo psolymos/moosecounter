@@ -181,8 +181,10 @@ server <- function(input, output, session) {
   })
 
   observe(shinyjs::toggleState("dl_uni_graph", is_ready(uni_graph())))
-  output$uni_graph <- renderGirafe(moosecounter:::mc_ggiraph(uni_graph(), width = 15, height = 4))
-  output$dl_uni_graph <- plot_download(uni_graph(), "total_uni_var.png",
+  output$uni_graph <- renderGirafe({
+    moosecounter:::mc_ggiraph(uni_graph(), width = 15, height = 4, hover = "fancy")
+  })
+  output$dl_uni_graph <- plot_download(uni_graph, "total_uni_var.png",
                                        dims = c(15, 4))
 
 
@@ -405,13 +407,18 @@ server <- function(input, output, session) {
                  choices = sort(names(total_models())))
   })
 
-  output$total_resid_plot <- renderPlot({
+  total_resid_plot <- reactive({
     req(length(total_models()) > 0, input$total_resid_model)
     moosecounter:::validate_model_errors(total_models())
 
     map(total_models(), "model") %>%
       mc_plot_residuals(input$total_resid_model, ., survey_sub())
+    grDevices::recordPlot()
   })
+  observe(shinyjs::toggleState("dl_total_resid_plot", is_ready(total_resid_plot())))
+  output$total_resid_plot <- renderPlot(total_resid_plot())
+  output$dl_total_resid_plot <- plot_download(total_resid_plot, "total_resid_plot.png",
+                                             dims = c(10, 5))
 
   output$total_resid_summary <- renderPrint({
     req(length(total_models()) > 0, input$total_resid_model)
@@ -502,12 +509,26 @@ server <- function(input, output, session) {
 
 
   # Plots
-  output$total_pi_predpi <- renderPlot(mc_plot_predpi(total_pi()$pi), res = 125)
-  output$total_pi_pidistr_all <- renderPlot({
+  total_pi_predpi <- reactive({
+    mc_plot_predpi(total_pi()$pi)
+    grDevices::recordPlot()
+  })
+  observe(shinyjs::toggleState("dl_total_pi_predpi", is_ready(total_pi_predpi())))
+  output$total_pi_predpi <- renderPlot(total_pi_predpi(), res = 125)
+  output$dl_total_pi_predpi <- plot_download(total_pi_predpi, "total_pi_predpi.png",
+                                             dims = c(15, 5))
+
+  total_pi_pidistr_all <- reactive({
     req(input$total_pi_bins_all)
     mc_plot_pidistr(total_pi()$pi, breaks = input$total_pi_bins_all)
-  }, res = 100)
-  output$total_pi_pidistr_cell <- renderPlot({
+    grDevices::recordPlot()
+  })
+  observe(shinyjs::toggleState("dl_total_pi_pidistr_all", is_ready(total_pi_pidistr_all())))
+  output$total_pi_pidistr_all <- renderPlot(total_pi_pidistr_all(), res = 100)
+  output$dl_total_pi_pidistr_all <- plot_download(total_pi_pidistr_all, "total_pi_pidistr_all.png",
+                                                  dims = c(10, 5))
+
+  total_pi_pidistr_cell <- reactive({
     req(input$total_pi_cell, input$total_pi_bins_cell)
     validate(need(input$total_pi_cell <= nrow(total_pi()$pi$data) &
                     input$total_pi_cell > 0,
@@ -515,7 +536,12 @@ server <- function(input, output, session) {
                          nrow(total_pi()$pi$data),
                          " cells in the data")))
     mc_plot_pidistr(total_pi()$pi, id = input$total_pi_cell, breaks = input$total_pi_bins_cell)
-  }, res = 100)
+    grDevices::recordPlot()
+  })
+  observe(shinyjs::toggleState("dl_total_pi_pidistr_cell", is_ready(total_pi_pidistr_cell())))
+  output$total_pi_pidistr_cell <- renderPlot(total_pi_pidistr_cell(), res = 100)
+  output$dl_total_pi_pidistr_cell <- plot_download(total_pi_pidistr_cell, "total_pi_pidistr_cell.png",
+                                                   dims = c(10, 5))
 
   # Bootstraps table
   output$total_pi_boot <- renderDT({
@@ -570,9 +596,12 @@ server <- function(input, output, session) {
   total_pi_data_proxy <- dataTableProxy("total_pi_data")
 
   # Render map
-  output$total_pi_map <- renderGirafe({
+  total_pi_map <- reactive({
     moosecounter:::validate_flow(input$survey_file, models = total_models_list$m,
                   pi = total_pi(), pi_subset = total_pi_subset())
+
+    # Prevent intermittent error as subset refreshes when select a new group
+    req(nrow(total_pi_subset()$data) > 0)
 
     d <- total_pi_subset()$data
     d[d$srv, c("Cell.mean", "Cell.mode", "Cell.pred",
@@ -604,17 +633,22 @@ server <- function(input, output, session) {
       length(unique(na.omit(d[, input$total_pi_col]))) > 1,
       paste0("Cannot plot. No variability in ", input$total_pi_col)))
 
-    g <- ggplot(data = d,
-                aes(x = .data$CENTRLON, y = .data$CENTRLAT,
-                    fill = .data[[input$total_pi_col]], data_id = .data$cell)) +
+    ggplot(data = d,
+           aes(x = .data$CENTRLON, y = .data$CENTRLAT,
+               fill = .data[[input$total_pi_col]], data_id = .data$cell)) +
       geom_tile_interactive(aes(tooltip = tooltip))+
       coord_map() +
       scale_fill_binned(type = "viridis", n.breaks = input$total_pi_bins)
-
-    girafe(ggobj = g,
-           options = list(opts_selection(type = "multiple")),
-           width_svg = 8, height_svg = 7)
   })
+
+  observe(shinyjs::toggleState("dl_total_pi_map", is_ready(total_pi_map())))
+  output$total_pi_map <- renderGirafe({
+    moosecounter:::mc_ggiraph(total_pi_map(), selection_type = "multiple", width = 8, height = 7)
+  })
+  output$dl_total_pi_map <- plot_download(total_pi_map, "total_pi_map.png",
+                                          dims = c(8, 7))
+
+
 
 
   # Select map cells when table rows selected
@@ -715,7 +749,7 @@ server <- function(input, output, session) {
                 choices = vars)
   })
 
-  output$total_pi_plot <- renderGirafe({
+  total_pi_plot <- reactive({
     req(input$total_pi_plot_col,
         input$total_pi_plot_col != "No variables")
 
@@ -725,6 +759,13 @@ server <- function(input, output, session) {
 
     mc_plot_predfit(input$total_pi_plot_col, total_pi()$pi, ss = ss, interactive = TRUE)
   })
+
+  observe(shinyjs::toggleState("dl_total_pi_plot", is_ready(total_pi_plot())))
+  output$total_pi_plot <- renderGirafe({
+    moosecounter:::mc_ggiraph(total_pi_plot(), width = 8, height = 4)
+  })
+  output$dl_total_pi_plot <- plot_download(total_pi_plot, "total_pi_plot.png",
+                                           dims = c(8, 4))
 
   output$total_pi_density_selected <- reactive({
     moosecounter:::validate_flow(input$survey_file, models = total_models_list$m,
@@ -759,7 +800,7 @@ server <- function(input, output, session) {
                        survey_sub())
   })
 
-  output$comp_explore_graph <- renderPlot({
+  comp_explore_graph <- reactive({
     req(input$comp_explore_var)
     req(input$comp_explore_var != "none")
     req(opts())
@@ -768,7 +809,13 @@ server <- function(input, output, session) {
     mc_check_comp(survey_sub())
 
     mc_plot_comp(input$comp_explore_var, survey_sub())
-  }, res = 125)
+    grDevices::recordPlot()
+  })
+  observe(shinyjs::toggleState("dl_comp_explore_graph", is_ready(comp_explore_graph())))
+  output$comp_explore_graph <- renderPlot(comp_explore_graph(), res = 125)
+  output$dl_comp_explore_graph <- plot_download(comp_explore_graph, "comp_explore_graph.png",
+                                                dims = c(12, 5))
+
 
 
   ## Add Models -------------------------------------------------------------
