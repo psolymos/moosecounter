@@ -203,7 +203,7 @@ server <- function(input, output, session) {
   })
   observe(shinyjs::toggleState("dl_multi_graph", is_ready(multi_graph())))
   output$multi_graph <- renderPlot(multi_graph(), res = 100)
-  output$dl_multi_graph <- plot_download(multi_graph(), "total_multi_var.png",
+  output$dl_multi_graph <- plot_download(multi_graph, "total_multi_var.png",
                                          dims = c(10, 5))
 
 

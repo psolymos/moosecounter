@@ -62,7 +62,7 @@ ui_plot_download <- function(id) {
 
 #' Download plot
 #'
-#' @param plot ggplot object
+#' @param plot Reactive plot object
 #' @param file_name file name to save as
 #' @param dims Vector of plot width and plot height
 #' @param dpi Resolution
@@ -74,16 +74,17 @@ plot_download <- function(plot, file_name, dims = c(8, 8), dpi = 400) {
       file_name
     },
     content = function(file) {
-      shiny::req(plot)
+      shiny::req(plot())
       id <- shiny::showNotification("Downloading plot...", duration = NULL, closeButton = FALSE)
       on.exit(shiny::removeNotification(id), add = TRUE)
 
-      if(inherits(plot, "ggplot")) {
-        ggplot2::ggsave(file, plot, device = "png",
-                        width = dims[1], height = dims[2], dpi = dpi)
+      if(inherits(plot(), "ggplot")) {
+        ggplot2::ggsave(file, plot(), device = "png",
+                        width = dims[1], height = dims[2], dpi = dpi,
+                        bg = "white") # Otherwise mc_plot_predfit() plots have transparent bg (?)
       } else {
         grDevices::png(filename = file, width = dims[1], height = dims[2], units = "in", res = dpi)
-        grDevices::replayPlot(plot)
+        grDevices::replayPlot(plot())
         grDevices::dev.off()
       }
     }
