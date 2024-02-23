@@ -46,3 +46,78 @@ validate_flow <- function(survey_file, models, models_comp, pi, pi_subset) {
                     pi %then%
                     pi_subset)
 }
+
+#' UI for plot download button
+#'
+#' @param id Id of the plot object
+#'
+#' @noRd
+ui_plot_download <- function(id) {
+  shiny::div(align = "right",
+      shinyjs::disabled(
+        shiny::downloadButton(paste0("dl_", id), label = NULL, title = "Download plot")
+      )
+  )
+}
+
+#' Download plot
+#'
+#' @param plot Reactive plot object
+#' @param file_name file name to save as
+#' @param dims Vector of plot width and plot height
+#' @param dpi Resolution
+#'
+#' @noRd
+plot_download <- function(plot, file_name, dims = c(8, 8), dpi = 400) {
+  shiny::downloadHandler(
+    filename = function() {
+      file_name
+    },
+    content = function(file) {
+      shiny::req(plot())
+      id <- shiny::showNotification("Downloading plot...", duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(id), add = TRUE)
+
+      if(inherits(plot(), "ggplot")) {
+        ggplot2::ggsave(file, plot(), device = "png",
+                        width = dims[1], height = dims[2], dpi = dpi,
+                        bg = "white") # Otherwise mc_plot_predfit() plots have transparent bg (?)
+      } else {
+        grDevices::png(filename = file, width = dims[1], height = dims[2], units = "in", res = dpi)
+        grDevices::replayPlot(plot())
+        grDevices::dev.off()
+      }
+    }
+  )
+}
+
+is_ready <- function(reactive) {
+  t <- try(reactive, silent = TRUE)
+  !inherits(t, "try-error")
+}
+
+
+
+mc_ggiraph <- function(p, width, height, hover = "standard", selection_type = "none") {
+
+  # Use `girafe_css` to specify different css for different types
+  # - https://www.ardata.fr/ggiraph-book/customize.html#sec-global-opt
+  # - https://www.ardata.fr/ggiraph-book/customize.html#detailled-control
+
+  if(hover == "fancy") {
+    hover <- ggiraph::opts_hover(ggiraph::girafe_css(
+      css = "fill:orange;",
+      line = "fill:none;stroke:black;",
+      point = "fill:orange;fill-opacity:1;r:3pt;stroke-width:3px;stroke-opacity:1;stroke:orange;"))
+  } else hover <- ggiraph::opts_hover()
+
+
+  ggiraph::girafe(
+    ggobj = p, width_svg = width, height_svg = height,
+    options = list(
+      ggiraph::opts_selection(type = selection_type),
+      ggiraph::opts_toolbar(saveaspng = FALSE),
+      hover))
+
+}
+

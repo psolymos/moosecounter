@@ -316,28 +316,6 @@ mc_plot_univariate <- function(i, x, dist = "ZINB",
   p
 }
 
-mc_ggiraph <- function(p, width, height, type) {
-
-  # Use `girafe_css` to specify different css for different types
-  # - https://www.ardata.fr/ggiraph-book/customize.html#sec-global-opt
-  # - https://www.ardata.fr/ggiraph-book/customize.html#detailled-control
-
-  ggiraph::girafe(
-    ggobj = p, width_svg = width, height_svg = height,
-    options = list(
-      ggiraph::opts_selection(type = "none"),
-      ggiraph::opts_toolbar(saveaspng = FALSE),
-      ggiraph::opts_hover(
-        css = ggiraph::girafe_css(
-          css = "fill:orange;",
-          line = "fill:none;stroke:black;",
-          point = "fill:orange;fill-opacity:1;r:3pt;stroke-width:3px;stroke-opacity:1;stroke:orange;"))))
-
-}
-
-
-
-
 
 #' @rdname explore
 #' @export

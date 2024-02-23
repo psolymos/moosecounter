@@ -780,7 +780,6 @@ mc_plot_predfit <- function(i, PI, ss = NULL, interactive = FALSE) {
     p <- p + ggiraph::geom_point_interactive(data = dat, size = 3, alpha = 0.5,
                                              ggplot2::aes(tooltip = .data$tt,
                                                           data_id = .data$tt))
-    p <- ggiraph::girafe(ggobj = p, width_svg = 8, height_svg = 4)
   } else {
     p <- p + ggplot2::geom_point()
   }
