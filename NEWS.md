@@ -1,3 +1,7 @@
+# Version 0.8-0 -- February 22, 2024
+
+* All plots are downloadable using the download button.
+
 # Version 0.7-3 -- February 7, 2024
 
 * Hurdle models added as `HP` and `HNB` options for the `dist` argument.
