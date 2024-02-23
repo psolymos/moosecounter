@@ -537,6 +537,14 @@ pred_density_moose_PI <- function(PI) {
 #' @export
 # was: plotResiduals
 mc_plot_residuals <- function(model_id, ml, x) {
+    # model_id can be a vector --> pick the best
+    if (length(model_id) > 1) {
+        tab <- mc_models_total(ml, x, coefs = FALSE)
+        w <- tab$weight
+        names(w) <- rownames(tab)
+        w <- w[model_id]
+        model_id <- names(w)[1]
+    }
     fit <- ml[[model_id]]
     opts <- getOption("moose_options")
     srv <- x$srv
