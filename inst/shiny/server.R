@@ -180,11 +180,11 @@ server <- function(input, output, session) {
     p1 + p2 + p3
   })
 
-  observe(shinyjs::toggleState("dl_uni_graph", is_ready(uni_graph())))
+  observe(shinyjs::toggleState("dl_uni_graph", moosecounter:::is_ready(uni_graph())))
   output$uni_graph <- renderGirafe({
     moosecounter:::mc_ggiraph(uni_graph(), width = 15, height = 4, hover = "fancy")
   })
-  output$dl_uni_graph <- plot_download(uni_graph, "total_uni_var.png",
+  output$dl_uni_graph <- moosecounter:::plot_download(uni_graph, "total_uni_var.png",
                                        dims = c(15, 4))
 
 
@@ -203,9 +203,9 @@ server <- function(input, output, session) {
                          alpha = input$multi_alpha)
     grDevices::recordPlot()
   })
-  observe(shinyjs::toggleState("dl_multi_graph", is_ready(multi_graph())))
+  observe(shinyjs::toggleState("dl_multi_graph", moosecounter:::is_ready(multi_graph())))
   output$multi_graph <- renderPlot(multi_graph(), res = 100)
-  output$dl_multi_graph <- plot_download(multi_graph, "total_multi_var.png",
+  output$dl_multi_graph <- moosecounter:::plot_download(multi_graph, "total_multi_var.png",
                                          dims = c(10, 5))
 
 
@@ -415,9 +415,9 @@ server <- function(input, output, session) {
       mc_plot_residuals(input$total_resid_model, ., survey_sub())
     grDevices::recordPlot()
   })
-  observe(shinyjs::toggleState("dl_total_resid_plot", is_ready(total_resid_plot())))
+  observe(shinyjs::toggleState("dl_total_resid_plot", moosecounter:::is_ready(total_resid_plot())))
   output$total_resid_plot <- renderPlot(total_resid_plot())
-  output$dl_total_resid_plot <- plot_download(total_resid_plot, "total_resid_plot.png",
+  output$dl_total_resid_plot <- moosecounter:::plot_download(total_resid_plot, "total_resid_plot.png",
                                              dims = c(10, 5))
 
   output$total_resid_summary <- renderPrint({
@@ -513,9 +513,9 @@ server <- function(input, output, session) {
     mc_plot_predpi(total_pi()$pi)
     grDevices::recordPlot()
   })
-  observe(shinyjs::toggleState("dl_total_pi_predpi", is_ready(total_pi_predpi())))
+  observe(shinyjs::toggleState("dl_total_pi_predpi", moosecounter:::is_ready(total_pi_predpi())))
   output$total_pi_predpi <- renderPlot(total_pi_predpi(), res = 125)
-  output$dl_total_pi_predpi <- plot_download(total_pi_predpi, "total_pi_predpi.png",
+  output$dl_total_pi_predpi <- moosecounter:::plot_download(total_pi_predpi, "total_pi_predpi.png",
                                              dims = c(15, 5))
 
   total_pi_pidistr_all <- reactive({
@@ -523,9 +523,9 @@ server <- function(input, output, session) {
     mc_plot_pidistr(total_pi()$pi, breaks = input$total_pi_bins_all)
     grDevices::recordPlot()
   })
-  observe(shinyjs::toggleState("dl_total_pi_pidistr_all", is_ready(total_pi_pidistr_all())))
+  observe(shinyjs::toggleState("dl_total_pi_pidistr_all", moosecounter:::is_ready(total_pi_pidistr_all())))
   output$total_pi_pidistr_all <- renderPlot(total_pi_pidistr_all(), res = 100)
-  output$dl_total_pi_pidistr_all <- plot_download(total_pi_pidistr_all, "total_pi_pidistr_all.png",
+  output$dl_total_pi_pidistr_all <- moosecounter:::plot_download(total_pi_pidistr_all, "total_pi_pidistr_all.png",
                                                   dims = c(10, 5))
 
   total_pi_pidistr_cell <- reactive({
@@ -538,9 +538,9 @@ server <- function(input, output, session) {
     mc_plot_pidistr(total_pi()$pi, id = input$total_pi_cell, breaks = input$total_pi_bins_cell)
     grDevices::recordPlot()
   })
-  observe(shinyjs::toggleState("dl_total_pi_pidistr_cell", is_ready(total_pi_pidistr_cell())))
+  observe(shinyjs::toggleState("dl_total_pi_pidistr_cell", moosecounter:::is_ready(total_pi_pidistr_cell())))
   output$total_pi_pidistr_cell <- renderPlot(total_pi_pidistr_cell(), res = 100)
-  output$dl_total_pi_pidistr_cell <- plot_download(total_pi_pidistr_cell, "total_pi_pidistr_cell.png",
+  output$dl_total_pi_pidistr_cell <- moosecounter:::plot_download(total_pi_pidistr_cell, "total_pi_pidistr_cell.png",
                                                    dims = c(10, 5))
 
   # Bootstraps table
@@ -641,11 +641,11 @@ server <- function(input, output, session) {
       scale_fill_binned(type = "viridis", n.breaks = input$total_pi_bins)
   })
 
-  observe(shinyjs::toggleState("dl_total_pi_map", is_ready(total_pi_map())))
+  observe(shinyjs::toggleState("dl_total_pi_map", moosecounter:::is_ready(total_pi_map())))
   output$total_pi_map <- renderGirafe({
     moosecounter:::mc_ggiraph(total_pi_map(), selection_type = "multiple", width = 8, height = 7)
   })
-  output$dl_total_pi_map <- plot_download(total_pi_map, "total_pi_map.png",
+  output$dl_total_pi_map <- moosecounter:::plot_download(total_pi_map, "total_pi_map.png",
                                           dims = c(8, 7))
 
 
@@ -760,11 +760,11 @@ server <- function(input, output, session) {
     mc_plot_predfit(input$total_pi_plot_col, total_pi()$pi, ss = ss, interactive = TRUE)
   })
 
-  observe(shinyjs::toggleState("dl_total_pi_plot", is_ready(total_pi_plot())))
+  observe(shinyjs::toggleState("dl_total_pi_plot", moosecounter:::is_ready(total_pi_plot())))
   output$total_pi_plot <- renderGirafe({
     moosecounter:::mc_ggiraph(total_pi_plot(), width = 8, height = 4)
   })
-  output$dl_total_pi_plot <- plot_download(total_pi_plot, "total_pi_plot.png",
+  output$dl_total_pi_plot <- moosecounter:::plot_download(total_pi_plot, "total_pi_plot.png",
                                            dims = c(8, 4))
 
   output$total_pi_density_selected <- reactive({
@@ -811,9 +811,9 @@ server <- function(input, output, session) {
     mc_plot_comp(input$comp_explore_var, survey_sub())
     grDevices::recordPlot()
   })
-  observe(shinyjs::toggleState("dl_comp_explore_graph", is_ready(comp_explore_graph())))
+  observe(shinyjs::toggleState("dl_comp_explore_graph", moosecounter:::is_ready(comp_explore_graph())))
   output$comp_explore_graph <- renderPlot(comp_explore_graph(), res = 125)
-  output$dl_comp_explore_graph <- plot_download(comp_explore_graph, "comp_explore_graph.png",
+  output$dl_comp_explore_graph <- moosecounter:::plot_download(comp_explore_graph, "comp_explore_graph.png",
                                                 dims = c(12, 5))
 
 

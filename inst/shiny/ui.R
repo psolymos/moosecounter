@@ -116,7 +116,7 @@ ui_total_univar <- fluidRow(
                           selected = "NB")),
          shinydashboard::box(
            width = 12,
-           ui_plot_download("uni_graph"),
+           moosecounter:::ui_plot_download("uni_graph"),
            girafeOutput("uni_graph", height = "100%")
          )
   )
@@ -132,7 +132,7 @@ ui_total_multivar <- fluidRow(
                                     min = 0.001, max = 0.5, step = 0.01)),
          shinydashboard::box(
            width = 12,
-           ui_plot_download("multi_graph"),
+           moosecounter:::ui_plot_download("multi_graph"),
            plotOutput("multi_graph"))
   )
 )
@@ -186,7 +186,7 @@ ui_total_residuals <- fluidRow(
         h4("AIC Model Comparison"),
         div(style = "overflow-x: scroll", tableOutput("total_model_aic2")),
         uiOutput("total_resid_models_ui"),
-        ui_plot_download("total_resid_plot"),
+        moosecounter:::ui_plot_download("total_resid_plot"),
         plotOutput("total_resid_plot"),
         verbatimTextOutput("total_resid_summary"))
   )
@@ -221,19 +221,19 @@ ui_total_pi <- fluidRow(
 
     tabBox(width = 12, id = "total_pi_panel",
            tabPanel("Diagnostic Plots",
-                    ui_plot_download("total_pi_predpi"),
+                    moosecounter:::ui_plot_download("total_pi_predpi"),
                     plotOutput("total_pi_predpi")),
            tabPanel(
              "Total Moose PI",
              sliderInput("total_pi_bins_all", label = "Number of Bins",
                          min = 1, max = 100, value = 30),
-             ui_plot_download("total_pi_pidistr_all"),
+             moosecounter:::ui_plot_download("total_pi_pidistr_all"),
              plotOutput("total_pi_pidistr_all")),
            tabPanel(
              "Cell Level PI",
              sliderInput("total_pi_bins_cell", label = "Number of Bins",
                          min = 1, max = 50, value = 10),
-             ui_plot_download("total_pi_pidistr_cell"),
+             moosecounter:::ui_plot_download("total_pi_pidistr_cell"),
              plotOutput("total_pi_pidistr_cell")),
            tabPanel("Bootstrap Results",
                     div(style = "overflow-x: scroll", DTOutput("total_pi_boot"))))
@@ -266,11 +266,11 @@ ui_total_pi_map <- fluidRow(
              bsButton("total_pi_reset", "Reset selection", style = "primary")),
          tabBox(width = 9,
                 tabPanel(title = "Map",
-                         ui_plot_download("total_pi_map"),
+                         moosecounter:::ui_plot_download("total_pi_map"),
                          girafeOutput("total_pi_map")),
                 tabPanel(title = "Plot",
                          uiOutput("total_pi_plot_col"),
-                         ui_plot_download("total_pi_plot"),
+                         moosecounter:::ui_plot_download("total_pi_plot"),
                          girafeOutput("total_pi_plot")),
                 tabPanel(title = "Summary",
                          tableOutput("total_pi_density_selected"))
@@ -290,7 +290,7 @@ ui_comp_explore <- fluidRow(
   column(width = 12,
          h2("Composition Exploration"),
          shinydashboard::box(height = "100px", uiOutput("comp_explore_ui")),
-         ui_plot_download("comp_explore_graph"),
+         moosecounter:::ui_plot_download("comp_explore_graph"),
          plotOutput("comp_explore_graph", width = "100%")
   )
 )
