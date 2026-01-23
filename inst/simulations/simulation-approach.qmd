@@ -1,0 +1,198 @@
+---
+title: "Introduction and background"
+subtitle: "Point count data analysis workshop 2025"
+date: "`r Sys.Date()`"
+author: "Péter Sólymos"
+toc: true
+format:
+  html: 
+    html-math-method: katex
+    self-contained: true
+  pdf: default
+---
+
+```{r}
+#| include: false
+library(knitr)
+if (interactive()) {
+    devtools::load_all(".")
+} else {
+    devtools::load_all("../..")
+}
+set.seed(0)
+get_stats <- function(PI, true_vals) {
+    is_srv <- PI$data$srv
+    cell_q <- t(apply(
+        PI$boot_full,
+        1,
+        quantile,
+        c(0.025, 0.05, 0.95, 0.975)
+    ))
+    in_95 <- true_vals %[]% cell_q[, c(1, 4)]
+    in_90 <- true_vals %[]% cell_q[, c(2, 3)]
+    tot <- colSums(PI$boot_full)
+    tot_mean <- mean(tot)
+    tot_q <- quantile(tot, c(0.025, 0.05, 0.95, 0.975))
+    c(
+        true_total = sum(true_vals),
+        mean = tot_mean,
+        tot_q,
+        coverage_90 = sum(in_90[!is_srv]) / sum(!is_srv),
+        coverage_95 = sum(in_95[!is_srv]) / sum(!is_srv)
+    )
+}
+
+```
+
+# Preamble
+
+```{r}
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(ggplot2)
+    library(intrval)
+})
+```
+
+# Simulating data from count distributions
+
+There are some functions in the package that allow us to simulate data.
+
+`sim_rsf()` generates a spatial random field represented by (x,y,z) pairs of
+values: coordinates (x, y), and the value of the RSF functions that is spatially
+correlated to imitate real world data sets. The grid has a default size
+of 50 x 50 = 2500 cells.
+
+```{r}
+m <- sim_rsf()
+summary(m)
+
+m |>
+    ggplot(aes(x = x, y = y, z = z)) +
+    geom_contour_filled() +
+    theme_light()
+```
+
+We can stratify the grid using `sim_strat()`.
+`threshold` is the cutoff value for the low (0 values, < threshold)
+and high (1 values, >= threshold); `p_misclass` is the misclassification 
+probability (0 = perfect, 1 = random) indicating what proportion of the 
+classes are misclassified (taking the opposite value).
+
+NOTE: we can probably make this more realistic if the misclassification only
+happens in an interval around the threshold and not over the full range of the RSF.
+
+```{r}
+m <- m |>
+    sim_strat(threshold = 0, p_misclass = 0.1)
+summary(m)
+table(m$stratum, m$z > 0)
+1 - sum(diag(table(m$stratum, m$z > 0))) / nrow(m)
+
+m |>
+    ggplot(aes(x = x, y = y, z = z)) +
+    geom_contour_filled() +
+    geom_point(aes(x = x, y = y, col = as.factor(stratum)), m) +
+    theme_light()
+```
+
+The `sim_expected()` function will add the column `mu` for the expected Moose
+abundance calculated as `mu = exp(intercept + z * slope)` based on the RSF value.
+The other column, `phi.zi` is the probability of nonzero counts for ZI and
+Huardle models later (phi1 = plogis(intercept1 + slope1 * sim_rsf$z))
+
+```{r}
+m <- m |>
+    sim_expected(
+        intercept = -1, slope = 0.5,
+        intercept1 = -1, slope1 = 0.25
+    )
+summary(m)
+
+m |>
+    ggplot(aes(x = x, y = y, z = mu)) +
+    geom_contour_filled() +
+    theme_light()
+```
+
+Finally, we simulate the counts according to one of the chosen count distribution
+using `sim_counts()`.
+The `theta.nb` sets the dispersion parameter for the Negative Binomial
+(Poisson when left as `NULL`). The `type` argument takes a value
+`"none"`, `"zeroinfl"` or `"hurdle"`.
+
+|  Distribution    |  `theta.nb`  |  `type`      |
+|------------------|--------------|--------------|
+| Poisson          |  `NULL`      |     `"none"`      |
+| NegBin           |  Not `NULL`  |    `"none"`       |
+| ZI Poisson       |  `NULL`      |    `"zeroinfl"`       |
+| ZI NegBin        |  Not `NULL`  |     `"zeroinfl"`      |
+| Hurdle Poisson   |  `NULL`      |    `"hurdle"`       |
+| Hurdle NegBin    |  Not `NULL`  |    `"hurdle"`       |
+
+The `sim_counts()` function add the `MOOSE_TOTA` to our data frame:
+
+
+```{r}
+m <- m |>
+    sim_counts(theta.nb = 0.1, type = "zeroinfl")
+summary(m)
+table(m$MOOSE_TOTA)
+plot(table(m$MOOSE_TOTA))
+
+m |>
+    ggplot(aes(x = x, y = y, z = mu)) +
+    geom_contour_filled() +
+    geom_point(aes(x = x, y = y, col = MOOSE_TOTA), m[m$MOOSE_TOTA > 0, ]) +
+    theme_light()
+```
+
+# Analyze simulated data
+
+```{r}
+mc_options(B = 100)
+switch_response("total")
+
+# sample 100 cells
+surv_id <- sample(nrow(m), 100)
+m$srv <- FALSE
+m$srv[surv_id] <- TRUE
+m$AREA_KM <- 16
+
+# fit models
+a <- c(
+    "P" = "P",
+    "NB" = "NB",
+    "ZIP" = "ZIP",
+    "ZINB" = "ZINB"
+)
+ML <- lapply(a, function(i) {
+    mc_fit_total(m, vars = "z", zi_vars = "z", dist = i)
+})
+
+# get PIs
+PIL <- list()
+for (i in a) {
+    PIL[[i]] <- mc_predict_total(
+        model_id = i,
+        ml = ML,
+        x = m,
+        do_boot = TRUE,
+        do_avg = FALSE
+    )
+}
+
+# true abundance
+sum(m$MOOSE_TOTA)
+
+# Count model estimates
+sapply(PIL, get_stats, true_vals = m$MOOSE_TOTA)
+
+# Gassaway
+mc_gassaway(
+    y1 = m$MOOSE_TOTA[m$srv & m$stratum == 0],
+    y2 = m$MOOSE_TOTA[m$srv & m$stratum == 1],
+    N1 = sum(1 - m$stratum),
+    N2 = sum(m$stratum)
+)
+```
