@@ -12,7 +12,7 @@ MODEL <- value(CONFIG$model, "P")
 GRID_SIZE <- value(CONFIG$grid, 50)
 FIXED_SAMPLE_SIZE <- value(CONFIG$sample, 250)
 THETA_NB <- value(CONFIG$theta, 2)
-B <- value(CONFIG$B, 100) # should be 500-1000
+B <- value(CONFIG$B, 500) # should be 500-1000
 N <- value(CONFIG$N, 100) # >200 for sure
 SEED <- value(CONFIG$seed, 0)
 
@@ -35,7 +35,7 @@ get_stats <- function(PI, true_vals) {
     tot <- colSums(PI$boot_full)
     tot_mean <- mean(tot)
     tot_median <- median(tot)
-    tot_mode <- moosecounter::find_mode(x)
+    tot_mode <- moosecounter::find_mode(tot)
     tot_q <- quantile(tot, c(0.025, 0.05, 0.95, 0.975))
     c(
         true_total = sum(true_vals),
@@ -64,7 +64,7 @@ theta_nb <- if (MODEL %in% c("NB", "HNB", "ZINB")) {
 }
 
 if (MODEL == "P") {
-    COEF <- list(a = -0.5, b = 1, a1 = 0, b1 = 0)
+    COEF <- list(a = -0.7, b = 1, a1 = 0, b1 = 0)
 }
 if (MODEL == "NB") {
     COEF <- list(a = -0.8, b = 1, a1 = 0, b1 = 0)
@@ -127,6 +127,13 @@ while (k <= N) {
                 do_avg = FALSE
             ))
         }
+        # PL[["MM"]] <- try(mc_predict_total(
+        #     model_id = names(ML),
+        #     ml = ML,
+        #     x = m,
+        #     do_boot = TRUE,
+        #     do_avg = FALSE
+        # ))
         if (all(!sapply(PL, inherits, "try-error"))) {
             RES[[k]] <- sapply(PL, get_stats, true_vals = m$MOOSE_TOTA)
             k <- k + 1
@@ -136,7 +143,7 @@ while (k <= N) {
     }
 }
 
-fn <- sprintf("%s/moose-sim_model-%s.RData", DIR, MODEL)
+fn <- sprintf("%s/moose-sim_model-%s_B-%s.RData", DIR, MODEL, as.character(B))
 save(
     m0,
     MT,
@@ -153,61 +160,3 @@ save(
     file = fn
 )
 quit("no")
-
-if (FALSE) {
-    library(intrval)
-    library(ggplot2)
-    library(dplyr)
-
-    DIR <- "_tmp/simuls"
-    # MODEL <- "ZINB"
-    dd <- NULL
-    for (MODEL in c("P", "NB", "ZIP", "ZINB")) {
-        fn <- sprintf("%s/moose-sim_model-%s.RData", DIR, MODEL)
-        load(fn)
-
-        d <- do.call(
-            rbind,
-            lapply(RES, \(x) {
-                z <- data.frame(
-                    true_model = MODEL,
-                    model = colnames(x),
-                    as.data.frame(t(x))
-                )
-            })
-        )
-        d$pi_95 <- as.numeric(d[, "true_total"] %[]% d[, c("X2.5.", "X97.5.")])
-        d$pi_90 <- as.numeric(d[, "true_total"] %[]% d[, c("X5.", "X95.")])
-        d$bias <- d$mean - d$true_total
-        d$rel_bias <- (d$mean - d$true_total) / d$true_total
-
-        dd <- rbind(dd, d)
-    }
-
-    dd |>
-        group_by(true_model, model) |>
-        summarize(pi_90 = mean(pi_90), pi_95 = mean(pi_95))
-
-    dd |>
-        ggplot(aes(x = true_model, y = coverage_95, col = model)) +
-        geom_boxplot() +
-        theme_light()
-    dd |>
-        ggplot(aes(x = true_model, y = coverage_90, col = model)) +
-        geom_boxplot() +
-        theme_light()
-
-    dd |>
-        ggplot(aes(x = true_model, y = true_total, col = model)) +
-        geom_boxplot() +
-        theme_light()
-
-    dd |>
-        ggplot(aes(x = true_model, y = bias, col = model)) +
-        geom_boxplot() +
-        theme_light()
-    dd |>
-        ggplot(aes(x = true_model, y = rel_bias, col = model)) +
-        geom_boxplot() +
-        theme_light()
-}

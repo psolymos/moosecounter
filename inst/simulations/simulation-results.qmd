@@ -12,7 +12,7 @@ format:
 ---
 
 Simulated 250 cells, sampled 250 of them randomly. This was repeated 100
-times for each of the 4 models (P, NB, ZIP, ZINB). Used 100 bootstrap iterations.
+times for each of the 4 models (P, NB, ZIP, ZINB). Used 500 bootstrap iterations.
 
 The same 4 models were fit to the data, then the following metrics were saved:
 
@@ -31,7 +31,7 @@ library(dplyr)
 DIR <- "../../_tmp/simuls"
 dd <- NULL
 for (MODEL in c("P", "NB", "ZIP", "ZINB")) {
-    fn <- sprintf("%s/moose-sim_model-%s.RData", DIR, MODEL)
+    fn <- sprintf("%s/moose-sim_model-%s_B-500.RData", DIR, MODEL)
     load(fn)
 
     d <- do.call(
@@ -56,7 +56,7 @@ for (MODEL in c("P", "NB", "ZIP", "ZINB")) {
 The true total abundance varied somewhat between the setups, might have to tune a bit more to make them more comparable:
 
 ```{r}
-
+#| echo: false
 dd |>
     ggplot(aes(x = true_model, y = true_total, col = model)) +
     geom_boxplot() +
@@ -67,15 +67,18 @@ dd |>
 The total moose abundance coverage was lower than nominal for all models:
 
 ```{r}
+#| echo: false
+#| output: asis
 dd |>
     group_by(true_model, model) |>
-    summarize(pi_90 = mean(pi_90), pi_95 = mean(pi_95))
+    summarize(pi_90 = mean(pi_90), pi_95 = mean(pi_95), .groups = "keep") |>
+    knitr::kable()
 ```
 
 The bias (estimate - true) in total abundance:
 
 ```{r}
-
+#| echo: false
 dd |>
     ggplot(aes(x = true_model, y = bias, col = model)) +
     geom_boxplot() +
@@ -85,6 +88,7 @@ dd |>
 Relative bias (standardized by true abundance):
 
 ```{r}
+#| echo: false
 dd |>
     ggplot(aes(x = true_model, y = rel_bias, col = model)) +
     geom_boxplot() +
@@ -94,6 +98,7 @@ dd |>
 Cell level coverage was higher than nominal:
 
 ```{r}
+#| echo: false
 dd |>
     ggplot(aes(x = true_model, y = coverage_95, col = model)) +
     geom_boxplot() +
