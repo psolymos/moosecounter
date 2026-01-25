@@ -85,13 +85,20 @@ NULL
 
 #' @rdname total
 #' @export
-switch_response <- function(type="total") {
+switch_response <- function(type = "total") {
     type <- match.arg(type, c("total", "cows"))
     opts <- getOption("moose_options")
     if (type == "total") {
         opts$Ntot <- "MOOSE_TOTA"
-        opts$composition <- c("BULL_SMALL", "BULL_LARGE", "LONE_COW",
-            "COW_1C", "COW_2C", "LONE_CALF", "UNKNOWN_AG")
+        opts$composition <- c(
+            "BULL_SMALL",
+            "BULL_LARGE",
+            "LONE_COW",
+            "COW_1C",
+            "COW_2C",
+            "LONE_CALF",
+            "UNKNOWN_AG"
+        )
     }
     if (type == "cows") {
         opts$Ntot <- "COW_TOTA"
@@ -104,62 +111,77 @@ switch_response <- function(type="total") {
 #' @rdname total
 #' @export
 # used to be saveMooseData
-mc_update_total <- function(x, srv=NULL, ss=NULL) {
-  opts <- getOption("moose_options")
-  if (is.null(srv)) {
-    srv <- x[[opts$srv_name]] == opts$srv_value
-  }
-  x$srv <- srv
-  ## this is needed for COW analysis
-  x$COW_TOTA <- rowSums(x[,c("LONE_COW", "COW_1C", "COW_2C")])
-  if (!is.null(ss))
-    x <- x[ss,]
-  x
+mc_update_total <- function(x, srv = NULL, ss = NULL) {
+    opts <- getOption("moose_options")
+    if (is.null(srv)) {
+        srv <- x[[opts$srv_name]] == opts$srv_value
+    }
+    x$srv <- srv
+    ## this is needed for COW analysis
+    x$COW_TOTA <- rowSums(x[, c("LONE_COW", "COW_1C", "COW_2C")])
+    if (!is.null(ss)) {
+        x <- x[ss, ]
+    }
+    x
 }
 
 #' @rdname total
 #' @export
-mc_fit_total <- function(x, vars=NULL, zi_vars=NULL,
-    dist="ZINB", weighted=FALSE, robust=FALSE, 
+mc_fit_total <- function(
+    x,
+    vars = NULL,
+    zi_vars = NULL,
+    dist = "ZINB",
+    weighted = FALSE,
+    robust = FALSE,
     intercept = c("both", "count", "zero", "none"),
-    xv = FALSE, ...) {
+    xv = FALSE,
+    ...
+) {
     intercept <- match.arg(intercept)
     opts <- getOption("moose_options")
     if (is.null(vars)) {
-        if (intercept %in% c("zero", "none"))
+        if (intercept %in% c("zero", "none")) {
             warning("Cannot remove intercept for the count model.")
+        }
         CNT <- "1"
     } else {
         vars <- vars[!(vars %in% c(opts$Ntot, opts$composition))]
-        CNT <- paste(vars, collapse=" + ")
-        if (intercept %in% c("zero", "none"))
+        CNT <- paste(vars, collapse = " + ")
+        if (intercept %in% c("zero", "none")) {
             CNT <- paste0(CNT, " - 1")
+        }
     }
     if (is.null(zi_vars)) {
-        if (intercept %in% c("count", "none"))
+        if (intercept %in% c("count", "none")) {
             warning("Cannot remove intercept for the zero model.")
+        }
         ZI <- "1"
     } else {
         zi_vars <- zi_vars[!(zi_vars %in% c(opts$Ntot, opts$composition))]
-        ZI <- paste(zi_vars, collapse=" + ")
-        if (intercept %in% c("count", "none"))
+        ZI <- paste(zi_vars, collapse = " + ")
+        if (intercept %in% c("count", "none")) {
             ZI <- paste0(ZI, " - 1")
+        }
     }
     chrForm <- paste(opts$Ntot, "~", CNT, "|", ZI)
     Form <- stats::as.formula(chrForm)
     out <- zeroinfl2(
-        formula=Form,
-        data=x[x$srv,],
-        dist=dist,
-        link="logit",
-        method=opts$method,
-        robust=robust,
-        ...)
+        formula = Form,
+        data = x[x$srv, ],
+        dist = dist,
+        link = "logit",
+        method = opts$method,
+        robust = robust,
+        ...
+    )
     out$chrformula <- chrForm
-    if (xv)
-        out <- loo(out) # loo knows about method
-    if (weighted)
-        out <- wzi(out) # wzi knows about method
+    if (xv) {
+        out <- loo(out)
+    } # loo knows about method
+    if (weighted) {
+        out <- wzi(out)
+    } # wzi knows about method
     out$call <- match.call()
     out
 }
@@ -176,64 +198,77 @@ get_coefs <- function(ML) {
     M <- matrix(NA_real_, length(ML), length(cfn))
     dimnames(M) <- list(names(ML), cfn)
     for (i in seq_len(length(ML))) {
-        M[i,] <- l[[i]][match(cfn, names(l[[i]]))]
+        M[i, ] <- l[[i]][match(cfn, names(l[[i]]))]
     }
-    colnames(M) <- gsub("(", "", gsub(")", "", colnames(M), fixed=TRUE), fixed=TRUE)
+    colnames(M) <- gsub(
+        "(",
+        "",
+        gsub(")", "", colnames(M), fixed = TRUE),
+        fixed = TRUE
+    )
     M
 }
 
 #' @rdname total
 #' @export
 # was updateModelTab
-mc_models_total <- function(ml, x, coefs=TRUE) {
+mc_models_total <- function(ml, x, coefs = TRUE) {
     aic <- sapply(ml, stats::AIC)
     bic <- sapply(ml, stats::BIC)
-    Chi2 <- sapply(ml, function(z) { if (is.null(z$chi2)) NA_real_ else sum(z$chi2) })
+    Chi2 <- sapply(ml, function(z) {
+        if (is.null(z$chi2)) NA_real_ else sum(z$chi2)
+    })
     ic <- data.frame(
-        AIC=aic,
-        BIC=bic,
-        df=sapply(ml, function(z) length(stats::coef(z))),
-        logLik=sapply(ml, function(z) as.numeric(stats::logLik(z))))
+        AIC = aic,
+        BIC = bic,
+        df = sapply(ml, function(z) length(stats::coef(z))),
+        logLik = sapply(ml, function(z) as.numeric(stats::logLik(z)))
+    )
     ic$delta <- ic$AIC - min(ic$AIC)
-    ic$weight <- exp( -0.5 * ic$delta) / sum(exp( -0.5 * ic$delta))
+    ic$weight <- exp(-0.5 * ic$delta) / sum(exp(-0.5 * ic$delta))
     ic$Chi2 <- Chi2
 
-    D <- t(sapply(ml, pred_density_moose, x=x))
+    D <- t(sapply(ml, pred_density_moose, x = x))
     out <- data.frame(ic, D)
     if (coefs) {
-      cf <- get_coefs(ml)
-      out <- data.frame(out, cf)
+        cf <- get_coefs(ml)
+        out <- data.frame(out, cf)
     }
-    out[order(out$delta),]
+    out[order(out$delta), ]
 }
 
 
 ## predict total moose abundance and density
-pred_total_moose <- function(x, surveyed, fit){
+pred_total_moose <- function(x, surveyed, fit) {
     opts <- getOption("moose_options")
     ## predict response for unsurveyed cells
-    pr_uns <- stats::predict(fit, newdata=x[!surveyed,,drop=FALSE], type=c("response"))
+    pr_uns <- stats::predict(
+        fit,
+        newdata = x[!surveyed, , drop = FALSE],
+        type = c("response")
+    )
     ## sum observed + predicted
     pr_total <- sum(pr_uns) + sum(x[[opts$Ntot]][surveyed])
     ## here is the sightability
     s <- opts$sightability
     out <- list(
-#        pr_srv = fitted(fit),
+        #        pr_srv = fitted(fit),
         pr_uns = pr_uns / s,
         Ntot_srv = sum(x[[opts$Ntot]][surveyed]) / s,
-        Ntot_uns = sum(pr_uns) / s) # this is kind of redundant
+        Ntot_uns = sum(pr_uns) / s
+    ) # this is kind of redundant
     out$Ntot_all <- out$Ntot_srv + out$Ntot_uns
     out
 }
 
 # x: MooseData
-pred_density_moose <- function(fit, x){
+pred_density_moose <- function(fit, x) {
     opts <- getOption("moose_options")
     srv <- x$srv
     Ntot <- pred_total_moose(x, srv, fit)
     A_all <- sum(x$AREA_KM)
-    Density <- Ntot$Ntot_all / (1*A_all)
-    out <- c(N=Ntot$Ntot_all, A=A_all, D=Density)
+    Density <- Ntot$Ntot_all / (1 * A_all)
+    out <- c(N = Ntot$Ntot_all, A = A_all, D = Density)
     names(out) <- if (opts$response == "total") {
         c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2")
     } else {
@@ -247,11 +282,18 @@ pred_density_moose <- function(fit, x){
 #' @export
 # was: MooseSim.PI
 # x: MooseData
-mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
+mc_predict_total <- function(
+    model_id,
+    ml,
+    x,
+    do_boot = TRUE,
+    do_avg = FALSE
+) {
     wt <- mc_models_total(ml, x)
-    if (!any(model_id %in% rownames(wt)))
+    if (!any(model_id %in% rownames(wt))) {
         stop("model_id not recognized")
-    wts <- wt[model_id,,drop=FALSE]
+    }
+    wts <- wt[model_id, , drop = FALSE]
     opts <- getOption("moose_options")
     model_id0 <- model_id
     ## if some survey area is defined, use dual prediction
@@ -266,12 +308,16 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     x$observed_values <- NA
     x$observed_values[srv] <- ml[[1]]$y # all models should have same data
     x$fitted_values <- NA
-#    x$fitted_values[srv] <- fit$fitted.values
+    #    x$fitted_values[srv] <- fit$fitted.values
     B <- opts$B
-    MAXCELL <- if (is.null(opts$MAXCELL))
-        2*max(x[srv,opts$Ntot], na.rm=TRUE) else opts$MAXCELL
-    if (MAXCELL < max(x[srv,opts$Ntot], na.rm=TRUE))
+    MAXCELL <- if (is.null(opts$MAXCELL)) {
+        2 * max(x[srv, opts$Ntot], na.rm = TRUE)
+    } else {
+        opts$MAXCELL
+    }
+    if (MAXCELL < max(x[srv, opts$Ntot], na.rm = TRUE)) {
         stop("MAXCELL must not be smaller than max observed total abundance")
+    }
     alpha <- opts$alpha
 
     NS <- sum(!srv)
@@ -279,17 +325,19 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     ## Simulated prediction intervals for the Unsurveyed cells
     ## accounting for the estimation uncertainty.
 
-    x_srv <- x[srv,]
-    x_uns <- x[!srv,]
+    x_srv <- x[srv, ]
+    x_uns <- x[!srv, ]
     boot.out <- matrix(0, NS, B)
     fit.out <- matrix(0, sum(srv), B)
     mid <- character(B)
     b <- 1
 
     # Progress bars setup
-    if(requireNamespace("shiny") && shiny::isRunning()) {
-      pbapply::pboptions(type = "shiny",
-                         title = "Calculating prediction intervals")
+    if (requireNamespace("shiny") && shiny::isRunning()) {
+        pbapply::pboptions(
+            type = "shiny",
+            title = "Calculating prediction intervals"
+        )
     }
     pb <- pbapply::startpb(0, B)
     on.exit(pbapply::closepb(pb))
@@ -297,23 +345,25 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     ISSUES <- list()
 
     while (b <= B) {
-
         ## model selection
         if (do_avg) {
-            model_id <- sample(rownames(wts), 1, prob=wts$weight)
+            model_id <- sample(rownames(wts), 1, prob = wts$weight)
         } else {
             model_id <- rownames(wts)[which.max(wts$weight)]
-            if (length(model_id) > 1) # this should really never happen
+            if (length(model_id) > 1) {
+                # this should really never happen
                 model_id <- sample(model_id, 1)
+            }
         }
         mid[b] <- model_id
         #cat("Fitting #", b, " of ", model_id, "\n", sep="")
 
-        if (!(model_id %in% names(ml)))
+        if (!(model_id %in% names(ml))) {
             stop(model_id, " model cannot be found")
+        }
         fit <- ml[[model_id]]
 
-        fit.out[,b] <- fit$fitted.values
+        fit.out[, b] <- fit$fitted.values
 
         # if (inherits(fit, "hurdle")) {
         #     parms.start <- list(count = fit$coef$count,
@@ -324,99 +374,166 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
         #         zero = fit$coef$zero,
         #         theta = fit$theta)
         # }
-        parms.start <- list(count = fit$coef$count,
+        parms.start <- list(
+            count = fit$coef$count,
             zero = fit$coef$zero,
-            theta = fit$theta)
+            theta = fit$theta
+        )
 
         if (do_boot) {
-            BSurvey.data <- x_srv[sample.int(nrow(x_srv), nrow(x_srv),
-                replace=TRUE),]
+            BSurvey.data <- x_srv[
+                sample.int(nrow(x_srv), nrow(x_srv), replace = TRUE),
+            ]
         } else {
             BSurvey.data <- x_srv
         }
-        if (max(BSurvey.data[[opts$Ntot]]) != 0){
-
+        if (max(BSurvey.data[[opts$Ntot]]) != 0) {
             if (do_boot) {
                 # ctrl <- fit$control
                 # ctrl$start = parms.start
                 # ctrl$method = opts$method
                 # ctrl$separate <- fit$separate
                 ctrl <- if (inherits(fit, "hurdle")) {
-                    pscl::hurdle.control(start = parms.start, method = opts$method, separate = fit$separate)
+                    pscl::hurdle.control(
+                        start = parms.start,
+                        method = opts$method,
+                        separate = fit$separate
+                    )
                 } else {
-                    pscl::zeroinfl.control(start = parms.start, method = opts$method)
+                    pscl::zeroinfl.control(
+                        start = parms.start,
+                        method = opts$method
+                    )
                 }
-                model.Boot <- try(suppressWarnings(stats::update(fit,
-                    x = BSurvey.data,
-                    weights=rep(1, nrow(BSurvey.data)),
-                    control = ctrl,
-                    xv = FALSE # no need to use LOO
-                )), silent = TRUE)
+                model.Boot <- try(
+                    suppressWarnings(stats::update(
+                        fit,
+                        x = BSurvey.data,
+                        weights = rep(1, nrow(BSurvey.data)),
+                        control = ctrl,
+                        xv = FALSE # no need to use LOO
+                    )),
+                    silent = TRUE
+                )
                 if (!inherits(model.Boot, "try-error")) {
                     attr(model.Boot, "parms.start") <- parms.start
-                    if (inherits(fit, "wzi"))
-                        model.Boot <- wzi(model.Boot, pass_data=TRUE)
+                    if (inherits(fit, "wzi")) {
+                        model.Boot <- wzi(model.Boot, pass_data = TRUE)
+                    }
                 }
             } else {
                 model.Boot <- fit
             }
 
             if (!inherits(model.Boot, "try-error")) {
-                predict.BNS <- stats::predict(model.Boot, newdata=x_uns, type="response")
+                predict.BNS <- stats::predict(
+                    model.Boot,
+                    newdata = x_uns,
+                    type = "response"
+                )
                 predict.BNSout <- if (DUAL && inherits(fit, "wzi")) {
-                    stats::predict(model.Boot$unweighted_model,
-                        newdata=x_uns, type="response")
+                    stats::predict(
+                        model.Boot$unweighted_model,
+                        newdata = x_uns,
+                        type = "response"
+                    )
                 } else {
                     predict.BNS
                 }
 
                 # hurdle has a list of count & zero, zeroinfl has just a single optim object
-                CONVERGED <- model.Boot$optim$convergence == 0 || model.Boot$optim$count$convergence == 0 || model.Boot$optim$zero$convergence == 0
-
+                CONVERGED <- if (model.Boot$dist %in% c("HP", "HNB")) {
+                    model.Boot$optim$count$convergence == 0 ||
+                        model.Boot$optim$zero$convergence == 0
+                } else {
+                    model.Boot$optim$convergence == 0
+                }
                 if (max(predict.BNS, predict.BNSout) <= MAXCELL && CONVERGED) {
-                    Bm.NS <- stats::predict(model.Boot, newdata = x_uns, type="count")
+                    Bm.NS <- stats::predict(
+                        model.Boot,
+                        newdata = x_uns,
+                        type = "count"
+                    )
                     Btheta.nb <- model.Boot$theta
                     if (inherits(fit, "hurdle")) {
-                        Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="prob", at = 0:1)[,1]
+                        Bphi.zi <- 1 -
+                            stats::predict(
+                                model.Boot,
+                                newdata = x_uns,
+                                type = "prob",
+                                at = 0:1
+                            )[, 1]
                         # need truncated Pois here for hurdle
-                        boot.out[,b] <- rHurdle(NS,
+                        boot.out[, b] <- rHurdle(
+                            NS,
                             mu.nb = Bm.NS,
-                            theta.nb=Btheta.nb,
-                            phi.zi=Bphi.zi) # this is prob of 1 (not 0) and is correct
+                            theta.nb = Btheta.nb,
+                            phi.zi = Bphi.zi
+                        ) # this is prob of 1 (not 0) and is correct
                     } else {
-                        Bphi.zi <- 1 - stats::predict(model.Boot, newdata = x_uns, type="zero")
-                        boot.out[,b] <- rZINB(NS,
+                        Bphi.zi <- 1 -
+                            stats::predict(
+                                model.Boot,
+                                newdata = x_uns,
+                                type = "zero"
+                            )
+                        boot.out[, b] <- rZINB(
+                            NS,
                             mu.nb = Bm.NS,
-                            theta.nb=Btheta.nb,
-                            phi.zi=Bphi.zi) # this is prob of 1 (not 0) and is correct
+                            theta.nb = Btheta.nb,
+                            phi.zi = Bphi.zi
+                        ) # this is prob of 1 (not 0) and is correct
                     }
                     if (DUAL && inherits(fit, "wzi")) {
-                        Bm.NSout <- stats::predict(model.Boot$unweighted_model,
-                                            newdata = x_uns[!x_uns$area_srv,], type="count")
+                        Bm.NSout <- stats::predict(
+                            model.Boot$unweighted_model,
+                            newdata = x_uns[!x_uns$area_srv, ],
+                            type = "count"
+                        )
                         Btheta.nbout <- model.Boot$unweighted_model$theta
                         if (inherits(fit, "hurdle")) {
-                            Bphi.ziout <- stats::predict(model.Boot$unweighted_model,
-                                                newdata = x_uns[!x_uns$area_srv,], type="prob", at = 0:1)[,1]
-                            boot.out[!x_uns$area_srv,b] <- rHurdle(sum(!x_uns$area_srv),
+                            Bphi.ziout <- stats::predict(
+                                model.Boot$unweighted_model,
+                                newdata = x_uns[!x_uns$area_srv, ],
+                                type = "prob",
+                                at = 0:1
+                            )[, 1]
+                            boot.out[!x_uns$area_srv, b] <- rHurdle(
+                                sum(!x_uns$area_srv),
                                 mu.nb = Bm.NSout,
-                                theta.nb=Btheta.nbout,
-                                phi.zi=Bphi.ziout)
+                                theta.nb = Btheta.nbout,
+                                phi.zi = Bphi.ziout
+                            )
                         } else {
-                            Bphi.ziout <- 1 - stats::predict(model.Boot$unweighted_model,
-                                                newdata = x_uns[!x_uns$area_srv,], type="zero")
-                            boot.out[!x_uns$area_srv,b] <- rZINB(sum(!x_uns$area_srv),
+                            Bphi.ziout <- 1 -
+                                stats::predict(
+                                    model.Boot$unweighted_model,
+                                    newdata = x_uns[!x_uns$area_srv, ],
+                                    type = "zero"
+                                )
+                            boot.out[!x_uns$area_srv, b] <- rZINB(
+                                sum(!x_uns$area_srv),
                                 mu.nb = Bm.NSout,
-                                theta.nb=Btheta.nbout,
-                                phi.zi=Bphi.ziout)
+                                theta.nb = Btheta.nbout,
+                                phi.zi = Bphi.ziout
+                            )
                         }
                     }
-                    if (max(boot.out[,b]) <= MAXCELL) {
+                    if (
+                        all(!is.na(boot.out[, b])) &&
+                            max(boot.out[, b], na.rm = TRUE) <= MAXCELL
+                    ) {
                         pbapply::setpb(pb, b)
                         b <- b + 1
                     }
                 }
             } else {
-                ISSUES[[length(ISSUES)+1]] <- as.character(model.Boot)
+                ISSUES[[length(ISSUES) + 1]] <- as.character(model.Boot)
+                if (length(ISSUES) > 2 * B) {
+                    stop(
+                        "Too many refitting iterations failed, check the model(s)."
+                    )
+                }
             }
         }
     }
@@ -426,13 +543,18 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     boot.out <- boot.out / s
 
     TotalMoose.dist <- apply(boot.out, 2, sum)
-    Cell.PI <- apply(boot.out, 1, stats::quantile, c(alpha/2, 0.5, (1-alpha/2)))
+    Cell.PI <- apply(
+        boot.out,
+        1,
+        stats::quantile,
+        c(alpha / 2, 0.5, (1 - alpha / 2))
+    )
     x_uns$Cell.mean <- rowMeans(boot.out)
     x_uns$Cell.mode <- apply(boot.out, 1, find_mode)
-    x_uns$Cell.pred <- Cell.PI[2,]
-    x_uns$Cell.PIL <- Cell.PI[1,]
-    x_uns$Cell.PIU <- Cell.PI[3,]
-    x_uns$Cell.accuracy <- Cell.PI[3,] - Cell.PI[1,]
+    x_uns$Cell.pred <- Cell.PI[2, ]
+    x_uns$Cell.PIL <- Cell.PI[1, ]
+    x_uns$Cell.PIU <- Cell.PI[3, ]
+    x_uns$Cell.accuracy <- Cell.PI[3, ] - Cell.PI[1, ]
     #x_uns$Cell.perc.accuracy <- 0.5*x_uns$Cell.accuracy / (x_uns$Cell.pred + 1)
     x_uns$Rank <- as.integer(as.factor(rank(-x_uns$Cell.accuracy)))
 
@@ -451,25 +573,31 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
     x_full$keep <- TRUE
 
     o <- order(x_full$sort_id)
-    out <- list(model_id=model_id0,
-        do_avg=do_avg,
-        do_boot=do_boot,
-        model_list=ml,
-        model_select_id=mid,
-        alpha=alpha,
-        boot_full=boot.full[o,,drop=FALSE],
-        issues=ISSUES,
-#        fit_matrix=if (do_avg) fit.out else NULL, # see fitted_values when NULL
-        data=x_full[o,,drop=FALSE])
+    out <- list(
+        model_id = model_id0,
+        do_avg = do_avg,
+        do_boot = do_boot,
+        model_list = ml,
+        model_select_id = mid,
+        alpha = alpha,
+        boot_full = boot.full[o, , drop = FALSE],
+        issues = ISSUES,
+        #        fit_matrix=if (do_avg) fit.out else NULL, # see fitted_values when NULL
+        data = x_full[o, , drop = FALSE]
+    )
 
     csfull <- colSums(boot.full)
-    tmPI <- c(Mean=mean(csfull),
-        Median=unname(stats::quantile(csfull, 0.5)),
-        Mode=find_mode(csfull),
-        stats::quantile(csfull, c(alpha/2, (1-alpha/2))))
-    out$total <- rbind(N=tmPI,
-        A=sum(x_full[[opts$Area]]),
-        D=tmPI / (1 * sum(x_full[[opts$Area]])))
+    tmPI <- c(
+        Mean = mean(csfull),
+        Median = unname(stats::quantile(csfull, 0.5)),
+        Mode = find_mode(csfull),
+        stats::quantile(csfull, c(alpha / 2, (1 - alpha / 2)))
+    )
+    out$total <- rbind(
+        N = tmPI,
+        A = sum(x_full[[opts$Area]]),
+        D = tmPI / (1 * sum(x_full[[opts$Area]]))
+    )
     rownames(out$total) <- if (opts$response == "total") {
         c("Total_Moose", "Total_Area_km2", "Density_Moose_Per_km2")
     } else {
@@ -495,28 +623,35 @@ mc_predict_total <- function(model_id, ml, x, do_boot=TRUE, do_avg=FALSE) {
 #' @rdname total
 #' @export
 # was: subsetPiData
-mc_get_pred <- function(PI, ss=NULL) {
-    if (is.null(ss))
+mc_get_pred <- function(PI, ss = NULL) {
+    if (is.null(ss)) {
         ss <- rep(TRUE, nrow(PI$data))
+    }
     opts <- getOption("moose_options")
     PIout <- PI
-    PIout$boot_full <- PI$boot_full[ss,,drop=FALSE]
-    PIout$data <- PI$data[ss,,drop=FALSE]
-    PIout$data$Residuals <- PIout$data$fitted_values - PIout$data$observed_values
-#    PIout$fit_matrix <- NULL
+    PIout$boot_full <- PI$boot_full[ss, , drop = FALSE]
+    PIout$data <- PI$data[ss, , drop = FALSE]
+    PIout$data$Residuals <- PIout$data$fitted_values -
+        PIout$data$observed_values
+    #    PIout$fit_matrix <- NULL
     Rank <- PIout$data$Rank[]
     PIout$data$Rank[!PIout$data$srv] <- as.integer(as.factor(
-        rank(-PIout$data$Cell.accuracy[!PIout$data$srv])))
+        rank(-PIout$data$Cell.accuracy[!PIout$data$srv])
+    ))
 
     csfull <- colSums(PIout$boot_full)
     alpha <- getOption("moose_options")$alpha
-    tmPI <- c(Mean=mean(csfull),
-        Median=unname(stats::quantile(csfull, 0.5)),
-        Mode=find_mode(csfull),
-        stats::quantile(csfull, c(alpha/2, (1-alpha/2))))
-    PIout$total <- rbind(N=tmPI,
-        A=sum(PIout$data[[opts$Area]]),
-        D=tmPI/sum(PIout$data[[opts$Area]]))
+    tmPI <- c(
+        Mean = mean(csfull),
+        Median = unname(stats::quantile(csfull, 0.5)),
+        Mode = find_mode(csfull),
+        stats::quantile(csfull, c(alpha / 2, (1 - alpha / 2)))
+    )
+    PIout$total <- rbind(
+        N = tmPI,
+        A = sum(PIout$data[[opts$Area]]),
+        D = tmPI / sum(PIout$data[[opts$Area]])
+    )
     PIout
 }
 
@@ -527,8 +662,11 @@ pred_density_moose_PI <- function(PI) {
     cat("Total Moose PI summary:\n\n")
     print(out)
     if (length(PI$issues) > 0L) {
-        cat("\nNote:", length(PI$issues),
-            "issues were found during PI calculations.\n\n")
+        cat(
+            "\nNote:",
+            length(PI$issues),
+            "issues were found during PI calculations.\n\n"
+        )
     }
     invisible(out)
 }
@@ -554,38 +692,57 @@ mc_plot_residuals <- function(model_id, ml, x) {
     xy <- x[!srv, opts$xy]
 
     Colfun <- grDevices::colorRampPalette(
-        c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'))
+        c('#d7191c', '#fdae61', '#ffffbf', '#abd9e9', '#2c7bb6')
+    )
     AbsMax <- max(abs(z))
     Sd <- stats::sd(z)
     nn <- ceiling(AbsMax / Sd)
-    br <- seq(-nn*Sd, nn*Sd, by=0.5*Sd)
-    tmp <- graphics::hist(z, plot=FALSE, breaks=br)
+    br <- seq(-nn * Sd, nn * Sd, by = 0.5 * Sd)
+    tmp <- graphics::hist(z, plot = FALSE, breaks = br)
     Col <- Colfun(length(tmp$counts))
     tz <- tanh(z)
     ctz <- cut(z, br)
 
-    op <- graphics::par(mfrow=c(1,2))
+    op <- graphics::par(mfrow = c(1, 2))
     on.exit(graphics::par(op))
 
-    plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
-      xlab="Longitude", ylab="Latitude", #asp=1,
-      main=paste("Residuals for Model ID:", model_id),
-      ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
-    graphics::points(x[!srv,opts$xy], pch="+", col="grey")
-    graphics::legend("bottomleft", pch=c("o","+"), col="grey",
-      bty="n", legend=c("Surveyed", "Unsurveyed"))
+    plot(
+        x[srv, opts$xy],
+        pch = 19,
+        col = Col[ctz],
+        cex = 0.5 + 1.5 * abs(tz),
+        xlab = "Longitude",
+        ylab = "Latitude", #asp=1,
+        main = paste("Residuals for Model ID:", model_id),
+        ylim = range(x[, opts$xy[2]]) - c(0.2 * diff(range(x[, opts$xy[2]])), 0)
+    )
+    graphics::points(x[!srv, opts$xy], pch = "+", col = "grey")
+    graphics::legend(
+        "bottomleft",
+        pch = c("o", "+"),
+        col = "grey",
+        bty = "n",
+        legend = c("Surveyed", "Unsurveyed")
+    )
 
-    lo <- x[srv,,drop=FALSE]
-    lo <- lo[z <= (-1.5*Sd),,drop=FALSE]
-    if (nrow(lo) > 0)
-        graphics::text(lo[, opts$xy], labels = lo$SU_ID, cex=0.8)
-    hi <- x[srv,,drop=FALSE]
-    hi <- hi[z >= 1.5*Sd,,drop=FALSE]
-    if (nrow(hi) > 0)
-        graphics::text(hi[, opts$xy], labels = hi$SU_ID, cex=0.8)
+    lo <- x[srv, , drop = FALSE]
+    lo <- lo[z <= (-1.5 * Sd), , drop = FALSE]
+    if (nrow(lo) > 0) {
+        graphics::text(lo[, opts$xy], labels = lo$SU_ID, cex = 0.8)
+    }
+    hi <- x[srv, , drop = FALSE]
+    hi <- hi[z >= 1.5 * Sd, , drop = FALSE]
+    if (nrow(hi) > 0) {
+        graphics::text(hi[, opts$xy], labels = hi$SU_ID, cex = 0.8)
+    }
 
-    graphics::hist(z, xlab="Standardized Residuals", col=Col, breaks=br,
-      main=paste("Model ID:", model_id))
+    graphics::hist(
+        z,
+        xlab = "Standardized Residuals",
+        col = Col,
+        breaks = br,
+        main = paste("Model ID:", model_id)
+    )
 
     invisible(z)
 }
@@ -593,11 +750,11 @@ mc_plot_residuals <- function(model_id, ml, x) {
 #' @rdname total
 #' @export
 mc_plot_predpi <- function(PI) {
-
     opts <- getOption("moose_options")
     x <- PI$data
-    if (nrow(x) < 1)
+    if (nrow(x) < 1) {
         stop("subset is empty")
+    }
     srv <- x$srv
     B <- opts$B
     #MAXCELL <- opts$MAXCELL
@@ -609,40 +766,62 @@ mc_plot_predpi <- function(PI) {
     xy <- x[!srv, opts$xy]
 
     Colfun <- grDevices::colorRampPalette(
-        c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'))
+        c('#d7191c', '#fdae61', '#ffffbf', '#abd9e9', '#2c7bb6')
+    )
     AbsMax <- max(abs(z))
     Sd <- stats::sd(z)
     nn <- ceiling(AbsMax / Sd)
-    br <- seq(-nn*Sd, nn*Sd, by=0.5*Sd)
-    tmp <- graphics::hist(z, plot=FALSE, breaks=br)
+    br <- seq(-nn * Sd, nn * Sd, by = 0.5 * Sd)
+    tmp <- graphics::hist(z, plot = FALSE, breaks = br)
     Col <- Colfun(length(tmp$counts))
     tz <- tanh(z)
     ctz <- cut(z, br)
 
-    op <- graphics::par(mfrow=c(1,3))
+    op <- graphics::par(mfrow = c(1, 3))
     on.exit(graphics::par(op))
 
-    ModID <- if (length(unique(PI$model_select_id))>1)
-        "Avg" else unique(PI$model_select_id)
-    plot(x[srv, opts$xy], pch=19, col=Col[ctz], cex=0.5+1.5*abs(tz),
-        xlab="Longitude", ylab="Latitude", #asp=1,
-        main=paste("Residuals for Model ID:", ModID),
-        ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0))
-    graphics::points(x[!srv,opts$xy], pch="+", col="grey")
-    graphics::legend("bottomleft", pch=c("o","+"), col="grey",
-        bty="n", legend=c("Surveyed", "Unsurveyed"))
+    ModID <- if (length(unique(PI$model_select_id)) > 1) {
+        "Avg"
+    } else {
+        unique(PI$model_select_id)
+    }
+    plot(
+        x[srv, opts$xy],
+        pch = 19,
+        col = Col[ctz],
+        cex = 0.5 + 1.5 * abs(tz),
+        xlab = "Longitude",
+        ylab = "Latitude", #asp=1,
+        main = paste("Residuals for Model ID:", ModID),
+        ylim = range(x[, opts$xy[2]]) - c(0.2 * diff(range(x[, opts$xy[2]])), 0)
+    )
+    graphics::points(x[!srv, opts$xy], pch = "+", col = "grey")
+    graphics::legend(
+        "bottomleft",
+        pch = c("o", "+"),
+        col = "grey",
+        bty = "n",
+        legend = c("Surveyed", "Unsurveyed")
+    )
 
-    lo <- x[srv,,drop=FALSE]
-    lo <- lo[z <= (-1.5*Sd),,drop=FALSE]
-    if (nrow(lo) > 0)
-        graphics::text(lo[, opts$xy], labels = lo$SU_ID, cex=0.8)
-    hi <- x[srv,,drop=FALSE]
-    hi <- hi[z >= 1.5*Sd,,drop=FALSE]
-    if (nrow(hi) > 0)
-        graphics::text(hi[, opts$xy], labels = hi$SU_ID, cex=0.8)
+    lo <- x[srv, , drop = FALSE]
+    lo <- lo[z <= (-1.5 * Sd), , drop = FALSE]
+    if (nrow(lo) > 0) {
+        graphics::text(lo[, opts$xy], labels = lo$SU_ID, cex = 0.8)
+    }
+    hi <- x[srv, , drop = FALSE]
+    hi <- hi[z >= 1.5 * Sd, , drop = FALSE]
+    if (nrow(hi) > 0) {
+        graphics::text(hi[, opts$xy], labels = hi$SU_ID, cex = 0.8)
+    }
 
-    graphics::hist(z, breaks=br, xlab="Standardized Residuals", col=Col,
-        main=paste("Model ID:", ModID))
+    graphics::hist(
+        z,
+        breaks = br,
+        xlab = "Standardized Residuals",
+        col = Col,
+        main = paste("Model ID:", ModID)
+    )
 
     xy <- PI$data[!srv, opts$xy]
     Nobs <- x[srv, opts$Ntot]
@@ -655,7 +834,8 @@ mc_plot_predpi <- function(PI) {
     zAcc <- (Acc - min(Acc)) / diff(range(Acc))
 
     Colfun <- grDevices::colorRampPalette(
-        c('#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'))
+        c('#ffffb2', '#fecc5c', '#fd8d3c', '#f03b20', '#bd0026')
+    )
     Col <- Colfun(9)
     #Col <- brewer.pal(9, "YlOrRd")[1:5]
     czAcc <- cut(zAcc, c(-0.1, 0.2, 0.4, 0.6, 0.8, 1.1))
@@ -663,33 +843,49 @@ mc_plot_predpi <- function(PI) {
     Min <- sapply(1:20, function(z) length(which(AccRank <= z)))
     Min <- min(20, (1:20)[min(which(Min >= 20))])
 
-    plot(xy, pch=19, col=Col[czAcc], cex=1+zAcc*1,
-      ylim=range(x[,opts$xy[2]])-c(0.2*diff(range(x[,opts$xy[2]])), 0),
-      xlab="Longitude", ylab="Latitude", #asp=1,
-      main=paste("Accuracy for Model ID:", ModID))
-    graphics::points(x[srv,opts$xy], pch="+", col="grey")
-#    text(x[!srv,opts$xy][AccRank <= Min,], labels=AccRank[AccRank <= Min], cex=1)
-    graphics::text(x[!srv,opts$xy][AccRank <= Min,], labels=x[!srv,"SU_ID"][AccRank <= Min], cex=1)
-    graphics::legend("bottomleft", pch=19, col=Col[c(5,3,1)],
-      bty="n", legend=c("+++", "++", "+"))
+    plot(
+        xy,
+        pch = 19,
+        col = Col[czAcc],
+        cex = 1 + zAcc * 1,
+        ylim = range(x[, opts$xy[2]]) -
+            c(0.2 * diff(range(x[, opts$xy[2]])), 0),
+        xlab = "Longitude",
+        ylab = "Latitude", #asp=1,
+        main = paste("Accuracy for Model ID:", ModID)
+    )
+    graphics::points(x[srv, opts$xy], pch = "+", col = "grey")
+    #    text(x[!srv,opts$xy][AccRank <= Min,], labels=AccRank[AccRank <= Min], cex=1)
+    graphics::text(
+        x[!srv, opts$xy][AccRank <= Min, ],
+        labels = x[!srv, "SU_ID"][AccRank <= Min],
+        cex = 1
+    )
+    graphics::legend(
+        "bottomleft",
+        pch = 19,
+        col = Col[c(5, 3, 1)],
+        bty = "n",
+        legend = c("+++", "++", "+")
+    )
 
     invisible(PI)
 }
 
 #' @rdname total
 #' @export
-mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
+mc_plot_pidistr <- function(PI, id = NULL, plot = TRUE, breaks = "Sturges") {
     if (is.null(id)) {
-        .mc_plot_pidistrall(PI=PI, plot=plot, breaks=breaks)
+        .mc_plot_pidistrall(PI = PI, plot = plot, breaks = breaks)
     } else {
-        .mc_plot_pidistrcell(PI=PI, id=id, plot=plot, breaks=breaks)
+        .mc_plot_pidistrcell(PI = PI, id = id, plot = plot, breaks = breaks)
     }
 }
 
-.mc_plot_pidistrall <- function(PI, plot=TRUE, breaks="Sturges") {
+.mc_plot_pidistrall <- function(PI, plot = TRUE, breaks = "Sturges") {
     csfull <- colSums(PI$boot_full)
     if (plot) {
-        h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
+        h <- graphics::hist(csfull, breaks = breaks, plot = FALSE)
         h$density <- h$counts * 100 / sum(h$counts)
         if (length(unique(csfull)) == 1) {
             h$mids <- unique(csfull)
@@ -697,37 +893,56 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
         }
         d <- stats::density(csfull)
         d$y <- max(h$density) * d$y / max(d$y)
-        plot(h,
-            freq=FALSE, col="lightgrey", main="Total Moose PI",
-            xlab="Predicted Total Moose", ylab="Percent",
-            border="darkgrey",
-            ylim=c(0, max(h$density, d$y)))
+        plot(
+            h,
+            freq = FALSE,
+            col = "lightgrey",
+            main = "Total Moose PI",
+            xlab = "Predicted Total Moose",
+            ylab = "Percent",
+            border = "darkgrey",
+            ylim = c(0, max(h$density, d$y))
+        )
 
         graphics::lines(d)
-        graphics::rug(csfull, col=1)
-        graphics::abline(v=PI$total["Total_Moose", "Mean"], col=2)
-        graphics::abline(v=PI$total["Total_Moose", "Median"], col=3)
-        graphics::abline(v=PI$total["Total_Moose", "Mode"], col=4)
-        graphics::abline(v=PI$total["Total_Moose", 4:5], col="darkgrey", lty=2)
-        TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
-            format(PI$total["Total_Moose", c("Mean", "Median", "Mode")],
-                   nsmall = 3))
-        graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
-            legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
+        graphics::rug(csfull, col = 1)
+        graphics::abline(v = PI$total["Total_Moose", "Mean"], col = 2)
+        graphics::abline(v = PI$total["Total_Moose", "Median"], col = 3)
+        graphics::abline(v = PI$total["Total_Moose", "Mode"], col = 4)
+        graphics::abline(
+            v = PI$total["Total_Moose", 4:5],
+            col = "darkgrey",
+            lty = 2
+        )
+        TXT <- paste0(
+            c("Mean", "Median", "Mode"),
+            " = ",
+            format(
+                PI$total["Total_Moose", c("Mean", "Median", "Mode")],
+                nsmall = 3
+            )
+        )
+        graphics::legend(
+            "topright",
+            lty = c(1, 1, 1, 2),
+            col = c(2:4, "darkgrey"),
+            bty = "n",
+            legend = c(TXT, paste0(100 - 100 * PI$alpha, "% PI"))
+        )
     }
     invisible(csfull)
 }
 
-.mc_plot_pidistrcell <- function(PI, id=1, plot=TRUE, breaks="Sturges") {
-    csfull <- PI$boot_full[id,]
+.mc_plot_pidistrcell <- function(PI, id = 1, plot = TRUE, breaks = "Sturges") {
+    csfull <- PI$boot_full[id, ]
     is_srv <- PI$data$srv[id]
     if (plot) {
         if (is_srv) {
             graphics::plot.new()
-            graphics::title(main=paste("Moose PI for Cell", id))
+            graphics::title(main = paste("Moose PI for Cell", id))
             graphics::text(0.5, 0.5, paste("Observed Count =", csfull[1]))
         } else {
-            h <- graphics::hist(csfull, breaks=breaks, plot=FALSE)
+            h <- graphics::hist(csfull, breaks = breaks, plot = FALSE)
             h$density <- h$counts * 100 / sum(h$counts)
             if (length(unique(csfull)) == 1) {
                 h$mids <- unique(csfull)
@@ -735,23 +950,41 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
             }
             d <- stats::density(csfull)
             d$y <- max(h$density) * d$y / max(d$y)
-            plot(h,
-                freq=FALSE, col="lightgrey",
-                main=paste("Moose PI for Cell", id),
-                xlab="Predicted Total Moose in cell", ylab="Percent",
-                border="darkgrey",
-                ylim=c(0, max(h$density, d$y)))
+            plot(
+                h,
+                freq = FALSE,
+                col = "lightgrey",
+                main = paste("Moose PI for Cell", id),
+                xlab = "Predicted Total Moose in cell",
+                ylab = "Percent",
+                border = "darkgrey",
+                ylim = c(0, max(h$density, d$y))
+            )
             graphics::lines(d)
-            graphics::rug(csfull, col=1)
-            graphics::abline(v=PI$data[id, "Cell.mean"], col=2)
-            graphics::abline(v=PI$data[id, "Cell.pred"], col=3)
-            graphics::abline(v=PI$data[id, "Cell.mode"], col=4)
-            graphics::abline(v=PI$data[id, c("Cell.PIL", "Cell.PIU")], col="darkgrey", lty=2)
-            TXT <- paste0(c("Mean", "Median", "Mode"), " = ",
-                format(PI$data[id, c("Cell.mean", "Cell.pred", "Cell.mode")],
-                       nsmall = 3))
-            graphics::legend("topright", lty=c(1,1,1,2), col=c(2:4, "darkgrey"), bty="n",
-                legend=c(TXT, paste0(100-100*PI$alpha, "% PI")))
+            graphics::rug(csfull, col = 1)
+            graphics::abline(v = PI$data[id, "Cell.mean"], col = 2)
+            graphics::abline(v = PI$data[id, "Cell.pred"], col = 3)
+            graphics::abline(v = PI$data[id, "Cell.mode"], col = 4)
+            graphics::abline(
+                v = PI$data[id, c("Cell.PIL", "Cell.PIU")],
+                col = "darkgrey",
+                lty = 2
+            )
+            TXT <- paste0(
+                c("Mean", "Median", "Mode"),
+                " = ",
+                format(
+                    PI$data[id, c("Cell.mean", "Cell.pred", "Cell.mode")],
+                    nsmall = 3
+                )
+            )
+            graphics::legend(
+                "topright",
+                lty = c(1, 1, 1, 2),
+                col = c(2:4, "darkgrey"),
+                bty = "n",
+                legend = c(TXT, paste0(100 - 100 * PI$alpha, "% PI"))
+            )
         }
     }
     invisible(csfull)
@@ -761,36 +994,58 @@ mc_plot_pidistr <- function(PI, id=NULL, plot=TRUE, breaks="Sturges") {
 #' @rdname total
 #' @export
 mc_plot_predfit <- function(i, PI, ss = NULL, interactive = FALSE) {
+    dat <- PI$data[, c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU", "srv", i)]
+    names(dat)[names(dat) == "srv"] <- "Surveyed"
+    names(dat)[names(dat) == i] <- "z"
+    if (!is.null(ss)) {
+        dat <- dat[ss, , drop = FALSE]
+    }
 
-  dat <- PI$data[, c("SU_ID", "Cell.mean", "Cell.PIL", "Cell.PIU", "srv", i)]
-  names(dat)[names(dat) == "srv"] <- "Surveyed"
-  names(dat)[names(dat) == i] <- "z"
-  if(!is.null(ss)) dat <- dat[ss, , drop = FALSE]
+    p <- ggplot2::ggplot(
+        dat,
+        ggplot2::aes(x = .data$z, y = .data$Cell.mean, colour = .data$Surveyed)
+    ) +
+        ggplot2::geom_ribbon(
+            data = dplyr::filter(dat, !.data$Surveyed),
+            mapping = ggplot2::aes(
+                ymin = .data$Cell.PIL,
+                ymax = .data$Cell.PIU,
+                fill = "Prediction Interval"
+            ),
+            alpha = 0.15,
+            colour = NA
+        ) +
+        ggplot2::scale_fill_manual(name = NULL, values = "black") +
+        ggplot2::scale_colour_viridis_d(end = 0.7) +
+        ggplot2::theme_minimal() +
+        ggplot2::xlab(i) +
+        ggplot2::ylab("Total Moose")
 
-  p <- ggplot2::ggplot(dat, ggplot2::aes(x = .data$z, y = .data$Cell.mean,
-                                         colour = .data$Surveyed)) +
-    ggplot2::geom_ribbon(data = dplyr::filter(dat, !.data$Surveyed),
-                         mapping = ggplot2::aes(ymin = .data$Cell.PIL, ymax = .data$Cell.PIU,
-                                                fill = "Prediction Interval"),
-                         alpha = 0.15, colour = NA) +
-    ggplot2::scale_fill_manual(name = NULL, values = "black") +
-    ggplot2::scale_colour_viridis_d(end = 0.7) +
-    ggplot2::theme_minimal() +
-    ggplot2::xlab(i) +
-    ggplot2::ylab("Total Moose")
-
-  if(interactive) {
-    dat <- dplyr::mutate(dat,
-                         tt = paste0("SU_ID: ", .data$SU_ID,
-                                     "<br>", .env$i, ": ", round(.data$z, 2),
-                                     "<br>Total Moose: ", .data$Cell.mean,
-                                     "<br>Surveyed: ", .data$Surveyed))
-    p <- p + ggiraph::geom_point_interactive(data = dat, size = 3, alpha = 0.5,
-                                             ggplot2::aes(tooltip = .data$tt,
-                                                          data_id = .data$tt))
-  } else {
-    p <- p + ggplot2::geom_point()
-  }
-  p
+    if (interactive) {
+        dat <- dplyr::mutate(
+            dat,
+            tt = paste0(
+                "SU_ID: ",
+                .data$SU_ID,
+                "<br>",
+                .env$i,
+                ": ",
+                round(.data$z, 2),
+                "<br>Total Moose: ",
+                .data$Cell.mean,
+                "<br>Surveyed: ",
+                .data$Surveyed
+            )
+        )
+        p <- p +
+            ggiraph::geom_point_interactive(
+                data = dat,
+                size = 3,
+                alpha = 0.5,
+                ggplot2::aes(tooltip = .data$tt, data_id = .data$tt)
+            )
+    } else {
+        p <- p + ggplot2::geom_point()
+    }
+    p
 }
-
