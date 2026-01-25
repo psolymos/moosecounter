@@ -1,6 +1,6 @@
 ---
-title: "Introduction and background"
-subtitle: "Point count data analysis workshop 2025"
+title: "Simulation Approach"
+subtitle: "Moose Abundance Estimation"
 date: "`r Sys.Date()`"
 author: "Péter Sólymos"
 toc: true
@@ -19,7 +19,7 @@ if (interactive()) {
 } else {
     devtools::load_all("../..")
 }
-set.seed(0)
+set.seed(1)
 get_stats <- function(PI, true_vals) {
     is_srv <- PI$data$srv
     cell_q <- t(apply(

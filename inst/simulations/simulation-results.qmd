@@ -1,0 +1,106 @@
+---
+title: "Simulation Results: Fixed Sample Size"
+subtitle: "Moose Abundance Estimation"
+date: "`r Sys.Date()`"
+author: "Péter Sólymos"
+toc: true
+format:
+  html: 
+    html-math-method: katex
+    self-contained: true
+  pdf: default
+---
+
+Simulated 250 cells, sampled 250 of them randomly. This was repeated 100
+times for each of the 4 models (P, NB, ZIP, ZINB). Used 100 bootstrap iterations.
+
+The same 4 models were fit to the data, then the following metrics were saved:
+
+- `true_total`: sum of counts for all 2500 cells
+- total abundance (`mean`) estimate: cell level estimates summed for each bootstrap run, boostrap mean calculated
+- 90% and 95% PIs for total abundance (quantiles of the bootstrap total counts)
+- coverage (90% and 95%): proportion of unsurveyed cells where the true count was inside the cell level PIs
+
+```{r}
+#| include: false
+library(knitr)
+library(intrval)
+library(ggplot2)
+library(dplyr)
+
+DIR <- "../../_tmp/simuls"
+dd <- NULL
+for (MODEL in c("P", "NB", "ZIP", "ZINB")) {
+    fn <- sprintf("%s/moose-sim_model-%s.RData", DIR, MODEL)
+    load(fn)
+
+    d <- do.call(
+        rbind,
+        lapply(RES, \(x) {
+            z <- data.frame(
+                true_model = MODEL,
+                model = colnames(x),
+                as.data.frame(t(x))
+            )
+        })
+    )
+    d$pi_95 <- as.numeric(d[, "true_total"] %[]% d[, c("X2.5.", "X97.5.")])
+    d$pi_90 <- as.numeric(d[, "true_total"] %[]% d[, c("X5.", "X95.")])
+    d$bias <- d$mean - d$true_total
+    d$rel_bias <- (d$mean - d$true_total) / d$true_total
+
+    dd <- rbind(dd, d)
+}
+```
+
+The true total abundance varied somewhat between the setups, might have to tune a bit more to make them more comparable:
+
+```{r}
+
+dd |>
+    ggplot(aes(x = true_model, y = true_total, col = model)) +
+    geom_boxplot() +
+    theme_light()
+```
+
+
+The total moose abundance coverage was lower than nominal for all models:
+
+```{r}
+dd |>
+    group_by(true_model, model) |>
+    summarize(pi_90 = mean(pi_90), pi_95 = mean(pi_95))
+```
+
+The bias (estimate - true) in total abundance:
+
+```{r}
+
+dd |>
+    ggplot(aes(x = true_model, y = bias, col = model)) +
+    geom_boxplot() +
+    theme_light()
+```
+
+Relative bias (standardized by true abundance):
+
+```{r}
+dd |>
+    ggplot(aes(x = true_model, y = rel_bias, col = model)) +
+    geom_boxplot() +
+    theme_light()
+```
+
+Cell level coverage was higher than nominal:
+
+```{r}
+dd |>
+    ggplot(aes(x = true_model, y = coverage_95, col = model)) +
+    geom_boxplot() +
+    theme_light()
+dd |>
+    ggplot(aes(x = true_model, y = coverage_90, col = model)) +
+    geom_boxplot() +
+    theme_light()
+```
+
