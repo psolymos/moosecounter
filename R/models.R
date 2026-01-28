@@ -1144,47 +1144,47 @@ zeroinfl2 <- function(
             mu <- as.vector(exp(X %*% parms[1:kx] + offsetx))
             #phi <- as.vector(linkinv(Z %*% parms[(kx + 1):(kx + kz)] + offsetz))
             # phi <- linkinv(-100)
-            # phi <- 0
+            phi <- 0
             theta <- exp(parms[(kx + kz) + 1])
-            # loglik0 <- log(
-            #     phi +
-            #         exp(
-            #             log(1 - phi) +
-            #                 suppressWarnings(stats::dnbinom(
-            #                     0,
-            #                     size = theta,
-            #                     mu = mu,
-            #                     log = TRUE
-            #                 ))
-            #         )
-            # )
-            # loglik1 <- log(1 - phi) +
-            #     suppressWarnings(stats::dnbinom(
-            #         Y,
-            #         size = theta,
-            #         mu = mu,
-            #         log = TRUE
-            #     ))
-            # loglik <- sum(weights[Y0] * loglik0[Y0]) +
-            #     sum(
-            #         weights[Y1] *
-            #             loglik1[Y1]
-            #     )
-            # loglik
+            loglik0 <- log(
+                phi +
+                    exp(
+                        log(1 - phi) +
+                            suppressWarnings(stats::dnbinom(
+                                0,
+                                size = theta,
+                                mu = mu,
+                                log = TRUE
+                            ))
+                    )
+            )
+            loglik1 <- log(1 - phi) +
+                suppressWarnings(stats::dnbinom(
+                    Y,
+                    size = theta,
+                    mu = mu,
+                    log = TRUE
+                ))
+            loglik <- sum(weights[Y0] * loglik0[Y0]) +
+                sum(
+                    weights[Y1] *
+                        loglik1[Y1]
+                )
+            loglik
 
-            loglik <- suppressWarnings(stats::dnbinom(
-                Y,
-                size = theta,
-                mu = mu,
-                log = TRUE
-            ))
-            sum(weights * loglik)
+            # loglik <- suppressWarnings(stats::dnbinom(
+            #     Y,
+            #     size = theta,
+            #     mu = mu,
+            #     log = TRUE
+            # ))
+            # sum(weights * loglik)
         }
         gradNegBinNonZI <- function(parms) {
             eta <- as.vector(X %*% parms[1:kx] + offsetx)
             mu <- exp(eta)
             #etaz <- as.vector(Z %*% parms[(kx + 1):(kx + kz)] + offsetz)
-            etaz <- -100
+            etaz <- -999
             muz <- linkinv(etaz)
             theta <- exp(parms[(kx + kz) + 1])
             clogdens0 <- stats::dnbinom(0, size = theta, mu = mu, log = TRUE)
@@ -1343,9 +1343,9 @@ zeroinfl2 <- function(
             poisson = gradPoisson,
             negbin = gradNegBin,
             # P = gradPoissonNonZI,
-            # NB = gradNegBinNonZI
             P = NULL,
-            NB = NULL
+            NB = gradNegBinNonZI
+            # NB = NULL
         )
         linkstr <- match.arg(link)
         linkobj <- stats::make.link(linkstr)
