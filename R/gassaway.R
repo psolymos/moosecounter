@@ -33,31 +33,51 @@ NULL
 #' @rdname gassaway
 #' @export
 mc_gassaway <- function(y1, y2, N1, N2) {
-
   ## address R CMD notes related to NSE
   Stratum <- counts <- strata <- N <- NULL
 
   df <- data.frame(
-    counts=c(y1, y2),
-    Stratum=factor(
-      c(rep("Stratum 1", length(y1)),
-      rep("Stratum 2", length(y2))),
-      c("Stratum 1", "Stratum 2")))
+    counts = c(y1, y2),
+    Stratum = factor(
+      c(rep("Stratum 1", length(y1)), rep("Stratum 2", length(y2))),
+      c("Stratum 1", "Stratum 2")
+    )
+  )
   stats <- df %>%
     dplyr::group_by(Stratum) %>%
     dplyr::summarise(
-      Mean=mean(counts),
-      SD=stats::sd(counts), # sd() uses small sample corrected N-1 denom
-      n=length(counts)) %>%
+      Mean = mean(counts),
+      SD = stats::sd(counts), # sd() uses small sample corrected N-1 denom
+      n = length(counts)
+    ) %>%
     as.data.frame()
   stats$N <- c(N1, N2)
   tot <- with(stats, Mean * N)
-  Var <- with(stats, N^2 * ((N-n)/N) / (SD^2/n))
+  # Var <- with(stats, N^2 * ((N-n)/N) / (SD^2/n))
+  Var <- with(stats, N * (N - n) * (SD^2 / n))
+
   tau_hat <- sum(tot)
   var_hat <- sum(Var)
-  out <- list(counts=counts, strata=strata, N=N,
-       stats=stats,
-       total=tau_hat, variance=var_hat)
+
+  level <- 0.95
+  a <- (1 - level) / 2
+  a <- c(a, 1 - a)
+  CI <- tau_hat + sqrt(var_hat) * qnorm(a)
+  names(CI) <- paste(
+    format(100 * a, trim = TRUE, scientific = FALSE, digits = 3),
+    "%"
+  )
+
+  out <- list(
+    counts = df$counts,
+    strata = df$Stratum,
+    N = N,
+    stats = stats,
+    total = tau_hat,
+    variance = var_hat,
+    ci = CI,
+    level = level
+  )
   class(out) <- "mc_gassaway"
   out
 }
@@ -65,9 +85,21 @@ mc_gassaway <- function(y1, y2, N1, N2) {
 #' @rdname gassaway
 #' @export
 print.mc_gassaway <- function(x, ...) {
-  cat("Total Moose population estimate - Gassaway formula\n\n",
-      "Total = ", format(x$total, ...),
-      " (Variance = ", format(x$variance, ...), ")\n\n", sep="")
+  cat(
+    "Total Moose population estimate - Gassaway formula\n\n",
+    "Total = ",
+    format(x$total, ...),
+    " (Variance = ",
+    format(x$variance, ...),
+    ")\n",
+    100 * x$level,
+    " % CI: ",
+    x$ci[1],
+    " - ",
+    x$ci[2],
+    "\n\n",
+    sep = ""
+  )
   print(x$stats, ...)
   invisible(x)
 }
