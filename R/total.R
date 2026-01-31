@@ -442,8 +442,8 @@ mc_predict_total <- function(
                 }
 
                 # hurdle has a list of count & zero, zeroinfl has just a single optim object
-                CONVERGED <- if (model.Boot$dist %in% c("HP", "HNB")) {
-                    model.Boot$optim$count$convergence == 0 ||
+                CONVERGED <- if (model.Boot$dist_og %in% c("HP", "HNB")) {
+                    model.Boot$optim$count$convergence == 0 &&
                         model.Boot$optim$zero$convergence == 0
                 } else {
                     model.Boot$optim$convergence == 0
