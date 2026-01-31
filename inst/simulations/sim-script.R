@@ -1,4 +1,4 @@
-# Rscript --vanilla inst/simulations/sim-script.R --model ZIP
+# Rscript --vanilla inst/simulations/sim-script.R --B 100 --model NB
 
 library(rconfig)
 library(intrval)
@@ -11,7 +11,7 @@ DIR <- value(CONFIG$dir, "_tmp/simuls")
 MODEL <- value(CONFIG$model, "P")
 GRID_SIZE <- value(CONFIG$grid, 50)
 FIXED_SAMPLE_SIZE <- value(CONFIG$sample, 500)
-THETA_NB <- value(CONFIG$theta, 5)
+THETA_NB <- value(CONFIG$theta, 10)
 B <- value(CONFIG$B, 500) # should be 500-1000, bootstrap iters
 N <- value(CONFIG$N, 100) # >200 for sure, number of sim runs
 SEED <- value(CONFIG$seed, 0)
