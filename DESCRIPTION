@@ -22,7 +22,8 @@ Imports:
     ggplot2 (>= 3.3.5),
     rlang (>= 1.0.2),
     dplyr (>= 1.0.7),
-    purrr (>= 0.3.4)
+    purrr (>= 0.3.4),
+    actuar
 Suggests: 
     DT (>= 0.18),
     ggiraph (>= 0.7.10),

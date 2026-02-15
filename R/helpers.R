@@ -45,13 +45,15 @@ NULL
 #' @rdname internal
 #' @export
 rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
-    if (length(phi.zi) < N)
+    if (length(phi.zi) < N) {
         phi.zi <- rep(phi.zi, N)[seq_len(N)]
+    }
     A <- stats::rbinom(N, 1, phi.zi)
     if (!is.null(theta.nb)) {
-        Z <- MASS::rnegbin(N, mu=mu.nb, theta=rep(theta.nb, N))
+        theta.nb <- max(0.01, theta.nb)
+        Z <- MASS::rnegbin(N, mu = mu.nb, theta = rep(theta.nb, N))
     } else {
-        Z <- stats::rpois(N, lambda=mu.nb)
+        Z <- stats::rpois(N, lambda = mu.nb)
     }
     Y <- A * Z
     Y
@@ -61,38 +63,53 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
 # lambda is pre-truncation mean of Poisson
 #' @rdname internal
 #' @export
-r0truncpois <- function(n, lambda) {
-  U <- stats::runif(n)
-  nu <- -log(1 - U*(1 - exp(-lambda)))
-  T1 <- (lambda - nu)
-  r <- stats::rpois(n, T1) + 1
-  r
+r0truncpois <- function(n, lambda, quick = TRUE) {
+    if (!quick) {
+        U <- stats::runif(n)
+        nu <- -log(1 - U * (1 - exp(-lambda)))
+        T1 <- (lambda - nu)
+        r <- stats::rpois(n, T1) + 1
+    } else {
+        r <- actuar::rztpois(n, lambda)
+    }
+    r
 }
 
 #' @rdname internal
 #' @export
-r0truncnegbin <- function(n, lambda, theta) {
-  r <- numeric(n)
-  while(any(r < 1)) {
-    i <- r < 1
-    m <- sum(i)
-    r[i] <- MASS::rnegbin(m, mu=lambda[i], theta=rep(theta, m))
-  }
-  r
+r0truncnegbin <- function(n, lambda, theta, quick = TRUE) {
+    if (!quick) {
+        r <- numeric(n)
+        while (any(r < 1)) {
+            i <- r < 1
+            m <- sum(i)
+            r[i] <- MASS::rnegbin(m, mu = lambda[i], theta = rep(theta, m))
+        }
+    } else {
+        # https://stats.stackexchange.com/questions/10419/what-is-theta-in-a-negative-binomial-regression-fitted-with-r
+        # p = theta / (theta + lambda)
+        p <- theta / (theta + lambda)
+        # s = (p / (1-p)) * lambda
+        s <- lambda * p / (1 - p)
+        r <- actuar::rztnbinom(n, size = s, prob = p)
+    }
+    r
 }
 
 #' @rdname internal
 #' @export
-rHurdle <- function(N, mu.nb, theta.nb, phi.zi) {
-    if (length(phi.zi) < N)
+rHurdle <- function(N, mu.nb, theta.nb, phi.zi, quick = TRUE) {
+    if (length(phi.zi) < N) {
         phi.zi <- rep(phi.zi, N)[seq_len(N)]
+    }
     Y <- stats::rbinom(N, 1, phi.zi)
     i <- Y > 0
     m <- sum(i)
     if (!is.null(theta.nb)) {
-        Z <- r0truncnegbin(m, mu.nb[i], theta.nb)
+        theta.nb <- max(0.01, theta.nb)
+        Z <- r0truncnegbin(m, mu.nb[i], theta.nb, quick = quick)
     } else {
-        Z <- r0truncpois(m, mu.nb[i])
+        Z <- r0truncpois(m, mu.nb[i], quick = quick)
     }
     Y[i] <- Z
     Y
@@ -100,12 +117,14 @@ rHurdle <- function(N, mu.nb, theta.nb, phi.zi) {
 
 #' @rdname internal
 #' @export
-solvenear <- function (x) {
-    if (is.null(x))
+solvenear <- function(x) {
+    if (is.null(x)) {
         return(NULL)
+    }
     xinv <- try(solve(x), silent = TRUE)
-    if (inherits(xinv, "try-error"))
+    if (inherits(xinv, "try-error")) {
         xinv <- as.matrix(solve(Matrix::nearPD(x)$mat))
+    }
     xinv
 }
 
@@ -136,39 +155,46 @@ NULL
 
 #' @noRd
 PI_xlslist <- function(file, pred, summary, seed, subset = "Full") {
-  o <- mc_options()
-  o <- append(o, c("random seed" = seed))
+    o <- mc_options()
+    o <- append(o, c("random seed" = seed))
 
-  ver <- read.dcf(file=system.file("DESCRIPTION", package="moosecounter"), fields=c("Version"))[1L]
-  info <- data.frame(moosecounter = paste0(
-    c("R package version: ", "Date of analysis: ", "File: "),
-    c(ver, format(Sys.time(), "%Y-%m-%d"), file$name)))
+    ver <- read.dcf(
+        file = system.file("DESCRIPTION", package = "moosecounter"),
+        fields = c("Version")
+    )[1L]
+    info <- data.frame(
+        moosecounter = paste0(
+            c("R package version: ", "Date of analysis: ", "File: "),
+            c(ver, format(Sys.time(), "%Y-%m-%d"), file$name)
+        )
+    )
 
-  settings <- data.frame(
-    Option = names(o),
-    Value = sapply(o, paste, sep = "", collapse = ", ")) %>%
-    rbind(cbind(Option = "Subset", Value = subset))
+    settings <- data.frame(
+        Option = names(o),
+        Value = sapply(o, paste, sep = "", collapse = ", ")
+    ) %>%
+        rbind(cbind(Option = "Subset", Value = subset))
 
-  # Ensure measurements included in output
-  summary <- as.data.frame(summary)
-  summary <- cbind(measurement = rownames(summary), summary)
+    # Ensure measurements included in output
+    summary <- as.data.frame(summary)
+    summary <- cbind(measurement = rownames(summary), summary)
 
-  list(
-    Info = info,
-    Settings = settings,
-    Summary = summary,
-    Data = pred$data,
-    Boot = pred$boot_full)
+    list(
+        Info = info,
+        Settings = settings,
+        Summary = summary,
+        Data = pred$data,
+        Boot = pred$boot_full
+    )
 }
 
 #' @noRd
 model_errors <- function(m) {
-  purrr::map(m, "model") %>%
-    purrr::map_lgl(~ "try-error" %in% class(.))
+    purrr::map(m, "model") %>%
+        purrr::map_lgl(~ "try-error" %in% class(.))
 }
 
 #' @noRd
 missing_levels <- function(x, cols) {
-  purrr::map_lgl(cols, ~any(table(x[[.]], x$srv) == 0L))
+    purrr::map_lgl(cols, ~ any(table(x[[.]], x$srv) == 0L))
 }
-
