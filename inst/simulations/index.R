@@ -87,3 +87,95 @@ get_stats <- function(PI, true_vals) {
 
 sapply(PIL, get_stats, true_vals = m$MOOSE_TOTA)
 # use PIL[[1]]$data$Rank to pick where to go next
+
+# S Canol data
+
+m <- read.csv(
+    "inst/simulations/SouthCanol2022_QuerriedSUs_FinalMooseData_ReducedVariables.csv"
+)
+devtools::load_all()
+
+# Sampled: whether the block was flown or not
+# SUM_RSPF
+# LOG_SUMRSPF
+
+# In case it's useful:
+# ActORPred: This column has the number of moose counted if Sampled=1 and the mean prediction from the best model if Sampled=0
+
+mc_options(B = 100)
+switch_response("total")
+
+surv_id <- which(m$Sampled == 1)
+m$srv <- FALSE
+m$srv[surv_id] <- TRUE
+
+a <- c(
+    "P" = "P",
+    "NB" = "NB",
+    "HP" = "HP",
+    "HNB" = "HNB",
+    "ZIP" = "ZIP",
+    "ZINB" = "ZINB"
+)
+
+ML <- lapply(a, function(i) {
+    mc_fit_total(
+        m,
+        vars = "SUM_RSPF_FINAL",
+        zi_vars = "SUM_RSPF_FINAL",
+        dist = i
+    )
+})
+
+mc_models_total(ML, m)
+
+PIL <- list()
+for (i in a) {
+    PIL[[i]] <- mc_predict_total(
+        model_id = i,
+        ml = ML,
+        x = m,
+        do_boot = TRUE,
+        do_avg = FALSE
+    )
+}
+PIest <- lapply(PIL, pred_density_moose_PI)
+
+# use coefs from ML
+lapply(ML, coef)
+ML$NB$theta
+ML$HNB$theta
+ML$ZINB$theta
+# use covariate from m
+
+x <- data.frame(
+    x = m$CENTRLON,
+    y = m$CENTRLAT,
+    z = m$SUM_RSPF_FINAL,
+    srv = m$Sampled == 1,
+    MOOSE_TOTA = m$MOOSE_TOTA
+)
+
+write.csv(
+    x,
+    row.names = FALSE,
+    file = "inst/simulations/SouthCanol2022_forSimul.csv"
+)
+
+
+if (FALSE) {
+    N = 10^3
+    mu.nb = rep(5, N)
+    theta.nb = 0.001
+    phi.zi = rep(1, N)
+    system.time(
+        u <- rHurdle(
+            N = N,
+            mu.nb = mu.nb,
+            theta.nb = theta.nb,
+            phi.zi = phi.zi,
+            quick = F
+        )
+    )
+    table(u)
+}
