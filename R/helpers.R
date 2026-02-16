@@ -59,12 +59,12 @@ rZINB <- function(N, mu.nb, theta.nb, phi.zi) {
     Y
 }
 
-# after https://stat.ethz.ch/pipermail/r-help/2005-May/070680.html
-# lambda is pre-truncation mean of Poisson
 #' @rdname internal
 #' @export
 r0truncpois <- function(n, lambda, quick = TRUE) {
     if (!quick) {
+        # after https://stat.ethz.ch/pipermail/r-help/2005-May/070680.html
+        # lambda is pre-truncation mean of Poisson
         U <- stats::runif(n)
         nu <- -log(1 - U * (1 - exp(-lambda)))
         T1 <- (lambda - nu)

@@ -481,6 +481,10 @@ mc_predict_total <- function(
                                 newdata = x_uns,
                                 type = "zero"
                             )
+                        # FIXME: this is where it hangs when theta.nb is too small
+                        # 1.86715236397392e-09, 2.79651310427985e-07
+                        # need truncated Pois here for hurdle
+                        # message("ThetaNB=", Btheta.nb)
                         boot.out[, b] <- rZINB(
                             NS,
                             mu.nb = Bm.NS,
@@ -541,11 +545,11 @@ mc_predict_total <- function(
                         "Too many refitting iterations failed, check the model(s)."
                     )
                 }
-                if (t1 > 0.5 * B) {
-                    stop(
-                        "Iterations took too long, check the model(s)."
-                    )
-                }
+                # if (t1 > 0.5 * B) {
+                #     stop(
+                #         "Iterations took too long, check the model(s)."
+                #     )
+                # }
             }
         }
     }

@@ -34,12 +34,9 @@ DIR <- "../../_tmp/simuls"
 # DIR <- "_tmp/simuls"
 
 dd0 <- NULL
-for (MODEL in c("P", "NB", "HP", "HNB", "ZIP", "ZINB")) {
-    if (MODEL %in% c("NB", "HNB", "ZINB")) {
-        fn <- sprintf("%s/moose-sim_model-%s_n-500_B-100.RData", DIR, MODEL)
-    } else {
-        fn <- sprintf("%s/moose-sim_model-%s_n-500_B-500.RData", DIR, MODEL)
-    }
+# for (MODEL in c("P", "NB", "HP", "HNB", "ZIP", "ZINB")) {
+for (MODEL in c("P", "NB", "HP", "HNB", "ZIP")) {
+    fn <- sprintf("%s/moose-sim_scanol-%s_n-100_B-100.RData", DIR, MODEL)
     load(fn)
 
     d <- do.call(
@@ -72,19 +69,27 @@ ci_fun <- function(tau_hat, var_hat, level = 0.95) {
 }
 
 GR <- NULL
-for (MODEL in c("P", "NB", "HP", "HNB", "ZIP", "ZINB")) {
-    if (MODEL %in% c("NB", "HNB", "ZINB")) {
-        fn <- sprintf("%s/moose-sim_model-%s_n-500_B-100.RData", DIR, MODEL)
-    } else {
-        fn <- sprintf("%s/moose-sim_model-%s_n-500_B-500.RData", DIR, MODEL)
-    }
+# for (MODEL in c("P", "NB", "HP", "HNB", "ZIP", "ZINB")) {
+for (MODEL in c("P", "NB", "HP", "HNB", "ZIP")) {
+    fn <- sprintf("%s/moose-sim_scanol-%s_n-100_B-100.RData", DIR, MODEL)
     load(fn)
 
     for (i in 1:ncol(MT)) {
-        v <- 0
+        v <- 0.5
         m <- m0 |> sim_strat(threshold = v, p_misclass = 0.1)
         m$stratum0 <- ifelse(m$z >= v, 1, 0)
-        m$stratumE <- ifelse((m$z + rnorm(length(m$z), 0, 0.1)) >= v, 1, 0)
+        m$stratumE <- ifelse((m$z + rnorm(length(m$z), 0, sqrt(0.1))) >= v, 1, 0)
+        summary(m)
+
+        # table(m$stratum0[SRV[, i] == 1], m$stratum[SRV[, i] == 1])
+        # table(m$stratum0[SRV[, i] == 1], m$stratumE[SRV[, i] == 1])
+        # table(m$stratum[SRV[, i] == 1], m$stratumE[SRV[, i] == 1])
+        # mean(MT[SRV[, i] == 1 & m$stratum0 == 0, i])
+        # mean(MT[SRV[, i] == 1 & m$stratum0 == 1, i])
+        # table(m$stratum0[SRV[, i] == 1], MT[SRV[, i] == 1, i] > 0)
+        # table(m$stratum[SRV[, i] == 1], MT[SRV[, i] == 1, i] > 0)
+        # table(m$stratumE[SRV[, i] == 1], MT[SRV[, i] == 1, i] > 0)
+
         g0 <- mc_gassaway(
             y1 = MT[SRV[, i] == 1 & m$stratum0 == 0, i],
             y2 = MT[SRV[, i] == 1 & m$stratum0 == 1, i],
@@ -168,7 +173,7 @@ The true total abundance varied somewhat between the setups, might have to tune 
 ```{r}
 #| echo: false
 dd |>
-    ggplot(aes(x = true_model, y = true_total, col = model)) +
+    ggplot(aes(x = true_model, y = true_total)) +
     geom_boxplot() +
     theme_light()
 ```
@@ -192,6 +197,7 @@ The bias (estimate - true) in total abundance:
 #| echo: false
 dd |>
     ggplot(aes(x = true_model, y = bias, col = model)) +
+    geom_hline(yintercept = 0) +
     geom_boxplot() +
     theme_light()
 ```
@@ -202,6 +208,7 @@ Relative bias (standardized by true abundance):
 #| echo: false
 dd |>
     ggplot(aes(x = true_model, y = rel_bias, col = model)) +
+    geom_hline(yintercept = 0) +
     geom_boxplot() +
     theme_light()
 ```
@@ -231,12 +238,14 @@ Gassaway
 dd |>
     filter(model == "G") |>
     ggplot(aes(x = true_model, y = bias, col = misclass)) +
+    geom_hline(yintercept = 0) +
     geom_boxplot() +
     theme_light()
 
 dd |>
     filter(model == "G") |>
     ggplot(aes(x = true_model, y = rel_bias, col = misclass)) +
+    geom_hline(yintercept = 0) +
     geom_boxplot() +
     theme_light()
 ```

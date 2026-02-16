@@ -8,10 +8,10 @@ CONFIG <- rconfig::rconfig()
 str(CONFIG)
 
 DIR <- value(CONFIG$dir, "_tmp/simuls")
-MODEL <- value(CONFIG$model, "NB")
+MODEL <- value(CONFIG$model, "P")
 FIXED_SAMPLE_SIZE <- value(CONFIG$sample, 100)
 B <- value(CONFIG$B, 500) # should be 500-1000, bootstrap iters
-N <- value(CONFIG$N, 100) # >200 for sure, number of sim runs
+N <- value(CONFIG$N, 200) # >200 for sure, number of sim runs
 SEED <- value(CONFIG$seed, 0)
 MAXCELL <- value(CONFIG$maxcell, 100)
 
@@ -19,7 +19,7 @@ m0 <- read.csv("inst/simulations/SouthCanol2022_forSimul.csv")
 
 MOD_LIST <- c("P", "NB", "ZIP", "ZINB", "HP", "HNB")
 
-# pbapply::pboptions(type = "none")
+pbapply::pboptions(type = "timer")
 mc_options(B = B, MAXCELL = MAXCELL)
 switch_response("total")
 set.seed(SEED)
@@ -105,6 +105,9 @@ MT <- matrix(0, nrow(m0), N)
 RES <- list()
 k <- 1
 SRV <- 0 * MT
+LL <- matrix(0, N, length(MOD_LIST))
+IC <- list()
+colnames(LL) <- MOD_LIST
 while (k <= N) {
     message(MODEL, ": run ", k, " [", Sys.time(), "]")
 
@@ -142,6 +145,10 @@ while (k <= N) {
             }
             if (all(!sapply(PL, inherits, "try-error"))) {
                 RES[[k]] <- sapply(PL, get_stats, true_vals = m$MOOSE_TOTA)
+                LL[k, ] <- sapply(ML, \(z) {
+                    as.numeric(logLik(z))
+                })
+                IC[[k]] <- mc_models_total(ML, m)
                 k <- k + 1
                 OK <- TRUE
             } else {
@@ -165,6 +172,8 @@ save(
     m0,
     MT,
     SRV,
+    LL,
+    IC,
     RES,
     MODEL,
     COEF,

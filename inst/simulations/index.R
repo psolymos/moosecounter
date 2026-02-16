@@ -128,6 +128,9 @@ ML <- lapply(a, function(i) {
 })
 
 mc_models_total(ML, m)
+u <- MASS::glm.nb(MOOSE_TOTA ~ SUM_RSPF_FINAL, data = m)
+summary(ML$NB)
+summary(u)
 
 PIL <- list()
 for (i in a) {
