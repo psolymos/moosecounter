@@ -1,4 +1,4 @@
-# Rscript --vanilla inst/simulations/sim-script-scanol.R --B 100 --model P
+# Rscript --vanilla inst/simulations/sim-script-scanol.R --model P
 
 library(rconfig)
 library(intrval)
