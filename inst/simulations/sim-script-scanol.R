@@ -1,5 +1,7 @@
-# Rscript --vanilla inst/simulations/sim-script-scanol.R --model P --N 2
+# Rscript --vanilla inst/simulations/sim-script-scanol.R --model P --N 2 --notify
 
+t0 <- proc.time()
+finished <- FALSE
 library(rconfig)
 library(intrval)
 devtools::load_all()
@@ -14,6 +16,71 @@ B <- value(CONFIG$B, 500) # should be 500-1000, bootstrap iters
 N <- value(CONFIG$N, 200) # >200 for sure, number of sim runs
 SEED <- value(CONFIG$seed, 0)
 MAXCELL <- value(CONFIG$maxcell, 100)
+notify <- rconfig::value(CONFIG$notify, FALSE)
+.Last <- function() {
+    if (notify) {
+        topic <- "a8m_bsims_alerts"
+        err <- if (finished) "" else paste0("\n", geterrmessage())
+        details <- paste0(
+            "model=",
+            MODEL,
+            ", N=",
+            as.character(N),
+            ", B=",
+            as.character(B),
+            collapse = ""
+        )
+        tm <- as.numeric(proc.time()[3] - t0[3]) / 60
+        tm <- if (tm < 60) {
+            paste0(round(tm, 1), " mins")
+        } else {
+            if (tm < 24 * 60) {
+                paste0(round(tm / 60, 1), " hrs")
+            } else {
+                paste0(
+                    tm %/% (60 * 24),
+                    " days & ",
+                    round(tm %% (60 * 24) / 60),
+                    " hrs"
+                )
+            }
+        }
+        msg <- paste(
+            "Finished job in",
+            tm,
+            "@",
+            format(.POSIXct(Sys.time(), "America/Edmonton")),
+            "\nJob details:",
+            details,
+            err
+        )
+        if (finished) {
+            icon <- "\"X-Tags: partying_face\""
+            pri <- "\"X-Priority: 3\""
+        } else {
+            icon <- "\"X-Tags: triangular_flag_on_post\""
+            pri <- "\"X-Priority: 4\""
+        }
+        system2(
+            "curl",
+            c(
+                "-H",
+                icon,
+                "-H",
+                pri,
+                "-d",
+                sprintf("\"%s\"", msg),
+                sprintf("ntfy.sh/%s", topic)
+            )
+        )
+    }
+    if (finished) {
+        message("DONE")
+    } else {
+        quit("no", 1L, FALSE)
+    }
+}
+options(error = .Last)
 
 m0 <- read.csv("inst/simulations/SouthCanol2022_forSimul.csv")
 
@@ -93,14 +160,6 @@ m1 <- sim_expected(
     slope1 = COEF$b1
 )
 MT <- matrix(0, nrow(m0), N)
-# for (i in seq_len(N)) {
-#     # Counts vary by run
-#     m1 <- sim_counts(m1, theta.nb = theta_nb, type = TYPE)
-#     MT[, i] <- m1$MOOSE_TOTA
-# }
-# summary(colSums(MT))
-# summary(colSums(MT > 0)) / nrow(MT)
-# summary(apply(MT, 2, max))
 
 RES <- list()
 SRV <- 0 * MT
@@ -170,10 +229,10 @@ while (k <= N) {
 }
 
 fn <- sprintf(
-    "%s/moose-sim_scanol-%s_n-%s_B-%s_%s.RData",
+    "%s/moose-sim_scanol-%s_N-%s_B-%s_%s.RData",
     DIR,
     MODEL,
-    as.character(FIXED_SAMPLE_SIZE),
+    as.character(N),
     as.character(B),
     paste0(sample(c(0:9, letters), 6, replace = TRUE), collapse = "")
 )
@@ -194,4 +253,6 @@ save(
     file = fn
 )
 message("Results saved: ", fn)
-quit("no")
+
+finished <- TRUE
+quit("no", 0L, TRUE)
