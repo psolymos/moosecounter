@@ -1,4 +1,4 @@
-# Rscript --vanilla inst/simulations/sim-script-scanol.R --model P --N 2 --notify
+# Rscript --vanilla inst/simulations/sim-script-scanol.R --notify --model P
 
 t0 <- proc.time()
 finished <- FALSE
