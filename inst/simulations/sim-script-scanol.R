@@ -1,4 +1,4 @@
-# Rscript --vanilla inst/simulations/sim-script-scanol.R --model P
+# Rscript --vanilla inst/simulations/sim-script-scanol.R --model P --N 2
 
 library(rconfig)
 library(intrval)
@@ -103,11 +103,13 @@ MT <- matrix(0, nrow(m0), N)
 # summary(apply(MT, 2, max))
 
 RES <- list()
-k <- 1
 SRV <- 0 * MT
 LL <- matrix(0, N, length(MOD_LIST))
 IC <- list()
+EST <- list()
 colnames(LL) <- MOD_LIST
+
+k <- 1
 while (k <= N) {
     message(MODEL, ": run ", k, " [", Sys.time(), "]")
 
@@ -127,6 +129,12 @@ while (k <= N) {
         ML[[i]] <- try(mc_fit_total(m, vars = "z", zi_vars = "z", dist = i))
     }
     if (all(!sapply(ML, inherits, "try-error"))) {
+        EST[[k]] <- lapply(ML, \(z) {
+            c(
+                coef(z),
+                theta.nb = if (is.null(z$theta)) NA else unname(unlist(z$theta))
+            )
+        })
         PL <- list()
         FAILED <- 0
         OK <- FALSE
@@ -162,11 +170,12 @@ while (k <= N) {
 }
 
 fn <- sprintf(
-    "%s/moose-sim_scanol-%s_n-%s_B-%s.RData",
+    "%s/moose-sim_scanol-%s_n-%s_B-%s_%s.RData",
     DIR,
     MODEL,
     as.character(FIXED_SAMPLE_SIZE),
-    as.character(B)
+    as.character(B),
+    paste0(sample(c(0:9, letters), 6, replace = TRUE), collapse = "")
 )
 save(
     m0,
@@ -174,6 +183,7 @@ save(
     SRV,
     LL,
     IC,
+    EST,
     RES,
     MODEL,
     COEF,
@@ -183,4 +193,5 @@ save(
     SEED,
     file = fn
 )
+message("Results saved: ", fn)
 quit("no")
