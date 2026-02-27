@@ -44,30 +44,28 @@ ssh root@$IP
 cd /root/moosecounter/inst/simulations
 
 
-Rscript --vanilla ./sim-script-scanol.R --model P
-Rscript --vanilla ./sim-script-scanol.R --model NB
-Rscript --vanilla ./sim-script-scanol.R --model HP
-Rscript --vanilla ./sim-script-scanol.R --model HNB
-Rscript --vanilla ./sim-script-scanol.R --model ZIP
-Rscript --vanilla ./sim-script-scanol.R --model ZINB
+Rscript --vanilla ./sim-script-scanol.R --notify --model P    # done
+Rscript --vanilla ./sim-script-scanol.R --notify --model NB   # done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 100 --model HNB --seed 1 # -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 100 --model HNB --seed 0 # -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 100 --model ZIP --seed 2 # 11 -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 100 --model ZIP --seed 4 # 14 -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 100 --model HP  --seed 1 # -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 50  --model HP  --seed 10 # -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 50  --model HP  --seed 11 # -- done
 
+Rscript --vanilla ./sim-script-scanol.R --notify --N 100 --model ZINB --seed 0 # -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 50 --model ZINB --seed 14 # 6 -- done
+Rscript --vanilla ./sim-script-scanol.R --notify --N 50 --model ZINB --seed 10 # 4 -- done
+
+Rscript --vanilla ./sim-script-scanol.R --notify --N 50 --model ZINB --seed 15 # 7 (14)
+Rscript --vanilla ./sim-script-scanol.R --notify --N 25 --model ZINB --seed 30 # 5 (1)
+Rscript --vanilla ./sim-script-scanol.R --notify --N 25 --model ZINB --seed 31 # 8 (1)
+Rscript --vanilla ./sim-script-scanol.R --notify --N 25 --model ZINB --seed 32 # 9 (1)
+Rscript --vanilla ./sim-script-scanol.R --notify --N 25 --model ZINB --seed 33 # 10 (1)
 
 # this is the current
 ls -al /root/moosecounter/_tmp/simuls
-```
-
-Push notifications:
-
-- install app, see: <https://docs.ntfy.sh/>
-- set up a topic, e.g. `a8m_cht_alerts`
-- send alert `curl -d "Run successful" ntfy.sh/a8m_cht_alerts`
-
-In R:
-
-```R
-topic <- "a8m_cht_alerts"
-msg <- paste("TEST Finished", YEAR, "@", .POSIXct(Sys.time(), "America/Edmonton"))
-system2("curl", c("-d", sprintf("\"%s\"", msg), sprintf("ntfy.sh/%s", topic)))
 ```
 
 Once finished, copy results back (keep timestamps too):
@@ -75,17 +73,13 @@ Once finished, copy results back (keep timestamps too):
 ```bash
 # this is the current
 rsync -rt \
-    root@$IP:/root/bsims-tests/sqpad-paper/analysis/_tmp/est_conv_mc \
-    /Users/Peter/git/github.com/psolymos/bsims-tests/sqpad-paper/analysis/_tmp
-
-rsync -rt \
-    root@$IP:/root/analysis/_tmp/paired_mc \
-    /Users/Peter/git/github.com/psolymos/bsims-tests/sqpad-paper/analysis/_tmp
-
+    root@$IP:/root/moosecounter/_tmp/simuls \
+    /Users/Peter/git/github.com/psolymos/moosecounter/_tmp
 ```
 
 
 ## Use estimates and make reports
+
 ```
 quarto::quarto_render("inst/simulations/simulation-approach.qmd", output_format = "all")
 quarto::quarto_render("inst/simulations/simulation-results.qmd", output_format = "all")

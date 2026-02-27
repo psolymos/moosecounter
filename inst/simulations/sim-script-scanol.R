@@ -229,7 +229,7 @@ while (k <= N) {
 }
 
 fn <- sprintf(
-    "%s/moose-sim_scanol-%s_N-%s_B-%s_%s.RData",
+    "%s/moose-sim_scanol_%s_N-%s_B-%s_%s.RData",
     DIR,
     MODEL,
     as.character(N),

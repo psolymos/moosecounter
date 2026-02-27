@@ -11,15 +11,34 @@ format:
   pdf: default
 ---
 
-Simulated 2500 cells, sampled 500 of them randomly. This was repeated 100
-times for each of the 4 models (P, NB, ZIP, ZINB). Used 500 bootstrap iterations.
+TODO:
 
-The same 4 models were fit to the data, then the following metrics were saved:
+- remove ZINB, ZIP
+- add CI to the coverage table (Gassaway too)
+- figure out NB issue (coverage is too low, try different theta)
+- BIC pairwise plots
 
-- `true_total`: sum of counts for all 2500 cells
+Gassaway:
+
+- SRL to check variance formula
+- RSF to use for "true" classification, take top 30% high
+- Do binomial: 10% flips (independent of RSF)
+- Check N1/N2 for Gassaway
+- Drop the Normal version
+
+Simulated cells using Sophie's South Canol RSF data, 
+sampled 100 of the cells randomly (same as in the real survey). 
+This was repeated 200 times for each of the 6 models (P, NB, HP, HNB, ZIP, ZINB). 
+Used 500 bootstrap iterations.
+
+The same 6 models were fit to the data, then the following metrics were saved:
+
+- `true_total`: sum of counts for all cells
 - total abundance (`mean`) estimate: cell level estimates summed for each bootstrap run, boostrap mean calculated
 - 90% and 95% PIs for total abundance (quantiles of the bootstrap total counts)
 - coverage (90% and 95%): proportion of unsurveyed cells where the true count was inside the cell level PIs
+
+We also saved coefficients (true and estimated) and model selection results (AIC, BIC).
 
 ```{r}
 #| include: false
@@ -33,10 +52,11 @@ DIR <- "../../_tmp/simuls"
 # devtools::load_all()
 # DIR <- "_tmp/simuls"
 
+fl <- list.files(DIR)
 dd0 <- NULL
-# for (MODEL in c("P", "NB", "HP", "HNB", "ZIP", "ZINB")) {
-for (MODEL in c("P", "NB", "HP", "HNB", "ZIP")) {
-    fn <- sprintf("%s/moose-sim_scanol-%s_n-100_B-100.RData", DIR, MODEL)
+for (fi in fl) {
+    MODEL <- gsub("scanol-", "", strsplit(fi, "_")[[1]][2])
+    fn <- paste0(DIR, "/", fi)
     load(fn)
 
     d <- do.call(
@@ -69,26 +89,17 @@ ci_fun <- function(tau_hat, var_hat, level = 0.95) {
 }
 
 GR <- NULL
-# for (MODEL in c("P", "NB", "HP", "HNB", "ZIP", "ZINB")) {
-for (MODEL in c("P", "NB", "HP", "HNB", "ZIP")) {
-    fn <- sprintf("%s/moose-sim_scanol-%s_n-100_B-100.RData", DIR, MODEL)
+for (fi in fl) {
+    MODEL <- gsub("scanol-", "", strsplit(fi, "_")[[1]][2])
+    fn <- paste0(DIR, "/", fi)
     load(fn)
 
     for (i in 1:ncol(MT)) {
-        v <- 0.5
+        v <- quantile(m0$z, 0.75)
         m <- m0 |> sim_strat(threshold = v, p_misclass = 0.1)
         m$stratum0 <- ifelse(m$z >= v, 1, 0)
-        m$stratumE <- ifelse((m$z + rnorm(length(m$z), 0, sqrt(0.1))) >= v, 1, 0)
         summary(m)
-
-        # table(m$stratum0[SRV[, i] == 1], m$stratum[SRV[, i] == 1])
-        # table(m$stratum0[SRV[, i] == 1], m$stratumE[SRV[, i] == 1])
-        # table(m$stratum[SRV[, i] == 1], m$stratumE[SRV[, i] == 1])
-        # mean(MT[SRV[, i] == 1 & m$stratum0 == 0, i])
-        # mean(MT[SRV[, i] == 1 & m$stratum0 == 1, i])
-        # table(m$stratum0[SRV[, i] == 1], MT[SRV[, i] == 1, i] > 0)
-        # table(m$stratum[SRV[, i] == 1], MT[SRV[, i] == 1, i] > 0)
-        # table(m$stratumE[SRV[, i] == 1], MT[SRV[, i] == 1, i] > 0)
+        table(true = m$stratum0, miscl = m$stratum)
 
         g0 <- mc_gassaway(
             y1 = MT[SRV[, i] == 1 & m$stratum0 == 0, i],
@@ -101,12 +112,6 @@ for (MODEL in c("P", "NB", "HP", "HNB", "ZIP")) {
             y2 = MT[SRV[, i] == 1 & m$stratum == 1, i],
             N1 = sum(1 - m$stratum),
             N2 = sum(m$stratum)
-        )
-        gE <- mc_gassaway(
-            y1 = MT[SRV[, i] == 1 & m$stratumE == 0, i],
-            y2 = MT[SRV[, i] == 1 & m$stratumE == 1, i],
-            N1 = sum(1 - m$stratumE),
-            N2 = sum(m$stratumE)
         )
         tot <- sum(MT[, i])
         ci0_90 <- ci_fun(g0$total, g0$variance, 0.90)
@@ -122,22 +127,7 @@ for (MODEL in c("P", "NB", "HP", "HNB", "ZIP")) {
             ci_95_lower = ci0_95[1],
             ci_95_upper = ci0_95[2],
             coverage_90 = ifelse(tot %[]% ci0_90, 1, 0),
-            coverage_95 = ifelse(tot %[]% ci0_90, 1, 0)
-        )
-        ciE_90 <- ci_fun(gE$total, gE$variance, 0.90)
-        ciE_95 <- ci_fun(gE$total, gE$variance, 0.95)
-        grE <- data.frame(
-            true_model = MODEL,
-            misclass = "N(0, 0.1)",
-            model = "G",
-            true_total = tot,
-            mean = gE$total,
-            ci_90_lower = ciE_90[1],
-            ci_90_upper = ciE_90[2],
-            ci_95_lower = ciE_95[1],
-            ci_95_upper = ciE_95[2],
-            coverage_90 = ifelse(tot %[]% ciE_90, 1, 0),
-            coverage_95 = ifelse(tot %[]% ciE_90, 1, 0)
+            coverage_95 = ifelse(tot %[]% ci0_95, 1, 0)
         )
         ci10_90 <- ci_fun(g10$total, g10$variance, 0.90)
         ci10_95 <- ci_fun(g10$total, g10$variance, 0.95)
@@ -152,9 +142,9 @@ for (MODEL in c("P", "NB", "HP", "HNB", "ZIP")) {
             ci_95_lower = ci10_95[1],
             ci_95_upper = ci10_95[2],
             coverage_90 = ifelse(tot %[]% ci10_90, 1, 0),
-            coverage_95 = ifelse(tot %[]% ci10_90, 1, 0)
+            coverage_95 = ifelse(tot %[]% ci10_95, 1, 0)
         )
-        GR <- rbind(GR, rbind(gr0, grE, gr10))
+        GR <- rbind(GR, rbind(gr0, gr10))
     }
 }
 GR$bias <- GR$mean - GR$true_total
@@ -166,6 +156,33 @@ GR$pi_90 <- NA_real_
 
 dd <- rbind(dd0, GR)
 # summary(dd)
+
+MS <- NULL
+cn <- "BIC"
+rn <- c("HNB", "HP", "NB", "P", "ZINB", "ZIP")
+for (fi in fl) {
+    MODEL <- gsub("scanol-", "", strsplit(fi, "_")[[1]][2])
+    fn <- paste0(DIR, "/", fi)
+    load(fn)
+
+    ms <- t(sapply(IC, \(z) {
+        z[rn, cn]
+    }))
+    colnames(ms) <- rn
+    sel <- character()
+    rnk <- numeric()
+    delta <- numeric()
+    for (k in 1:nrow(ms)) {
+        r <- rank(ms[k, ])
+        sel[k] <- names(r)[r == 1]
+        rnk[k] <- unname(r[MODEL])
+        delta[k] <- ms[k, MODEL] - ms[k, sel[k]]
+    }
+    ms <- data.frame(true_model = MODEL, best_model = sel, true_model_rank = rnk, delta = delta, ms)
+
+    MS <- rbind(MS, ms)
+}
+# summary(MS)
 ```
 
 The true total abundance varied somewhat between the setups, might have to tune a bit more to make them more comparable:
@@ -179,16 +196,28 @@ dd |>
 ```
 
 
-The total moose abundance coverage was lower than nominal for all models:
+The total moose abundance coverage was lower than nominal for all models
+(95% confidence intervals presented in parentheses):
 
 ```{r}
 #| echo: false
 #| output: asis
-dd |>
+df <- dd |>
     filter(model != "G") |>
     group_by(true_model, model) |>
     summarize(pi_90 = mean(pi_90), pi_95 = mean(pi_95), .groups = "keep") |>
-    knitr::kable()
+    mutate(
+        phat_pm_90 = 1.96 * sqrt(pi_90 * (1 - pi_90) / 200),
+        phat_pm_95 = 1.96 * sqrt(pi_95 * (1 - pi_95) / 200),
+        ci_lo_90 = round(pi_90 - phat_pm_90, 3),
+        ci_hi_90 = round(pi_90 + phat_pm_90, 3),
+        ci_lo_95 = round(pi_95 - phat_pm_95, 3),
+        ci_hi_95 = round(pi_95 + phat_pm_95, 3),
+        pi_90 = paste0(pi_90, " (", ci_lo_90, "--", ci_hi_90, ")"),
+        pi_95 = paste0(pi_95, " (", ci_lo_95, "--", ci_hi_95, ")")
+    ) |>
+    select(-phat_pm_90, -phat_pm_95, -ci_lo_90, -ci_hi_90, -ci_lo_95, -ci_hi_95)
+knitr::kable(df)
 ```
 
 The bias (estimate - true) in total abundance:
@@ -253,9 +282,122 @@ dd |>
 ```{r}
 #| echo: false
 #| output: asis
-dd |>
+df <- dd |>
     filter(model == "G") |>
     group_by(true_model, misclass) |>
     summarize(pi_90 = mean(coverage_90), pi_95 = mean(coverage_95), .groups = "keep") |>
-    knitr::kable()
+    mutate(
+        phat_pm_90 = 1.96 * sqrt(pi_90 * (1 - pi_90) / 200),
+        phat_pm_95 = 1.96 * sqrt(pi_95 * (1 - pi_95) / 200),
+        ci_lo_90 = round(pi_90 - phat_pm_90, 3),
+        ci_hi_90 = round(pi_90 + phat_pm_90, 3),
+        ci_lo_95 = round(pi_95 - phat_pm_95, 3),
+        ci_hi_95 = round(pi_95 + phat_pm_95, 3),
+        pi_90 = paste0(pi_90, " (", ci_lo_90, "--", ci_hi_90, ")"),
+        pi_95 = paste0(pi_95, " (", ci_lo_95, "--", ci_hi_95, ")")
+    ) |>
+    select(-phat_pm_90, -phat_pm_95, -ci_lo_90, -ci_hi_90, -ci_lo_95, -ci_hi_95) |>
+    arrange(true_model, desc(misclass))
+knitr::kable(df)
 ```
+
+Model selection results: frequency of selecting the true model based on BIC
+
+```{r}
+#| echo: false
+table(true_model = MS$true_model, best_model = MS$best_model)
+```
+
+The rank of the true model based on BIC
+
+```{r}
+#| echo: false
+table(MS$true_model, MS$true_model_rank)
+```
+
+NOTE: pivot longer given true model X, show faceted plots
+
+```{r}
+#| echo: false
+cn <- c("HNB", "HP", "NB", "P", "ZINB", "ZIP")
+mmm <- NULL
+for (i in 1:nrow(MS)) {
+    tmp <- unlist(MS[i, cn])
+    mm <- data.frame(true_model = MS$true_model[i], model = cn, BIC_true = unname(tmp[MS$true_model[i]]), BIC = unname(tmp))
+    mmm <- rbind(mmm, mm)
+}
+
+mmm |>
+    filter(true_model == "P") |>
+    ggplot(aes(x = BIC_true, y = BIC)) +
+    geom_abline(col = 4, lty = 2) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+    theme_light() +
+    xlab("BIC [true model]") +
+    ylab("BIC [fitted model]") +
+    labs(title = "True model: P") +
+    facet_wrap(vars(model), scales = "free")
+
+mmm |>
+    filter(true_model == "NB") |>
+    ggplot(aes(x = BIC_true, y = BIC)) +
+    geom_abline(col = 4, lty = 2) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+    theme_light() +
+    xlab("BIC [true model]") +
+    ylab("BIC [fitted model]") +
+    labs(title = "True model: NB") +
+    facet_wrap(vars(model), scales = "free")
+
+mmm |>
+    filter(true_model == "HP") |>
+    ggplot(aes(x = BIC_true, y = BIC)) +
+    geom_abline(col = 4, lty = 2) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+    theme_light() +
+    xlab("BIC [true model]") +
+    ylab("BIC [fitted model]") +
+    labs(title = "True model: HP") +
+    facet_wrap(vars(model), scales = "free")
+
+mmm |>
+    filter(true_model == "HNB") |>
+    ggplot(aes(x = BIC_true, y = BIC)) +
+    geom_abline(col = 4, lty = 2) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+    theme_light() +
+    xlab("BIC [true model]") +
+    ylab("BIC [fitted model]") +
+    labs(title = "True model: HNB") +
+    facet_wrap(vars(model), scales = "free")
+
+mmm |>
+    filter(true_model == "ZIP") |>
+    ggplot(aes(x = BIC_true, y = BIC)) +
+    geom_abline(col = 4, lty = 2) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+    theme_light() +
+    xlab("BIC [true model]") +
+    ylab("BIC [fitted model]") +
+    labs(title = "True model: ZIP") +
+    facet_wrap(vars(model), scales = "free")
+
+mmm |>
+    filter(true_model == "ZINB") |>
+    ggplot(aes(x = BIC_true, y = BIC)) +
+    geom_abline(col = 4, lty = 2) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+    theme_light() +
+    xlab("BIC [true model]") +
+    ylab("BIC [fitted model]") +
+    labs(title = "True model: ZINB") +
+    facet_wrap(vars(model), scales = "free")
+
+```
+
