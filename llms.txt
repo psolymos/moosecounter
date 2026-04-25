@@ -1,0 +1,204 @@
+# moosecounter
+
+> Adaptive Moose Surveys
+
+The R package and Shiny app implements count models to aid in estimating
+Moose populations and composition. Analyses are based on surveyed cells,
+residuals, point predictions, and prediction uncertainty help analysts
+to adaptively survey sampling units. As a result of adaptive sampling,
+models and estimates become more accurate. This improvement enables
+better management of moose populations.
+
+*The development of the R package and the Shiny app was funded by the
+Government of Yukon.*
+
+## Install
+
+Install dependencies and the package from GitHub:
+
+``` r
+
+install.packages(c('dplyr', 'DT', 'ggiraph','ggplot2', 'kableExtra',
+    'magrittr', 'mapproj', 'markdown', 'MASS', 'Matrix', 'openxlsx',
+    'partykit', 'pbapply', 'pscl', 'purrr', 'remotes', 'shiny', 'shinyBS',
+    'shinydashboard', 'VGAM', 'rlang', 'shinytest', 'systemfonts',
+    'testthat', 'patchwork', 'shinyjs'))
+remotes::install_github('psolymos/moosecounter')
+```
+
+## Example
+
+Load the package and set some options:
+
+``` r
+
+library(moosecounter)
+
+## modify options as needed
+mc_options(B=20)
+```
+
+Load an example data from the Mayo:
+
+``` r
+
+## load/read data set
+x <- read.csv(
+    system.file("extdata/MayoMMU_QuerriedData.csv", 
+        package="moosecounter"))
+```
+
+Switch between modeling total vs. cows only:
+
+``` r
+
+## set response in options
+#switch_response("cows")
+switch_response("total")
+```
+
+Define surveyed units and take a subset as needed (this also sets total
+cows value):
+
+``` r
+
+x <- mc_update_total(x)
+```
+
+Start univariate and multivariate exploration to see what drives the
+total population numbers:
+
+``` r
+
+## univariate exploration
+mc_plot_univariate("Subalp_Shrub_250buf", x, "ZINB")
+
+## multivariate exploration
+vars <- c("ELC_Subalpine", "Fire1982_2012", "Fire8212_DEM815",
+    "NALC_Needle", "NALC_Shrub", "Subalp_Shrub_250buf",
+    "ELCSub_Fire8212DEM815", "SubShrub250_Fire8212DEM815")
+
+mc_plot_multivariate(vars, x)
+```
+
+Now it is time to build a list of models for the total Moose models:
+
+``` r
+
+## build model list
+ML <- list()
+ML[["Model 0"]] <- mc_fit_total(x, dist="ZINB", weighted=TRUE)
+ML[["Model 1"]] <- mc_fit_total(x, vars[1:2], dist="ZINB", weighted=TRUE)
+ML[["Model 2"]] <- mc_fit_total(x, vars[2:3], dist="ZIP", weighted=TRUE)
+ML[["Model 3"]] <- mc_fit_total(x, vars[3:4], dist="ZINB", weighted=TRUE)
+```
+
+Compare estimates and plot residuals:
+
+``` r
+
+mc_models_total(ML, x)
+mc_plot_residuals("Model 3", ML, x)
+```
+
+Calculate prediction intervals (PI) for total moose predictions:
+
+``` r
+
+## PI calculation
+PI <- mc_predict_total(
+    model_id=c("Model 1", "Model 3"),
+    ml=ML,
+    x=x,
+    do_boot=TRUE, do_avg=TRUE)
+```
+
+Get summaries and visualize the results for total Moose:
+
+``` r
+
+mc_get_pred(PI)
+pred_density_moose_PI(PI)
+mc_plot_predpi(PI)
+mc_plot_pidistr(PI)
+mc_plot_pidistr(PI, id=2)
+```
+
+## Composition
+
+Continuing with the Mayo data. Checks comp data (sum of classes should
+equal total):
+
+``` r
+
+mc_check_comp(x)
+```
+
+Explore relationships:
+
+``` r
+
+# plot univariate comp model
+mc_plot_comp("Fire8212_DEM815", x)
+```
+
+Build a model list for composition:
+
+``` r
+
+CML <- list()
+CML[['FireDEMSub']] <- mc_fit_comp(x, "Fire8212_DEM815")
+
+mc_models_comp(CML)
+```
+
+Calculate prediction intervals for composition:
+
+``` r
+
+CPI <- mc_predict_comp(
+    total_model_id="Model 3",
+    comp_model_id='FireDEMSub',
+    model_list_total=ML,
+    model_list_comp=CML,
+    x=x,
+    do_avg=FALSE)
+# print results
+pred_density_moose_CPI(CPI)
+```
+
+## Shiny app
+
+Instead of using the command line, you can conduct the analyses,
+including total Moose and composition, using an interactive Shiny
+application:
+
+``` r
+
+run_app()
+```
+
+# Package index
+
+## All functions
+
+- [`mc_check_comp()`](comp.md) [`mc_fit_comp()`](comp.md)
+  [`mc_models_comp()`](comp.md) [`mc_predict_comp()`](comp.md)
+  [`subset_CPI_data()`](comp.md) [`pred_density_moose_CPI()`](comp.md) :
+  Moose Composition Workflow
+- [`mc_plot_univariate()`](explore.md)
+  [`mc_plot_multivariate()`](explore.md) [`mc_plot_comp()`](explore.md)
+  : Exploration
+- [`mc_gassaway()`](gassaway.md)
+  [`print(`*`<mc_gassaway>`*`)`](gassaway.md) : Total Estimate with
+  Gassaway Formula
+- [`mc_options()`](mc_options.md) : Set Moose Options
+- [`run_app()`](run_app.md) : Run Shiny App
+- [`switch_response()`](total.md) [`mc_update_total()`](total.md)
+  [`mc_fit_total()`](total.md) [`mc_models_total()`](total.md)
+  [`mc_predict_total()`](total.md) [`mc_get_pred()`](total.md)
+  [`pred_density_moose_PI()`](total.md)
+  [`mc_plot_residuals()`](total.md) [`mc_plot_predpi()`](total.md)
+  [`mc_plot_pidistr()`](total.md) [`mc_plot_predfit()`](total.md) :
+  Total Moose Workflow
+
